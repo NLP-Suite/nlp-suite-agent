@@ -247,6 +247,6 @@ def run_sentiment_analysis(inputFilename,
                                                          True, '', True, '', False)
             outputFiles = sentiment_analysis_VADER_util.main(inputFilename, inputDir, outputDir, mode, chartPackage, dataTransformation)
 
-            IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis end', 'Finished running VADER Sentiment Analysis at', True, '', True, startTime)
+            print('Analysis end', 'Finished running VADER Sentiment Analysis at')
         else:
-            IO_user_interface_util.timed_alert(GUI_util.window,4000,'Warning','The VADER algorithm is available only for the English language.\n\nYour currently selected language is '+language+'.\n\nYou can change the language using the Setup dropdownmenu at the bottom of this GUI and selecting "Setup NLP package and corpus language."')
+            print('Warning','The VADER algorithm is available only for the English language.\n\nYour currently selected language is '+language+'.\n\nYou can change the language using the Setup dropdownmenu at the bottom of this GUI and selecting "Setup NLP package and corpus language."')

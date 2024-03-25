@@ -1,32 +1,22 @@
 # Written by Roberto Franzosi Fall 2020
-# Written by Roberto Franzosi Fall 2020
 import argparse
-import csv
 import sys
-
 import numpy as np
 
 import GUI_util
 import IO_libraries_util
 
-# if not IO_libraries_util.install_all_Python_packages(GUI_util.window,"DB_SQL",['io','os','tkinter','subprocess','re','datetime','shutil','ntpath']):
-#     sys.exit(0)
-
 import os
 from sys import platform
 import math
 import re
-# import datetime
 from datetime import datetime
-import subprocess
 from subprocess import call
 import shutil
 import ntpath  # to split the path from filename
 from pathlib import Path
 
 import reminders_util
-import CoNLL_util
-import IO_user_interface_util
 import GUI_IO_util
 import IO_csv_util
 
@@ -129,21 +119,6 @@ def getFileList_SubDir(inputFilename, inputDir, fileType='.*', silent=False):
         else:
             if not silent:
                 print('Input file error', 'The input file type expected by the algorithm is ' + fileType + '.\n\nPlease, select the expected file type and try again.')
-    # folder, subs, files = os.walk(inputDir)
-    # filter files for the desired extension
-    # if fileType!='.*':
-    # 	files = [ fi for fi in files if not fi.endswith(fileType) ]
-    # if dirName!='':
-    # 	for path in Path(dirNameinputDir.rglob('*' + fileType)):
-    # 		files.append(str(path))
-    # else:
-    # 	if inputFilename.endswith(fileType):
-    # 		files = [inputFilename]
-    # 	else:
-    # 		if not silent:
-    # 			mb.showwarning(title='Input file error',
-    # 						   message='The input file type expected by the algorithm is ' + fileType + '.\n\nPlease, select the expected file type and try again.')
-    # return folder, subs, files
     return files
 
 
@@ -155,9 +130,6 @@ def getFileList_SubDir(inputFilename, inputDir, fileType='.*', silent=False):
 # returns a list of either a single file or all files in a directory
 #   examples of calls
 # https://thispointer.com/python-how-to-get-list-of-files-in-directory-and-sub-directories/
-
-
-
 
 import functools
 from datetime import datetime
@@ -664,8 +636,6 @@ def getScript(pydict,script):
         IO_values = val[2]
     # check the IO requirements of the function;
     #	all py cases have their own GUI where IO requirements are checked
-    # if val[1]==0: #NO GUI; must check IO requirements here
-    # 	if checkIO_Filename_InputDir (scriptName,val[2], val[3])==False:
     # RF return
     # IO_values is 0 when an internet program is used; do not check software in the software dir
     if IO_values != 0:
@@ -680,26 +650,7 @@ def run_jar_script(scriptName, inputFilename, inputDir, outputDir, openOutputFil
     filesToOpen = []
     if IO_libraries_util.check_inputPythonJavaProgramFile(scriptName) == False:
         return
-    # if scriptName=='Sentence_Complexity.jar':
-    #     outputFilename=IO_util.generate_output_file_name(inputFilename,outputDir,'.csv','SCo','','')
-    #     filesToOpen.append(outputFilename)
-    #     temp_outputFilename=ntpath.basename(outputFilename)
-    #     IO_util.timed_alert(GUI_util.window,2000,'Analysis start','Started running Sentence Complexity at',True,'\n\nYou can follow Sentence Complexity in command line.')
-    #     subprocess.call(['java', '-jar', 'Sentence_Complexity.Jar', inputFilename, outputDir, temp_outputFilename])
-    #     IO_util.timed_alert(GUI_util.window,2000,'Analysis end','Finished running Sentence Complexity at',True)
-    #     if chartPackage!='No charts':
-    #         columns_to_be_plotted_xAxis=[], columns_to_be_plotted_yAxis=[[1,3], [1,4], [1,6], [1,7]]
-    #         hover_label=['Sentence','Sentence','Sentence','Sentence']
-    #         outputFilenameXLSM_1 = charts_util.run_all(columns_to_be_plotted,inputFilename,outputDir, outputFilename, chart_type_list = ["line"], chart_title= "Sentence complexity", column_xAxis_label_var = 'Sentence ID',column_yAxis_label_var = 'Complexity',outputExtension = '.xlsm',label1='Scomp',label2='line',label3='chart',label4='',label5='', useTime=False,disable_suffix=True,  count_var=0, column_yAxis_field_list = [], reverse_column_position_for_series_label=False , series_label_list=[''], second_y_var=0, second_yAxis_label='', hover_info_column_list=hover_label)
-    #         if outputFilenameXLSM_1 != "":
-    #             filesToOpen.append(outputFilenameXLSM_1)
 
-    # elif scriptName=='DependenSee.jar':
-    #     #inputFilename must include the file full path with txt extension
-    #     #inputFilename must be a txt file
-    #     IO_util.timed_alert(GUI_util.window,2000,'Analysis start','Started running Sentence visualization: Dependency tree viewer (png graphs) at',True,'\n\nYou can follow Sentence Complexity in command line.')
-    #     subprocess.call(['java', '-jar', 'DependenSee.Jar', inputFilename, outputDir])
-    #     IO_util.timed_alert(GUI_util.window,2000,'Analysis end','Finished running Sentence visualization: Dependency tree viewer (png graphs) at',True,'\n\nMake sure to open the png files in output, one graph for each sentence.')
     if visualization_tools == "Sentence visualization: Dynamic sentence network viewer (Gephi graphs)":
         # TODO the script does not work even in command line using the arguments in the ReadMe file; it seems to want two more parameters
         """
@@ -784,27 +735,3 @@ def gatherCLAs():
         else:
             openOut = False
         return args.inputFile, args.outputDir, openOut
-
-
- # move the gender & quote files under the gender & quote dir where a user is more likely to look for it
-# the location_filename is moved above
-
-    # if gender_var:
-    #     # move the gender file under gender dir where a user is more likely to look for it
-    #     gender_outputDir = outputDir + os.sep + os.path.basename(outputDir.replace('_SVO_', '_gender_'))
-    #     if os.path.isfile(gender_filename) and os.path.isdir(gender_outputDir):
-    #         target_filePath = gender_outputDir + os.sep + os.path.basename(gender_filename)
-    #         # move the csv gender file
-    #         if not os.path.isfile(target_filePath):
-    #             os.replace(gender_filename, target_filePath)
-    #         # move the html gender file
-    #         target_filePath = gender_outputDir + os.sep + os.path.basename(gender_filename_html)
-    #         if os.path.isfile(gender_filename_html) and not os.path.isfile(target_filePath):
-    #             os.replace(gender_filename_html, target_filePath)
-    #
-    # if quote_var:
-    #     quote_outputDir = outputDir + os.sep + os.path.basename(outputDir.replace('_SVO_', '_quote_'))
-    #     if os.path.isfile(quote_filename) and os.path.isdir(quote_outputDir):
-    #         target_filePath = quote_outputDir + os.sep + os.path.basename(quote_filename)
-    #         # move the quote file under quote dir where a user is more likely to look for it
-    #         os.replace(quote_filename, target_filePath)
