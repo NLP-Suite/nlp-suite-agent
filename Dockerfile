@@ -12,4 +12,4 @@ COPY lib lib
 
 RUN python3.8 -m pip install -r ./src/requirements.txt
 
-CMD ["python3.8", "./src/NLP_menu_main.py"]
+CMD ["python3.8", "./src/server.py"]
