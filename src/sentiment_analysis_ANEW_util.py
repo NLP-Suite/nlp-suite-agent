@@ -27,11 +27,6 @@ Parameters:
 # add parameter to exclude duplicates? also mean or median analysis
 
 import sys
-import GUI_util
-import IO_libraries_util
-
-if IO_libraries_util.install_all_Python_packages(GUI_util.window,"Sentiment Analysis ANEW",['stanza','os','csv','argparse','pandas','tkinter','numpy','time'])==False:
-    sys.exit(0)
 
 import csv
 import os
@@ -41,7 +36,6 @@ import argparse
 
 # from Stanza_functions_util import stanzaPipeLine, word_tokenize_stanza, sent_tokenize_stanza, lemmatize_stanza
 import pandas as pd
-import tkinter.messagebox as mb
 
 import IO_csv_util
 import IO_files_util

@@ -38,14 +38,10 @@ import sys
 import GUI_util
 import IO_libraries_util
 
-if IO_libraries_util.install_all_Python_packages(GUI_util.window, "sentiment_analysis_VADER", ['nltk','os','csv','argparse','tkinter','time','stanza'])==False:
-    sys.exit(0)
-
 import csv
 import os
 import time
 import argparse
-import tkinter.messagebox as mb
 IO_libraries_util.import_nltk_resource(GUI_util.window,'vader_lexicon','vader_lexicon')
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 # from nltk import tokenize

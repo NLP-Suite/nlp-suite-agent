@@ -1,6 +1,4 @@
 from urllib.request import urlopen #to check internet connection
-from tkinter import *
-import tkinter.messagebox as mb
 
 #check internet connection
 #if internet connection is available, return True #otherwise, return False

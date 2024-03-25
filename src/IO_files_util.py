@@ -7,7 +7,6 @@ import GUI_util
 import IO_libraries_util
 
 import os
-from sys import platform
 import math
 import re
 from datetime import datetime

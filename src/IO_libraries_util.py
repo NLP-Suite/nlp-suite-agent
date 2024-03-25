@@ -1,8 +1,6 @@
 import sys
 from sys import platform
 import os
-import tkinter as tk
-import tkinter.messagebox as mb
 import subprocess
 from subprocess import call
 from psutil import virtual_memory
@@ -13,7 +11,6 @@ import csv
 import GUI_util
 import GUI_IO_util
 import reminders_util
-import TIPS_util
 import IO_internet_util
 import IO_user_interface_util
 

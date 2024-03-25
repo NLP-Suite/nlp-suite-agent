@@ -63,3 +63,7 @@ buck-out/
 #/src/WordNet_Search_UP.jar
 
 src/__pycache__
+
+bin
+pyvenv.cfg
+lib/python*

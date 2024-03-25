@@ -23,11 +23,6 @@ Parameters:
 # add parameter to exclude duplicates? also mean or median analysis
 
 import sys
-import GUI_util
-import IO_libraries_util
-
-if IO_libraries_util.install_all_Python_packages(GUI_util.window,"Sentiment Analysis HEDONOMETER",['stanza','json','os','csv','argparse','tkinter','time'])==False:
-    sys.exit(0)
 
 import os
 import csv
@@ -35,7 +30,6 @@ import json
 import statistics
 import time
 import argparse
-import tkinter.messagebox as mb
 
 import IO_csv_util
 import GUI_IO_util

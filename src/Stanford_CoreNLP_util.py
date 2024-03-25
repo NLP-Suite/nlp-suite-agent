@@ -22,9 +22,6 @@ import sys
 import IO_libraries_util
 import GUI_util
 
-if IO_libraries_util.install_all_Python_packages(GUI_util.window, "CoreNLP_annotator", ['os', 'tkinter','time','json','re','subprocess','string','pandas','pycorenlp','nltk'])==False:
-    sys.exit(0)
-
 from typing import Any, Tuple
 # import pprint
 import json
@@ -35,8 +32,6 @@ import string
 # not using stanfordcorenlp because it is not recognizing sentiment annotator
 import nltk
 from pycorenlp import StanfordCoreNLP
-from tkinter import messagebox as mb
-import tkinter as tk
 import pandas as pd
 import time
 import Stanford_CoreNLP_clause_util
