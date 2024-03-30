@@ -20,9 +20,8 @@ WE DO NOT USE ANY OF THESE RECOMMENDATIONS
 
 import sys
 import IO_libraries_util
-import GUI_util
 
-from typing import Any, Tuple
+from typing import Tuple
 # import pprint
 import json
 import os
@@ -39,13 +38,13 @@ import csv
 
 import IO_csv_util
 import file_splitter_ByLength_util
-import file_splitter_merged_txt_util
 import IO_files_util
 import IO_user_interface_util
 import Stanford_CoreNLP_SVO_enhanced_dependencies_util # Enhanced++ dependencies
 import reminders_util
 import parsers_annotators_visualization_util
 import charts_util
+import GUI_IO_util
 
 url = 'https://stanfordnlp.github.io/CoreNLP/human-languages.html'
 CoreNLP_web = '\n\nLanguage and annotator options for Stanford CoreNLP are listed at the Stanford CoreNLP website\n\n' + url
@@ -58,7 +57,7 @@ CoreNLP_web = '\n\nLanguage and annotator options for Stanford CoreNLP are liste
 def create_output_directory(inputFilename, inputDir, outputDir, config_filename,
                             export_json_var, annotator, silent, Json_question_already_asked):
     outputJsonDir = ''
-    outputDirSV=GUI_util.output_dir_path.get()
+    outputDirSV=GUI_IO_util.output_folder
     if outputDirSV != outputDir:
         # create output subdirectory
         outputDir = IO_files_util.make_output_subdirectory('', '', outputDir,
@@ -94,53 +93,53 @@ def check_CoreNLP_annotator_availability(config_filename, annotator, language):
     not_available = False
     if "lemma" in annotator:
         if language != 'English':
-            mb.showwarning(title=str(annotator).upper() + ' annotator availability for ' + language,
-                           message='The Stanford CoreNLP LEMMA annotator is only available for English.'+CoreNLP_web)
+            print(str(annotator).upper() + ' annotator availability for ' + language,
+                           'The Stanford CoreNLP LEMMA annotator is only available for English.'+CoreNLP_web)
             not_available = True
     elif "normalized" in annotator:
         if language != 'English':
-            mb.showwarning(title=str(annotator).upper() + ' annotator availability for ' + language,
-                           message='The Stanford CoreNLP NORMALIZED NER annotator is only available for English.'+CoreNLP_web)
+            print(str(annotator).upper() + ' annotator availability for ' + language,
+                           'The Stanford CoreNLP NORMALIZED NER annotator is only available for English.'+CoreNLP_web)
             not_available = True
     elif "gender" in annotator:
         if language != 'English':
-            mb.showwarning(title=str(annotator).upper() + ' annotator availability for ' + language,
-                           message='The Stanford CoreNLP GENDER annotator is only available for English.'+CoreNLP_web)
+            print(str(annotator).upper() + ' annotator availability for ' + language,
+                           'The Stanford CoreNLP GENDER annotator is only available for English.'+CoreNLP_web)
             not_available = True
     elif "quote" in annotator:
         if language != 'English':
-            mb.showwarning(title=str(annotator).upper() + ' annotator availability for ' + language,
-                           message='The Stanford CoreNLP QUOTE annotator is only available for English.'+CoreNLP_web)
+            print(str(annotator).upper() + ' annotator availability for ' + language,
+                           'The Stanford CoreNLP QUOTE annotator is only available for English.'+CoreNLP_web)
             not_available = True
     elif "OpenIE" in annotator:
         if language != 'English':
-            mb.showwarning(title=str(annotator).upper() + ' annotator availability for ' + language,
-                           message='The Stanford CoreNLP OPENIE annotator is only available for English.'+CoreNLP_web)
+            print(str(annotator).upper() + ' annotator availability for ' + language,
+                           'The Stanford CoreNLP OPENIE annotator is only available for English.'+CoreNLP_web)
             not_available = True
     elif "sentiment" in annotator:
         if language != 'English' and language != 'Chinese':
-            mb.showwarning(title=str(annotator).upper() + ' annotator availability for ' + language,
-                           message='The Stanford CoreNLP SENTIMENTT ANALYSIS annotator is only available for Chinese and English.' + CoreNLP_web)
+            print(str(annotator).upper() + ' annotator availability for ' + language,
+                           'The Stanford CoreNLP SENTIMENTT ANALYSIS annotator is only available for Chinese and English.' + CoreNLP_web)
             not_available = True
     elif "coreference" in annotator:
         if language != 'English' and language != 'Chinese':
-            mb.showwarning(title=str(annotator).upper() + ' annotator availability for ' + language,
-                           message='The Stanford CoreNLP COREFERENCE RESOLUTION annotator is only available for Chinese and English.' + CoreNLP_web)
+            print(str(annotator).upper() + ' annotator availability for ' + language,
+                           'The Stanford CoreNLP COREFERENCE RESOLUTION annotator is only available for Chinese and English.' + CoreNLP_web)
             not_available = True
     elif "PCFG" in annotator:
         if language == 'English' or language == 'German':
-            mb.showwarning(title=str(annotator).upper() + ' annotator availability for ' + language,
-                           message='The Stanford CoreNLP PCFG PARSER is not available for German and Hungarian.'+CoreNLP_web)
+            print(str(annotator).upper() + ' annotator availability for ' + language,
+                           'The Stanford CoreNLP PCFG PARSER is not available for German and Hungarian.'+CoreNLP_web)
             not_available = True
     elif "neural network" in annotator: #parser
         if language == 'Arabic' or language == 'Hungarian':
-            mb.showwarning(title=str(annotator).upper() + ' annotator availability for ' + language,
-                           message='The Stanford CoreNLP NEURAL NETWORK PARSER is not available for Arabic and Hungarian.'+CoreNLP_web)
+            print(str(annotator).upper() + ' annotator availability for ' + language,
+                           'The Stanford CoreNLP NEURAL NETWORK PARSER is not available for Arabic and Hungarian.'+CoreNLP_web)
             not_available = True
     elif "SVO" in annotator: #parser
         if language == 'Arabic' or language == 'Hungarian':
-            mb.showwarning(title=str(annotator).upper() + ' annotator availability for ' + language,
-                           message='The Stanford CoreNLP SVO annotator is not available for Arabic and Hungarian.'+CoreNLP_web)
+            print(str(annotator).upper() + ' annotator availability for ' + language,
+                           'The Stanford CoreNLP SVO annotator is not available for Arabic and Hungarian.'+CoreNLP_web)
             not_available = True
     if not_available:
         head, scriptName = os.path.split(os.path.basename(__file__))
@@ -357,7 +356,7 @@ def CoreNLP_annotate(config_filename,inputFilename,
         annotator_params = [annotator_params]
     outputDirSV=outputDir
 
-    startTime=IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis start', 'Started running Stanford CoreNLP ' + str(annotator_params) + ' annotator at', True)
+    startTime=IO_user_interface_util.timed_alert(2000,'Analysis start', 'Started running Stanford CoreNLP ' + str(annotator_params) + ' annotator at', True)
 
     head, scriptName = os.path.split(os.path.basename(__file__))
 
@@ -617,7 +616,7 @@ def CoreNLP_annotate(config_filename,inputFilename,
         #     if len(split_file)>1:
         #         split_file = IO_files_util.getFileList("", split_file[0], fileType=".txt")
         # else:
-        split_file = file_splitter_ByLength_util.splitDocument_byLength(GUI_util.window,config_filename,docName,'',document_length)
+        split_file = file_splitter_ByLength_util.splitDocument_byLength(config_filename,docName,'',document_length)
         nSplitDocs = len(split_file)
         split_docID = 0
         for doc_split in split_file:
@@ -640,8 +639,7 @@ def CoreNLP_annotate(config_filename,inputFilename,
             if param_string != '':
                 annotator_start_time = time.time()
                 CoreNLP_output = nlp.annotate(text, properties=params)
-                errorFound, filesError, CoreNLP_output = IO_user_interface_util.process_CoreNLP_error(GUI_util.window,
-                                                    CoreNLP_output,
+                errorFound, filesError, CoreNLP_output = IO_user_interface_util.process_CoreNLP_error(CoreNLP_output,
                                                     doc_split,
                                                     nDocs,
                                                     filesError,
@@ -689,8 +687,7 @@ def CoreNLP_annotate(config_filename,inputFilename,
                         params_NN["quote.singleQuotes"] = True
                     NN_start_time = time.time()
                     CoreNLP_output = nlp.annotate(text, properties=params_NN)
-                    errorFound, filesError, CoreNLP_output = IO_user_interface_util.process_CoreNLP_error(
-                        GUI_util.window, CoreNLP_output, doc_split, nDocs, filesError, text, silent)
+                    errorFound, filesError, CoreNLP_output = IO_user_interface_util.process_CoreNLP_error(CoreNLP_output, doc_split, nDocs, filesError, text, silent)
                     if errorFound:
                         continue  # move to next document; this only continues to next routine_list
                     NN_time_elapsed = time.time() - NN_start_time
@@ -742,7 +739,7 @@ def CoreNLP_annotate(config_filename,inputFilename,
                             ###
                         filesToOpen.append(outputFilename)
                     else:
-                        IO_user_interface_util.timed_alert(GUI_util.window, 2000, 'Coreference resolution',
+                        IO_user_interface_util.timed_alert(2000, 'Coreference resolution',
                                                            'The coreference resolution function did not produce any output for the input file ' + docName,
                                                            False, '', True, '', False)
                 else:
@@ -839,7 +836,7 @@ def CoreNLP_annotate(config_filename,inputFilename,
                     output_format.append("Date")
                 # save csv file with the expected header (i.e., output_format)
                 df = pd.DataFrame(run_output, columns=output_format)
-                IO_csv_util.df_to_csv(GUI_util.window, df, outputFilename, headers=output_format, index=False)
+                IO_csv_util.df_to_csv(df, outputFilename, headers=output_format, index=False)
                 #count the number of corefed pronouns (COREF annotator)
                 if annotator_chosen == 'coref table':
                     corefed_pronouns = df.shape[0]
@@ -848,9 +845,9 @@ def CoreNLP_annotate(config_filename,inputFilename,
     # set filesToVisualize because filesToOpen will include xlsx files otherwise
     filesToVisualize=filesToOpen
     if "coref" in str(annotator_params):
-        IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis end', 'Finished running Stanford CoreNLP ' + str(annotator_params) + ' annotator at', True, 'The coreference annotator produces a coref subdirectory inside the main output directory containing 2 separate subdirectories in turn containing, respectively, the coreferenced input text files, and statistics csv and chart files with coreference data.', True, startTime)
+        IO_user_interface_util.timed_alert(2000,'Analysis end', 'Finished running Stanford CoreNLP ' + str(annotator_params) + ' annotator at', True, 'The coreference annotator produces a coref subdirectory inside the main output directory containing 2 separate subdirectories in turn containing, respectively, the coreferenced input text files, and statistics csv and chart files with coreference data.', True, startTime)
     else:
-        IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis end', 'Finished running Stanford CoreNLP ' + str(annotator_params) + ' annotator at', True, '', True, startTime)
+        IO_user_interface_util.timed_alert(2000,'Analysis end', 'Finished running Stanford CoreNLP ' + str(annotator_params) + ' annotator at', True, '', True, startTime)
 
     # generate visualization output ----------------------------------------------------------------
 
@@ -877,13 +874,13 @@ def CoreNLP_annotate(config_filename,inputFilename,
     # print("Length of Files to Open after visualization: ", len(filesToOpen))
     # filesErroris a double list [[]] of headers and errors
     if len(filesError)>0:
-        IO_user_interface_util.timed_alert(GUI_util.window,2000,'Stanford CoreNLP Error',
+        IO_user_interface_util.timed_alert(2000,'Stanford CoreNLP Error',
                                            'Stanford CoreNLP ' + annotator_chosen + ' annotator has found '+str(len(filesError)-1)+' files that could not be processed by Stanford CoreNLP.\n\nPlease, read the error output file carefully to see the errors generated by CoreNLP.',
                                            False, '', True, '', False)
         errorFile = os.path.join(outputDir_chosen,
                                            IO_files_util.generate_output_file_name(IO_csv_util.dressFilenameForCSVHyperlink(inputFilename), inputDir, outputDir_chosen, '.csv',
                                                                                    'CoreNLP', 'file_ERRORS'))
-        IO_csv_util.list_to_csv(GUI_util.window, filesError, errorFile, encoding=language_encoding)
+        IO_csv_util.list_to_csv( filesError, errorFile, encoding=language_encoding)
         filesToOpen.append(errorFile)
     # record the time consumption of generating outputfiles and visualization
     # record the time consumption of running the whole analysis
@@ -931,12 +928,9 @@ def language_models(CoreNLPdir, language: str):
         language_file = os.path.join(CoreNLPdir, tail + "-models-" + language.lower() + ".jar")
         CoreNLP_download = "https://stanfordnlp.github.io/CoreNLP/human-languages.html"
         if not os.path.isfile(language_file):
-            answer = tk.messagebox.askyesno(title='Language pack', message="You have selected to work with the " + language.upper() + " language. But the language model " +
+            print('Language pack', "You have selected to work with the " + language.upper() + " language. But the language model " +
                                 language_file + " was not found in the main directory of Stanford CoreNLP " +
                                 CoreNLPdir + "\n\nPlease, download the " + language.upper() + " language pack from the Stanford NLP website " + CoreNLP_download + " and move it to the main Stanford CoreNLP directory.\n\nWould you like to do that now?")
-            if answer:
-                if not IO_libraries_util.open_url('Stanford CoreNLP', CoreNLP_download):
-                    return
             return
         pcfg_model = 'edu/stanford/nlp/models/srparser/' + language.lower() + 'SR.beam.ser.gz'
         nn_model = 'edu/stanford/nlp/models/parser/nndep/UD_' + language  +'.gz'
@@ -1693,7 +1687,7 @@ def process_json_SVO_enhanced_dependencies(config_filename,documentID, document,
         if os.path.isfile(fn):
             original_df = pd.read_csv(fn, encoding=language_encoding,on_bad_lines='skip')
             merge_df = pd.concat([original_df, merge_df], ignore_index=True)
-        outputFilename = IO_csv_util.df_to_csv(GUI_util.window, merge_df, fn, columns, False, language_encoding)
+        outputFilename = IO_csv_util.df_to_csv( merge_df, fn, columns, False, language_encoding)
         # merge_df.to_csv(fn, index=False, encoding=language_encoding)
 
     if quote_var:
@@ -1719,7 +1713,7 @@ def process_json_SVO_enhanced_dependencies(config_filename,documentID, document,
         if os.path.isfile(fn):
             original_df = pd.read_csv(fn, encoding=language_encoding,on_bad_lines='skip')
             merge_df = pd.concat([original_df, merge_df], ignore_index=True)
-        outputFilename = IO_csv_util.df_to_csv(GUI_util.window, merge_df, fn, columns, False, language_encoding)
+        outputFilename = IO_csv_util.df_to_csv( merge_df, fn, columns, False, language_encoding)
         # merge_df.to_csv(fn, index=False, encoding=language_encoding)
 
     return SVO_enhanced_dependencies
@@ -2167,7 +2161,7 @@ def visualize_GIS_maps(kwargs, locations, documentID, document, date_str):
     df = pd.DataFrame(to_write, columns=columns)
     outputFilename= kwargs["location_filename"]
     if not os.path.exists(outputFilename):
-        outputFilename = IO_csv_util.df_to_csv(GUI_util.window, df, outputFilename, columns, False, language_encoding)
+        outputFilename = IO_csv_util.df_to_csv( df, outputFilename, columns, False, language_encoding)
     else:
         df.to_csv(outputFilename, mode='a', header=False, index=False, encoding=language_encoding)
 
@@ -2229,7 +2223,7 @@ def check_pronouns(config_filename, inputFilename, outputDir, filesToOpen, chart
             #for coref, total count = number of resolved pronouns, the all_pronouns in the input is the number
             #   of all pronouns in the text
             coref_rate = round((corefed_pronouns / all_pronouns) * 100, 2)
-            IO_user_interface_util.timed_alert(GUI_util.window, 3000, 'Coreference results',
+            IO_user_interface_util.timed_alert( 3000, 'Coreference results',
                 "Number of pronouns: " + str(
                 all_pronouns) + "\nNumber of coreferenced pronouns: " + str(
                 corefed_pronouns) + "\nPronouns coreference rate: " + str(coref_rate))

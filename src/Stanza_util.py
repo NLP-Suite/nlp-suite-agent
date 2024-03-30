@@ -1,10 +1,4 @@
 import sys
-import GUI_util
-import IO_libraries_util
-
-if IO_libraries_util.install_all_Python_packages(GUI_util.window,"Stanza_util.py",['stanza','os','tkinter','multiprocessing','pandas','gensim','spacy','pyLDAvis','matplotlib','logging','IPython'])==False:
-    sys.exit(0)
-
 import stanza
 try:
     stanza.download('en')
@@ -15,18 +9,15 @@ except:
 from stanza.pipeline.multilingual import MultilingualPipeline
 
 import pandas as pd
-import tkinter.messagebox as mb
 import sys
 import os
 import re
 import warnings
-import tkinter as tk
 
 # from tenacity import retry_unless_exception_type
 
 import IO_files_util
 import IO_csv_util
-import GUI_util
 import GUI_IO_util
 import IO_user_interface_util
 import constants_util
@@ -127,8 +118,7 @@ def Stanza_annotate(configFilename, inputFilename, inputDir,
     filesToOpen = []
 
     if len(language)==0:
-        mb.showerror("Warning",
-                     "The language list is empty.\n\nPlease, select a language and try again.")
+        print("Warning", "The language list is empty.\n\nPlease, select a language and try again.")
         return filesToOpen
 
     available_language = check_Stanza_available_languages(language)
@@ -207,7 +197,7 @@ def Stanza_annotate(configFilename, inputFilename, inputDir,
         if not annotator_available:
             return
 
-        startTime = IO_user_interface_util.timed_alert(GUI_util.window, 2000, 'Analysis start',
+        startTime = IO_user_interface_util.timed_alert(2000, 'Analysis start',
                                                        'Started running Stanza ' + str(
                                                            annotator_params) + ' annotator at',
                                                        True, '', True, '', False)
@@ -268,8 +258,7 @@ def Stanza_annotate(configFilename, inputFilename, inputDir,
             with open(doc, encoding=language_encoding) as f:
                 text = f.read()
                 if text == '':
-                    mb.showinfo("Warning",
-                                "The input file\n" + tail + "\nis empty. The file will be skipped from processing.\n\nPlease, check the file and try again.")
+                    print("Warning", "The input file\n" + tail + "\nis empty. The file will be skipped from processing.\n\nPlease, check the file and try again.")
                     break
                 text = text.split('\n\n')
                 text = [t for t in text if not re.match(r'^\s*$', t)]
@@ -289,12 +278,10 @@ def Stanza_annotate(configFilename, inputFilename, inputDir,
                     nlp = MultilingualPipeline(lang_id_config={"langid_lang_subset":["en", "multilingual"]})
                     Stanza_output = nlp(text)
                 except:
-                    mb.showinfo("Warning",
-                                "Stanza encountered an error trying to download the language pack " + str(language) + "\n\nTry manually selecting the appropriate language rather than multilingual.")
+                    print("Warning", "Stanza encountered an error trying to download the language pack " + str(language) + "\n\nTry manually selecting the appropriate language rather than multilingual.")
                     return
             else:
-                mb.showinfo("Warning",
-                            "Stanza encountered an error trying to download the selected language pack " + str(language))
+                print("Warning", "Stanza encountered an error trying to download the selected language pack " + str(language))
                 return
 
         temp_df = convertStanzaDoctoDf(Stanza_output, inputFilename, inputDir, tail, docID, annotator_params, short_lang)
@@ -328,8 +315,7 @@ def Stanza_annotate(configFilename, inputFilename, inputDir,
         def callback(selected_language: str):
             return
         # open the dropdown menu to filter the original output with selected language
-        selected_language = GUI_IO_util.dropdown_menu_widget2(GUI_util.window,
-                                                    "Please, select the language you wish to use for your charts (dropdown menu on the right; press OK to accept selection; press ESCape to process all languages).",
+        selected_language = GUI_IO_util.dropdown_menu_widget2("Please, select the language you wish to use for your charts (dropdown menu on the right; press OK to accept selection; press ESCape to process all languages).",
                                                     language_list, 'Stanza languages', callback)
         # filter with selected language (using Pandas dataframe)
         selected_lang_df = df.loc[df['Language']==selected_language]
@@ -347,7 +333,7 @@ def Stanza_annotate(configFilename, inputFilename, inputDir,
 
     filesToVisualize=filesToOpen
 
-    IO_user_interface_util.timed_alert(GUI_util.window, 2000, 'Analysis end', 'Finished running Stanza ' + str(annotator_params) + ' annotator at', True, '', True, startTime, False)
+    IO_user_interface_util.timed_alert(2000, 'Analysis end', 'Finished running Stanza ' + str(annotator_params) + ' annotator at', True, '', True, startTime, False)
 
     for j in range(len(filesToVisualize)):
             #02/27/2021; eliminate the value error when there's no information from certain annotators
@@ -705,7 +691,7 @@ def visualize_GIS_maps_Stanza(svo_df):
 # modified from StanfordCoreNLP_util
 def create_output_directory(inputFilename, inputDir, outputDir,
                             annotator):
-    outputDirSV=GUI_util.output_dir_path.get()
+    outputDirSV=GUI_IO_util.output_folder
     if outputDirSV != outputDir:
         # create output subdirectory
         outputDir = IO_files_util.make_output_subdirectory('', '', outputDir,
@@ -728,8 +714,7 @@ import stanza.resources.common
 EFAULT_MODEL_DIR = stanza.resources.common.DEFAULT_MODEL_DIR
 resources_path = os.path.join(DEFAULT_MODEL_DIR, 'resources.json')
 if not os.path.exists(resources_path):
-    mb.showwarning(title='Warning',
-                   message='Stanza does not seem to be installed in your machine. The file-path\n\n' + resources_path + '\n\ncould not be found.\n\nPlease, open terminal, type conda activate NLP (Enter) and then type pip install stanza (Enter) and try again.')
+    print('Warning', 'Stanza does not seem to be installed in your machine. The file-path\n\n' + resources_path + '\n\ncould not be found.\n\nPlease, open terminal, type conda activate NLP (Enter) and then type pip install stanza (Enter) and try again.')
     sys.exit()
 
 with open(os.path.join(DEFAULT_MODEL_DIR, 'resources.json')) as fin:

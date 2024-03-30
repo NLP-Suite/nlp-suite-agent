@@ -1,4 +1,3 @@
-import sys
 from sys import platform
 import os
 import subprocess
@@ -8,7 +7,6 @@ import requests
 import webbrowser
 import csv
 
-import GUI_util
 import GUI_IO_util
 import reminders_util
 import IO_internet_util
@@ -32,94 +30,14 @@ def which_shell():
     if shell != 'zsh':
         error_msg = 'You are running shell ' + str(
             shell) + '\n\nSince the release of macOS 10.15 (Catalina) on October 7, 2019, the default macOS shell has been switched from bash to zsh. The NLP Suite has been optimized for zsh not bash. The algorithm will exit.\n\nPlease, read carefully the TIPS_NLP_Anaconda NLP environment pip.pdf on how to change shell to zsh.'
-        answer = tk.messagebox.askyesno("MacOS shell error",
-                                        error_msg + "\n\nDo you want to open the TIPS file now?")
-        if answer:
-            TIPS_util.open_TIPS('TIPS_NLP_Anaconda NLP environment pip.pdf')
+        print(f'{error_msg}: TIPS_NLP_Anaconda NLP environment pip.pdf')
     return shell
-
-# return false if missing modules
-def install_all_Python_packages(window, calling_script, modules_to_try):
-    errorFound = False
-    missingModules = []
-    for module in modules_to_try:
-        # import module
-        try:
-            i = __import__(module, fromlist=[''])
-            # __import__(module)
-        except ImportError as e:
-            print(e)
-            # passing pdfminer.six to this function, would ALWAYS fail the import
-            # so we need to pass only pdfminer but then tell the user which pdfminer to install
-            if 'pdfminer' in module:
-                module = 'pdfminer.six'  # we need this specific version of pdfminer
-            if 'docx' in module:
-                module = 'python-docx'  # python-docx would always break the code; must pass docx
-            if 'vlc' in module:
-                module = 'python-vlc'
-            missingModules.append(module)
-            if 'spellchecker' in missingModules:
-                # rename the module to the software_name to be installed
-                missingModules = ['pyspellchecker' if x == 'spellchecker' else x for x in missingModules]
-            if 'PIL' in missingModules:
-                # rename the module to the software_name to be installed
-                missingModules = ['pillow' if x == 'PIL' else x for x in missingModules]
-    if missingModules:
-        errorFound = True
-        if platform == 'darwin':
-            shell = which_shell()
-            if shell != 'zsh':
-                return False
-        # root = tk.Tk()
-        # root.withdraw()
-        window.withdraw()
-        if len(missingModules) == 0:
-            msg=''
-        elif len(missingModules) == 1:
-            msg = missingModules[0]
-        elif len(missingModules) > 1:
-            msg = 'each of the listed modules'
-
-        message = "FATAL ERROR. Please, read carefully. The NLP Suite will exit.\n\nThe script '" + \
-                  calling_script + "' needs to import the following modules:\n\n" + ', '.join(missingModules) + \
-                  "\n\nPlease, in command prompt/terminal, type\n\nNLP\n\nif you have run STEP3-NLP environment. Otherwise type" + \
-                  "\n\nconda activate NLP\n\nEither command will activate the right NLP environment (NLP case sensitive) where to install the module.\n\nIF IN TERMINAL YOU SEE THE WORD (base) YOU ARE NOT IN THE NLP ENVIRONMENT.\n\nIn the right NLP environment, type" + \
-                  "\n\npip install " + str(msg) + "\n\nto install the module, close the NLP Suite, and try again."
-
-        if 'pygit2' in str(missingModules):
-            message = message + "\n\nWithout pygit2 the NLP Suite will not be automatically updated.\n\nThis, however, may be a sign that either you have not run STEP2 or you have not run it to completion (STEP2 installs all software_names used by the NLP Suite and takes quite some time). To install all software_names, run STEP2 again or, in command line/prompt, type\n\npip install -r requirements.txt"
-
-        answer = tk.messagebox.askyesno("Module import error",
-                                        message + "\n\nDo you want to open the TIPS file 'TIPS_NLP_Anaconda NLP environment pip.pdf' to learn about Anaconda environments and the installation of python modules via pip?")
-        if answer:
-            TIPS_util.open_TIPS('TIPS_NLP_Anaconda NLP environment pip.pdf')
-
-        if 'stanfordnlp' or 'stanza' in missingModules:
-            # sys.version_info is the Python version
-            if (sys.version_info[0] < 3) or (sys.version_info[0] == 3 and sys.version_info[1] < 6):
-                if 'stanza' in missingModules:
-                    mb.showwarning(title='Python version error',
-                                   message="The module 'stanza' requires a Python version 3.6 or higher. You are currently running version " +
-                                           sys.version_info[0] + "." + sys.version_info[
-                                               0] + ".\n\nTo install Python with Anaconda, in command prompt/terminal type 'Conda install Python=3.7'.")
-            # https://stackoverflow.com/questions/56239310/could-not-find-a-version-that-satisfies-the-requirement-torch-1-0-0
-            # for more recent torch and torchvision, see https://pytorch.org/get-started/previous-versions/
-            # for most recent torch and torchvision, see https://pytorch.org/get-started/locally/
-            # if 'stanfordnlp' in missingModules:
-            #     mb.showwarning(title='Warning',
-            #                     message = "To install 'stanfordnlp' you will need to FIRST install 'torch' and 'torchvision' by typing:\n\nconda install pytorch torchvision cudatoolkit -c pytorch\n\nAFTER the successful installation of 'torch' and 'torchvision', you will need to install 'stanfordnlp' and 'stanford.download('en')'. At your command prompt/terminal, type:\n\npython\n\nThen at the >>> type:\n\nimport stanfordnlp\n\nWhen done type:\n\nstanfordnlp.download('en')\n\nWhen done type:\n\nexit().\n\nYOU MUST BE CONNECTED TO THE INTERNET TO INSTALL MODULES!\n\nYOU MUST ALSO BE IN THE NLP ENVIRONMENT!")
-            # pip install torch===1.7.1 torchvision===0.8.2 -f https://download.pytorch.org/whl/torch_stable.html
-            if 'stanza' in missingModules:
-                mb.showwarning(title='Warning',
-                               message="stanza requires 'torch' and 'torchvision.' If these two packages are not installed in your machine, in command prompt/terminal, type:\\conda activate NLP, then type: by typing:\n\nconda install pytorch torchvision cudatoolkit -c pytorch\n\nMAKE SURE TO INCLUDE THE HTTPS COMPONENT AFTER -f OR YOU WILL GET THE ERROR: -f option requires 1 argument.\n\nAFTER the successful installation of 'torch' and 'torchvision', you will need to install 'stanza' and 'stanza.download('en')'. At your command prompt/terminal or terminal, type:\\conda activate NLP, then type:\n\npip install stanza.\n\nThe current release of the NLP Suite will automatically download the English language model of stanza when you run stanza the first time. You can also install and doownload the language model in command prompt/terminal. Type:\n\npython\n\nThen at the >>> type:\n\nimport stanza\n\nWhen done type:\n\nstanza.download('en')\n\nWhen done type:\n\nexit().\n\nYOU MUST BE CONNECTED TO THE INTERNET TO INSTALL MODULES!\n\nYOU MUST ALSO BE IN THE NLP ENVIRONMENT!")
-        # install(e.name)
-    return not errorFound
 
 # modules_to_try has the following format: ['re','glob',...]
 # https://stackoverflow.com/questions/48097428/how-to-check-and-install-missing-modules-in-python-at-time-of-execution
 # we only check rather than install because the next function install would break if pip is not the expected version
 
-# def import_nltk_data(window):
+# def import_nltk_data():
 #     try:
 #         import nltk.data
 #     except LookupError:
@@ -134,7 +52,7 @@ def install_all_Python_packages(window, calling_script, modules_to_try):
 #   'corpora/WordNet','WordNet'
 #   'corpora/stopwords','stopwords'
 
-def import_nltk_resource(window, resource_path, resource):
+def import_nltk_resource(resource_path, resource):
     try:
         import nltk.data
         try:
@@ -142,7 +60,7 @@ def import_nltk_resource(window, resource_path, resource):
         except:
             nltk.data.find(resource_path+'.zip')
     except LookupError:
-        IO_user_interface_util.timed_alert(window, 2000, 'Downloading nltk resource',
+        IO_user_interface_util.timed_alert(2000, 'Downloading nltk resource',
                                            'The NLTK resource ' + resource + ' is missing. Starting to download nltk ' + resource + '...\n\nIf downloading fails, in command line please type python -m nltk.downloader all\n\n Please, be patient...', False)
         print('Downloading nltk ' + resource + 'If downloading fails, in command line please type: python -m nltk.downloader all')
         nltk.download(resource)
@@ -202,7 +120,7 @@ def get_java_version(system_output):
 def check_windows_64_bits():
     errorFound = False
     if 'PROCESSOR_ARCHITEW6432' in os.environ:
-        mb.showwraning(title='Fatal error',message='You are not running a Windows 64-bits machine as required by Stanford CoreNLP.\n\nThis will cause an error running Stanford CoreNLP: Could not create the Java Virtual Machine.')
+        print('Fatal error', 'You are not running a Windows 64-bits machine as required by Stanford CoreNLP.\n\nThis will cause an error running Stanford CoreNLP: Could not create the Java Virtual Machine.')
         errorFound = True
     if not os.environ['PROCESSOR_ARCHITECTURE'].endswith('64'):
         errorFound = True
@@ -268,10 +186,7 @@ def check_java_installation(script):
                 if "-Bit" in info:  # find the information about bit
                     if info[:2] != "64":  # check if it's 64 bit
                         message = 'You are not using JAVA 64-Bit version.\n\nThis will cause an error running Stanford CoreNLP: Could not create the Java Virtual Machine.\n\nPlease, read carefully the TIPS_NLP_Stanford CoreNLP memory issues.pdf.\n\nAfter checking the Java version installed in your machine, if 32-Bit you will need to uninstall it and download and install the Java 64-Bit version,\n\nTHE PROGRAM WILL EXIT.\n\nDo you want to open the TIPS file now?'
-                        answer = tk.messagebox.askyesno("Java version Error",
-                                                        "You are not using JAVA 64-Bit version.\n\nThis will cause an error running Stanford CoreNLP: Could not create the Java Virtual Machine.\n\nPlease, configure your machine to use JAVA 64-Bit.\n\nPlease, read carefully the TIPS_NLP_Stanford CoreNLP memory issues.pdf.\n\nDo you want to open the TIPS file now?")
-                        if answer:
-                            TIPS_util.open_TIPS('TIPS_NLP_Stanford CoreNLP memory issues.pdf')
+                        print("Java version Error", "You are not using JAVA 64-Bit version.\n\nThis will cause an error running Stanford CoreNLP: Could not create the Java Virtual Machine.\n\nPlease, configure your machine to use JAVA 64-Bit.\n\nPlease, read carefully the TIPS_NLP_Stanford CoreNLP memory issues.pdf.\n\nDo you want to open the TIPS file now?")
                         Java_errorFound = True
     return Java_errorFound, error_code, system_output, java_version
 
@@ -280,7 +195,7 @@ def check_java_installation(script):
 def check_inputPythonJavaProgramFile(programName, subdirectory='src'):
     # filePath=NLPPath+os.sep+subdirectory+os.sep+programName
     if not os.path.isfile(GUI_IO_util.NLPPath + os.sep + subdirectory + os.sep + programName):
-        mb.showerror("Input file error",
+        print("Input file error",
                      "The required file " + programName + " was not found. The file is expected to be in the subdirectory " + subdirectory + " of the main NLP directory.\n\nPlease, make sure to copy " + programName + " to the " + subdirectory + " subdirectory and try again.")
         return False
     return True
@@ -315,7 +230,7 @@ def check_CoreNLPVersion(CoreNLPdir,calling_script='',silent=False):
             local_version = f[:-4].split("-")[2]
             if github_version != local_version:
                 if not silent:
-                    IO_user_interface_util.timed_alert(GUI_util.window, 6000, 'Stanford CoreNLP version',
+                    IO_user_interface_util.timed_alert(6000, 'Stanford CoreNLP version',
                                    "Oops! Your local Stanford CoreNLP version is " + local_version +
                                    ".\n\nIt is behind the latest Stanford CoreNLP version available on GitHub (" + github_version + ").\n\nYour current version of Stanford CoreNLP will run anyway, but you should update to the latest release.",
                                                        False,'',True)
@@ -353,7 +268,7 @@ def check_inputExternalProgramFile(calling_script, software_dir, programName, re
 
         if software_dir=='':
             if not silent:
-                mb.showinfo(title='Warning', message=installation_message)
+                print('Warning', installation_message)
                 return False
         if not os.path.isdir(software_dir):
             if 'setup_external_software' in calling_script:
@@ -365,7 +280,7 @@ def check_inputExternalProgramFile(calling_script, software_dir, programName, re
                                 ' stored in the config file NLP_setup_external_software_config.csv DOES NOT EXIST.' \
                                 '\n\nIt may have been moved or renamed.' + reinstall_string + '.'
             if not silent:
-                mb.showinfo(title='Warning',message=wrong_software_dir)
+                print('Warning', wrong_software_dir)
                 return False
         else:
             for file in os.listdir(software_dir):
@@ -422,13 +337,13 @@ def check_inputExternalProgramFile(calling_script, software_dir, programName, re
                 save_software_config(existing_software_config, '', silent=True)
             return True
         if Java_errorFound and not silent:
-            mb.showwarning(title=programName + ' installation.',
-                           message=programName + ' IS NOT INSTALLED ON YOUR MACHINE.')
+            print(programName + ' installation.',
+                           programName + ' IS NOT INSTALLED ON YOUR MACHINE.')
             return False
         else:
             if software_dir=='' and not silent:
-                mb.showwarning(title=programName + ' installation.',
-                               message=programName + ' IS INSTALLED ON YOUR MACHINE (Java version ' + str(java_version) + ') but the Java version is not saved in NLP_setup_external_software_config.csv' \
+                print(programName + ' installation.',
+                               programName + ' IS INSTALLED ON YOUR MACHINE (Java version ' + str(java_version) + ') but the Java version is not saved in NLP_setup_external_software_config.csv' \
                                        '\n\nPlease, use the droopdown meny for "Software INSTALL on your machine and select "Java (JDK)" to save the Java version in the config file.')
                 return True
 
@@ -439,8 +354,8 @@ def check_inputExternalProgramFile(calling_script, software_dir, programName, re
             return True
         # check that MALLET has no spaces in path
         if ' ' in software_dir:
-            mb.showerror(title='MALLET directory error',
-                         message='The selected ' + programName.upper() + ' directory \n   ' + software_dir + '\ncontains a blank (space) in the path.\n\nThe ' + programName.upper() + ' code cannot handle paths that contain a space and will break.\n\nPlease, move ' + programName.upper() + ' in a directory with a path containing no spaces and try again.')
+            print('MALLET directory error',
+                         'The selected ' + programName.upper() + ' directory \n   ' + software_dir + '\ncontains a blank (space) in the path.\n\nThe ' + programName.upper() + ' code cannot handle paths that contain a space and will break.\n\nPlease, move ' + programName.upper() + ' in a directory with a path containing no spaces and try again.')
 
         directory_content = wrong_dir_msg + '\n\nThe ' + programName.upper() + ' directory should contain, among other things, the subdirectories \'bin\' and \'class\''
         message = directory_content + unarchive_msg + select_directory_msg
@@ -457,8 +372,7 @@ def check_inputExternalProgramFile(calling_script, software_dir, programName, re
     # if the user has tinkered with the config file adding an extra line, for whatever reason,
     #   it would not be marked with an error message; if message is '' we do not want to display the warning; all is OK
     if message!='' and not silent:
-        mb.showwarning(title=programName.upper() + ' installation error',
-                message=message)
+        print(programName.upper() + ' installation error', message)
     # False is returned when there is an error
     return False
 
@@ -470,17 +384,11 @@ def open_url(website_name, url, ask_to_open = False, message_title='', message='
     if reminder_title != '':
         reminders_util.checkReminder(scriptName, reminder_title,
                                      reminder_message, True)
-    # check if the question to open the website is asked
-    if ask_to_open:
-        answer = tk.messagebox.askyesno(message_title,
-                                        message)
-        if answer == False:
-            return False
 
     status_code = requests.get(url).status_code
     if status_code != 200:
-        mb.showwarning(title='Warning',
-                       message='Oops! The ' + website_name + ' website could not be opened.\n\nPlease, check the url or try again later.')
+        print('Warning',
+                       'Oops! The ' + website_name + ' website could not be opened.\n\nPlease, check the url or try again later.')
         return False
     webbrowser.open_new_tab(url)
     return True
@@ -592,8 +500,7 @@ def save_software_config(existing_software_config, missing_software_string, sile
             missing_software_string=", ".join(missing_software_list)
             message = message + "\n\nDon\'t forget that you have " + str(len(missing_software_list)) + " other remaining missing software to download and/or install: " + missing_software_string
         if not silent:
-            mb.showwarning(title='Config installation file saved',
-                       message=message)
+            print('Config installation file saved', message)
 
 # software_name is != '' when ...
 #   1. the function is called from a specific script that uses the software_name (e.g., parsers_annotators_main)
@@ -674,10 +581,10 @@ def ask_download_installation_questions(download_install, software_name, softwar
             answer = False
             if download_install == 'install':
                 if not silent:
-                    answer = tk.messagebox.askyesno(software_name + " installation", message)
+                    answer = print(software_name + " installation", message)
             else:
                 if not silent:
-                    answer = tk.messagebox.askyesno(software_name + " download", message)
+                    answer = print(software_name + " download", message)
             if not answer:
                 cancel_download_install = True
     return cancel_download_install
@@ -1122,7 +1029,7 @@ def external_software_download(calling_script, software_name, existing_software_
         # Java_errorFound=True # for testing
         if Java_errorFound:
             Java_required = software_name + ' requires the freeware Java (by Oracle) installed on our machine.\n\nDon\'t forget to download and install Java JDK.'
-            mb.showwarning(title='Warning',message=Java_required)
+            print('Warning', Java_required)
             # open_url('Java', url, ask_to_open = True, message_title = 'Java', message = Java_required)
     # software_dir, existing_software_config = external_software_install(calling_script, software_name, existing_software_config, silent)
     return software_dir, software_url, download_message

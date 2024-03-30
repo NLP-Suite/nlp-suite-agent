@@ -1,37 +1,19 @@
 # import statements
 # BERT is available as a multilingual model in 102 languages
 import sys
-import GUI_util
-import IO_libraries_util
-
-if IO_libraries_util.install_all_Python_packages(GUI_util.window, "BERT_util",
-                                          ['os', 'transformers', 'csv', 'argparse', 'tkinter', 'time', 'stanza',
-                                           'summarizer','sacremoses','contextualSpellCheck','sentencepiece','sentence_transformers', 'tensorflow']) == False:
-    sys.exit(0)
-
 
 from transformers import AutoTokenizer, AutoModelForTokenClassification
-from transformers import BertTokenizerFast, EncoderDecoderModel
 from transformers import pipeline
 from sentence_transformers import SentenceTransformer
 import pandas as pd
 import re
-import math
-from collections import Counter
 import os
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 import csv
 import time
-import itertools
 import stanza
 import argparse
 import tkinter.messagebox as mb
-import torch
-import spacy
-import contextualSpellCheck
 # Visualization
-import plotly.express as px
 ##from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from summarizer import Summarizer
@@ -47,7 +29,7 @@ import word2vec_distances_util
 import IO_internet_util
 
 # Provides NER tags per sentence for every doc and stores in a csv file
-def NER_tags_BERT(window, inputFilename, inputDir, outputDir, configFileName, mode, chartPackage, dataTransformation):
+def NER_tags_BERT(inputFilename, inputDir, outputDir, configFileName, mode, chartPackage, dataTransformation):
     tokenizer = AutoTokenizer.from_pretrained("xlm-roberta-large-finetuned-conll03-english")
     model = AutoModelForTokenClassification.from_pretrained("xlm-roberta-large-finetuned-conll03-english")
 
@@ -61,7 +43,7 @@ def NER_tags_BERT(window, inputFilename, inputDir, outputDir, configFileName, mo
     if not IO_internet_util.check_internet_availability_warning("BERT_util.py (Function BERT NER)"):
         return
 
-    startTime = IO_user_interface_util.timed_alert(window, 2000, 'Analysis start',
+    startTime = IO_user_interface_util.timed_alert( 2000, 'Analysis start',
                                                    'Started running BERT for NER annotators at',
                                                    True, '', True)
 
@@ -100,7 +82,7 @@ def NER_tags_BERT(window, inputFilename, inputDir, outputDir, configFileName, mo
 
     outputFilename = IO_files_util.generate_output_file_name(inputFilename, inputDir, outputDir, '.csv',
                                                               'NER_BERT')
-    IO_error = IO_csv_util.list_to_csv(window, result, outputFilename)
+    IO_error = IO_csv_util.list_to_csv(result, outputFilename)
 
     if not IO_error:
         filesToOpen.append(outputFilename)
@@ -116,7 +98,7 @@ def NER_tags_BERT(window, inputFilename, inputDir, outputDir, configFileName, mo
             else:
                 filesToOpen.extend(outputFiles)
 
-        IO_user_interface_util.timed_alert(window, 2000, 'Analysis end',
+        IO_user_interface_util.timed_alert(2000, 'Analysis end',
                                            'Finished running BERT NER annotator at',
                                            True, '', True,
                                            startTime, True)
@@ -125,7 +107,7 @@ def NER_tags_BERT(window, inputFilename, inputDir, outputDir, configFileName, mo
 
 
 # provides summary of text per doc and stores in a csv file
-def doc_summary_BERT(window, inputFilename, inputDir, outputDir, mode, chartPackage, dataTransformation, configFileName):
+def doc_summary_BERT(inputFilename, inputDir, outputDir, mode, chartPackage, dataTransformation, configFileName):
 
 
     result_summary_list = []
@@ -157,13 +139,13 @@ def doc_summary_BERT(window, inputFilename, inputDir, outputDir, mode, chartPack
 
     tempOutputFiles = IO_files_util.generate_output_file_name(inputFilename, inputDir, outputDir, '.csv',
                                                               'Doc_Summary_BERT')
-    IO_error = IO_csv_util.list_to_csv(window, result_summary_list, tempOutputFiles)
+    IO_error = IO_csv_util.list_to_csv(result_summary_list, tempOutputFiles)
     if not IO_error:
         return tempOutputFiles
     return tempOutputFiles
 
 # Creates a list of vectors/word embeddings for input files and subsequently plots them on a 2d graph
-def word_embeddings_BERT(window, inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation, vis_menu_var,
+def word_embeddings_BERT(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation, vis_menu_var,
             dim_menu_var, compute_distances_var, top_words_var, keywords_var, lemmatize_var, remove_stopwords_var, configFileName):
     model = SentenceTransformer('sentence-transformers/all-distilroberta-v1')
     inputDocs = IO_files_util.getFileList(inputFilename, inputDir, fileType='.txt', silent=False, configFileName=configFileName)
@@ -179,7 +161,7 @@ def word_embeddings_BERT(window, inputFilename, inputDir, outputDir, openOutputF
     tsne_df=None
 
     bad_chars = [';', ':', '', "*", "\"", "\'", "“", "”", "—", "’s", "n’t"]
-    startTime = IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis start',
+    startTime = IO_user_interface_util.timed_alert(2000,'Analysis start',
                                                    'Started running BERT word embeddings at', True)
 
 
@@ -471,7 +453,7 @@ def word_embeddings_BERT(window, inputFilename, inputDir, outputDir, openOutputF
         #keyword_df.to_csv(keyword_sim_outputFilename, encoding='utf-8', index=False)
        #filesToOpen.append(keyword_sim_outputFilename)
 
-    IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis end',
+    IO_user_interface_util.timed_alert(2000,'Analysis end',
                                        'Finished running BERT word embeddings at', True, '', True, startTime)
 
 
@@ -660,10 +642,6 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, dest='mode', default='mean',
                         help='mode with which to calculate sentiment in the sentence: mean or median')
     args = parser.parse_args()
-
-    # run main
-    sys.exit(main(args.inputFilename, args.inputDir,
-                  args.outputDir, args.configFileName, args.outputFilename, args.mode))
 
 # very fast method to split a text file into a list whose elements are each sentence in that file. Found on: https://stackoverflow.com/a/31505798
 # -*- coding: utf-8 -*-

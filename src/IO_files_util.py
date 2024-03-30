@@ -1,9 +1,7 @@
 # Written by Roberto Franzosi Fall 2020
 import argparse
 import sys
-import numpy as np
 
-import GUI_util
 import IO_libraries_util
 
 import os
@@ -39,12 +37,7 @@ def make_directory(newDirectory,silent=True):
     # Updates permission automatically
     if os.path.exists(newDirectory):
         if not silent:
-            result = mb.askyesno('Directory already exists',
-                                        'There already exists a directory\n\n' + newDirectory + '\n\nThis directory will be replaced.\n\nAre you sure you want to continue?')
-            if not result:
-                # createDir = False
-                # return createDir
-                return newDirectory
+            print('Directory already exists', 'There already exists a directory\n\n' + newDirectory + '\n\nThis directory will be replaced')
         shutil.rmtree(newDirectory)
     try:
         os.chmod(Path(newDirectory).parent.absolute(), 0o755)
@@ -72,12 +65,7 @@ def make_output_subdirectory(inputFilename, inputDir, outputDir, label, silent=T
         outputSubDir = outputDir
     if os.path.exists(outputSubDir):
         if not silent:
-            result = mb.askyesno('Directory already exists',
-                                        'The algorithms will create a new directory\n\n' + outputSubDir + '\n\nA directory by the same name already exists and it will be replaced.\n\nAre you sure you want to continue?')
-            if not result:
-                # createDir = False
-                # return createDir
-                return ''
+            result = print('Directory already exists', 'The algorithms will create a new directory\n\n' + outputSubDir + '\n\nA directory by the same name already exists and it will be replaced.\n\nAre you sure you want to continue?')
         try:
             shutil.rmtree(outputSubDir)
         except Exception as e:
@@ -545,7 +533,7 @@ def generate_output_file_name(inputFilename, inputDir, outputDir, outputExtensio
 
     if sys.platform == 'win32':  # Windows
         if len(outFilename)>255:
-            mb.showwarning(title='Warning',message='The length (' + str(len(outFilename)) + ' characters) of the filename\n\n' + outFilename + '\n\nexceeds the maximum length of 255 characters allowed by Windows Operating System.\n\nPlease, reduce the filename length and try again.')
+            print('Warning','The length (' + str(len(outFilename)) + ' characters) of the filename\n\n' + outFilename + '\n\nexceeds the maximum length of 255 characters allowed by Windows Operating System.\n\nPlease, reduce the filename length and try again.')
 
     return outFilename
 
@@ -676,7 +664,7 @@ def runScript_fromMenu_option(script_to_run, IO_values, inputFilename, inputDir,
         # check internet connection
         if not IO_internet_util.check_internet_availability_warning("Gender guesser"):
             return filesToOpen
-        webbrowser.open('http://www.hackerfactor.com/GenderGuesser.php#About')
+        print('http://www.hackerfactor.com/GenderGuesser.php#About')
     elif script_to_run.endswith('.py'):  # with GUI
         if IO_libraries_util.check_inputPythonJavaProgramFile(script_to_run) == False:
             return filesToOpen
@@ -695,11 +683,11 @@ def runScript_fromMenu_option(script_to_run, IO_values, inputFilename, inputDir,
         func = getattr(pythonFile, script[1])
         # # correct values are checked in NLP_GUI
         if IO_values == 1: # no inputDir
-            filesToOpen = func(GUI_util.window, inputFilename, outputDir, openOutputFiles, chartPackage, dataTransformation, processType)
+            filesToOpen = func(inputFilename, outputDir, openOutputFiles, chartPackage, dataTransformation, processType)
         elif IO_values == 2: # no inputFilename
-            filesToOpen = func(GUI_util.window, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation, processType)
+            filesToOpen = func(inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation, processType)
         else: # both inputFilename and inputDir
-            filesToOpen = func(GUI_util.window, inputFilename, inputDir, outputDir,
+            filesToOpen = func(inputFilename, inputDir, outputDir,
                  openOutputFiles,chartPackage, dataTransformation, processType)
 
         return filesToOpen

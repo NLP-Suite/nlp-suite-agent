@@ -1,4 +1,3 @@
-import GUI_util
 import sys
 
 # import spacy will trigger tensorflow
@@ -9,7 +8,6 @@ except Exception as e:
     print('Warning', 'The NLP Suite encountered an error in importing spacy, most likely due to tensorflow.\n\nERROR: ' + str(e))
     sys.exit(0)
 
-from spacytextblob.spacytextblob import SpacyTextBlob
 import pandas as pd
 import os
 import warnings
@@ -17,7 +15,6 @@ import subprocess
 
 import IO_files_util
 import IO_csv_util
-import GUI_util
 import IO_user_interface_util
 import constants_util
 import parsers_annotators_visualization_util
@@ -81,7 +78,7 @@ def spaCy_annotate(configFilename, inputFilename, inputDir,
     else:
         lang=lang_list[0]
 
-    startTime=IO_user_interface_util.timed_alert(GUI_util.window, 2000, 'Analysis start', 'Started running spaCy ' + str(annotator_params[0]) + ' annotator at',
+    startTime=IO_user_interface_util.timed_alert( 2000, 'Analysis start', 'Started running spaCy ' + str(annotator_params[0]) + ' annotator at',
                                             True, '', True, '', False)
     #collecting input txt files
     inputDocs = IO_files_util.getFileList(inputFilename, inputDir, fileType='.txt', silent=False, configFileName=configFilename)
@@ -142,8 +139,7 @@ def spaCy_annotate(configFilename, inputFilename, inputDir,
         if "sentiment" in annotator_params:
             nlp.add_pipe('spacytextblob')
     except:
-        mb.showinfo("Warning",
-                     "spaCy encountered an error trying to download the language pack " + str(language) + "\n\nCheck if this language is available in spaCy.")
+        print("Warning", "spaCy encountered an error trying to download the language pack " + str(language) + "\n\nCheck if this language is available in spaCy.")
         return
 
     # different outputFilename if SVO is selected
@@ -181,8 +177,7 @@ def spaCy_annotate(configFilename, inputFilename, inputDir,
         try:
             Spacy_output = nlp(text)
         except:
-            mb.showinfo("Warning",
-                        "spaCy encountered an error trying to download the language pack " + str(language) + "\n\nTry manually selecting the appropriate language rather than multilingual.")
+            print("Warning", "spaCy encountered an error trying to download the language pack " + str(language) + "\n\nTry manually selecting the appropriate language rather than multilingual.")
             return
 
         if 'NER' in str(annotator_params) or 'parse' in str(annotator_params) or 'sentiment' in str(annotator_params):
@@ -208,7 +203,7 @@ def spaCy_annotate(configFilename, inputFilename, inputDir,
             svo_df.to_csv(svo_df_outputFilename, index=False, encoding=language_encoding)
             filesToOpen.append(svo_df_outputFilename)
 
-    IO_user_interface_util.timed_alert(GUI_util.window, 2000, 'Analysis end',
+    IO_user_interface_util.timed_alert( 2000, 'Analysis end',
                                        'Finished running spaCy ' + str(annotator_params[0]) + ' annotator at',
                                        True,'',True, startTime)
 

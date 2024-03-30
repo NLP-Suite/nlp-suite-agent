@@ -35,14 +35,13 @@ The flags --file, --dir, --out MUST be entered before the respective strings but
 #   would provide a single measure of polarity.
 
 import sys
-import GUI_util
 import IO_libraries_util
 
 import csv
 import os
 import time
 import argparse
-IO_libraries_util.import_nltk_resource(GUI_util.window,'vader_lexicon','vader_lexicon')
+IO_libraries_util.import_nltk_resource('vader_lexicon','vader_lexicon')
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 # from nltk import tokenize
 # from nltk import word_tokenize
@@ -55,14 +54,6 @@ import charts_util
 
 # if VADER fails, run: "python -m nltk.downloader all"
 
-# IO_libraries_util.import_nltk_resource(GUI_util.window,'tokenizers/punkt','punkt')
-# check WordNet
-# IO_libraries_util.import_nltk_resource(GUI_util.window,'corpora/WordNet','WordNet')
-# from nltk.stem.wordnet import WordNetLemmatizer
-# check stopwords
-# IO_libraries_util.import_nltk_resource(GUI_util.window,'corpora/stopwords','stopwords')
-# from nltk.corpus import stopwords
-# stops = set(stopwords.words("english"))
 fin = open('../lib/wordLists/stopwords.txt', 'r')
 stops = set(fin.read().splitlines())
 
@@ -108,7 +99,7 @@ def analyzefile(inputFilename, outputDir, outputFilename, mode, Document_ID, Doc
         fulltext = myfile.read()
     # end method if file is empty
     if len(fulltext) < 1:
-        mb.showerror(title='File empty', message='The file ' + inputFilename + ' is empty.\n\nPlease, use another file and try again.')
+        print('File empty', 'The file ' + inputFilename + ' is empty.\n\nPlease, use another file and try again.')
         print('Empty file ', inputFilename)
         return
 

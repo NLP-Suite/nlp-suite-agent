@@ -4,7 +4,6 @@ import json
 import logging
 
 import IO_csv_util
-import GUI_IO_util
 
 logger = logging.getLogger()
 
@@ -47,7 +46,7 @@ def convert_time(time):
     return hours, minutes, seconds, message
 
 # silent will not display the message as a box
-def timed_alert(window, timeout, message_title, message_text, time_needed=False, extraLine='', printInCommandLine=True, startTime='', silent=False):
+def timed_alert(timeout, message_title, message_text, time_needed=False, extraLine='', printInCommandLine=True, startTime='', silent=False):
     if time_needed == True:
         # time has year [0], month [1], dat [2], hour [3], minute [4], second [5] & more
         time_report = time.localtime()
@@ -82,7 +81,7 @@ def timed_alert(window, timeout, message_title, message_text, time_needed=False,
 
 # inputFilename has complete path
 # filesError is []
-def process_CoreNLP_error(window, CoreNLP_output, inputFilename, nDocs, filesError, text, silent=True):
+def process_CoreNLP_error(CoreNLP_output, inputFilename, nDocs, filesError, text, silent=True):
     errorFound = False
     duration = 1000
     head, tail = os.path.split(inputFilename)
@@ -137,7 +136,7 @@ def process_CoreNLP_error(window, CoreNLP_output, inputFilename, nDocs, filesErr
             msg = msg + " Processing will continue with the next file."
             msgPrint += " Processing will continue with the next file."
         if not silent:
-            timed_alert(window, duration, 'Stanford CoreNLP error', msg)
+            timed_alert(duration, 'Stanford CoreNLP error', msg)
         print("\n\n" + msgPrint)
         filesError.append([len(filesError), IO_csv_util.dressFilenameForCSVHyperlink(inputFilename), str(CoreNLP_output) + " " + str(error)])
     return errorFound, filesError, CoreNLP_output

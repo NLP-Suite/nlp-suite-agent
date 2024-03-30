@@ -48,3 +48,6 @@ GISLocations_libPath = os.path.join(NLPPath,'lib'+os.sep+'GIS')
 TIPSPath = os.path.join(NLPPath,'TIPS')
 videosPath = os.path.join(NLPPath,'videos')
 remindersPath = os.path.join(NLPPath, 'reminders')
+config_filename = 'NLP_default_IO_config.csv'
+input_folder = os.path.join(os.path.expanduser("~"), "input")
+output_folder = os.path.join(os.path.expanduser("~"), "output")

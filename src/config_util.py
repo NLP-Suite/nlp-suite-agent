@@ -73,7 +73,7 @@ def getFiletype(config_input_output_numeric_options):
         fileType = 'Input filename with path'
     return fileType
 
-def write_external_software_config_file(window, config_filename, currently_selected_options, currently_selected_parsers):
+def write_external_software_config_file(config_filename, currently_selected_options, currently_selected_parsers):
     # check that the config directory exists inside the NLP main directory
     if os.path.isdir(GUI_IO_util.configPath) is False:
         try:
@@ -95,7 +95,7 @@ def write_external_software_config_file(window, config_filename, currently_selec
         csv_file.to_csv(config_filename_path, encoding='utf-8', index=False)
         csv_file.to_csv(config_filename_path, encoding='utf-8', index=False)
 
-        IO_user_interface_util.timed_alert(window, 2000, 'Warning',
+        IO_user_interface_util.timed_alert( 2000, 'Warning',
                                            'NLP external software options have been saved to\n\n  ' + config_filename_path,
                                            False)
     except:
@@ -152,7 +152,7 @@ def read_NLP_package_language_config():
     package_display_area_value = f"MAIN NLP PACKAGE: {package}, LEMMATIZER PACKAGE: {basics_package}, LANGUAGE(S): {language}"
     return error, package, parsers, basics_package, language, package_display_area_value, encoding_var, export_json_var, memory_var, limit_document_length_var, limit_sentence_length_var
 
-def write_NLP_package_language_config_file(window, config_filename,
+def write_NLP_package_language_config_file( config_filename,
                                            currently_selected_options, currently_selected_parsers,
                                            encoding_var, export_json_var, memory, limit_document_length, limit_sentence_length):
     # check that the config directory exists inside the NLP main directory
@@ -181,14 +181,14 @@ def write_NLP_package_language_config_file(window, config_filename,
 
         csv_file.to_csv(config_filename_path, encoding='utf-8', index=False)
 
-        IO_user_interface_util.timed_alert(window, 2000, 'Warning',
+        IO_user_interface_util.timed_alert( 2000, 'Warning',
                                            'NLP package and language options have been saved to\n\n  ' + config_filename_path,
                                            False)
     except:
         print('Permission error?', "The command failed to save the config file\n\n" + config_filename + "\n\nIf you look at your command line and you see a \'Permission error\', it means that the folder where you installed your NLP Suite is Read only.\n\nYou can check whether that's the case by right clicking on the folder name, clicking on \'Properties\'. Make sure that the \'Attributes\' setting, the last one on the display window, is NOT set to \'Read only\'. If so, click on the checkbox until the Read only is cleared, click on \'Apply\' and then \'OK\', exit the NLP Suite and try again.")
 
 
-def save_NLP_package_language_config(window, currently_selected_options,
+def save_NLP_package_language_config( currently_selected_options,
                                      package, basics_package, language,
                                      parsers,
                                      encoding, export_json,
@@ -198,7 +198,7 @@ def save_NLP_package_language_config(window, currently_selected_options,
     #   several times in this scripts (search for instance for MAIN NLP PACKAGE and change
     #   they also need to be changed in one line in NLP_setup_package_language_main.py
     package_display_area_value = f"MAIN NLP PACKAGE: {package}, LEMMATIZER PACKAGE: {basics_package}, LANGUAGE(S): {language}"
-    write_NLP_package_language_config_file(window, config_filename,
+    write_NLP_package_language_config_file( config_filename,
                                            currently_selected_options, parsers,
                                            encoding, export_json,
                                            memory, limit_document_length, limit_sentence_length)
@@ -325,7 +325,7 @@ def get_missing_IO_values(config_input_output_numeric_options, config_input_outp
 
 # check_missing_IO is called from GUI_util
 # the function checks for missing IO values, displays messages and sets the RUN button to normal or disabled
-def check_missing_IO(window, config_filename, scriptName, IO_setup_display_brief, missing_IO, silent=False):
+def check_missing_IO( config_filename, scriptName, IO_setup_display_brief, missing_IO, silent=False):
     # missing_IO=''
     if config_filename=='NLP_config.csv' or 'NLP_menu_main' in scriptName:
         config_filename = 'NLP_default_IO_config.csv'
@@ -374,10 +374,6 @@ def check_missing_IO(window, config_filename, scriptName, IO_setup_display_brief
         run_button_state="disabled"
     else:
         run_button_state="normal"
-    try:
-        window.focus_force()
-    except:
-        pass
     return run_button_state, False
 
 # every IO widget, files or directories, have a line in the config file
@@ -387,7 +383,7 @@ def check_missing_IO(window, config_filename, scriptName, IO_setup_display_brief
 #   with one sublist for each of the four types of IO configurations: filename, input main dir, input secondary dir, output dir
 # each sublist has four items: path, date format, date separator, date position
 # e.g., [['C:/Users/rfranzo/Desktop/NLP-Suite/lib/sampleData/The Three Little Pigs.txt', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['C:\\Program Files (x86)\\NLP_backup\\Output', '', '', '']]
-def write_IO_config_file(window, config_filename, config_input_output_numeric_options, config_input_output_alphabetic_options, silent=False):
+def write_IO_config_file( config_filename, config_input_output_numeric_options, config_input_output_alphabetic_options, silent=False):
     # check that the config directory exists inside the NLP main directory
     if os.path.isdir(GUI_IO_util.configPath) == False:
         try:
@@ -410,7 +406,7 @@ def write_IO_config_file(window, config_filename, config_input_output_numeric_op
         print('Permission error?', "The command failed to save the config file\n\n" + config_filename + "\n\nIf you look at your command line and you see a \'Permission error\', it means that the folder where you installed your NLP Suite is Read only.\n\nYou can check whether that's the case by right clicking on the folder name, clicking on \'Properties\'. Make sure that the \'Attributes\' setting, the last one on the display window, is NOT set to \'Read only\'. If so, click on the checkbox until the Read only is cleared, click on \'Apply\' and then \'OK\', exit the NLP Suite and try again.")
 
     if config_filename != 'license_config.csv':
-        IO_user_interface_util.timed_alert(window, 2000, 'Warning',
+        IO_user_interface_util.timed_alert( 2000, 'Warning',
                                            'INPUT and OUTPUT paths configuration have been saved to\n\n' + config_filename_path,
                                            False)
 
@@ -440,7 +436,7 @@ def get_date_options(config_filename, config_input_output_numeric_options):
 
 # used in GIS_GUI and GIS_geocode_GUI
 # Google_config: 'Google-geocode-API_config.csv' or 'Google-Maps-API_config.csv'
-def Google_API_Config_Save(window,Google_config,Google_API_key):
+def Google_API_Config_Save(Google_config,Google_API_key):
     # save the API key is not blank and not already there
     if Google_API_key != '':
         GoogleConfigFilename = os.path.join(GUI_IO_util.configPath, Google_config)
@@ -451,6 +447,6 @@ def Google_API_Config_Save(window,Google_config,Google_API_key):
                 msg='Maps'
             else:
                 msg = 'geocoder'
-            IO_user_interface_util.timed_alert(window, 2000, 'Warning',
+            IO_user_interface_util.timed_alert( 2000, 'Warning',
                     'The Google API key\n\n' + Google_API_key + '\n\nhas been saved to ' + GoogleConfigFilename + '."\n\nIt will read in automatically every time you select the Google ' + msg)
         file1.close()

@@ -74,7 +74,7 @@ def analyzefile(inputFilename, outputDir, outputFilename, csvfile, mode, Documen
         fulltext = myfile.read()
     # end method if file is empty
     if len(fulltext) < 1:
-        mb.showerror(title='File empty', message='The file ' + inputFilename + ' is empty.\n\nPlease, use another file and try again.')
+        print('File empty', 'The file ' + inputFilename + ' is empty.\n\nPlease, use another file and try again.')
         print('Empty file ', inputFilename)
         return
 

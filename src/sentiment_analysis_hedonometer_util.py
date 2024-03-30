@@ -63,8 +63,7 @@ def analyzefile(inputFilename, outputDir, outputFilename, mode, Document_ID, Doc
         fulltext = myfile.read()
     # end method if file is empty
     if len(fulltext) < 1:
-        mb.showerror(title='File empty', message='The file ' + inputFilename + ' is empty.\n\nPlease, use another file and try again.')
-        print('Empty file ', inputFilename)
+        print('File empty', 'The file ' + inputFilename + ' is empty.\n\nPlease, use another file and try again.')
         return
 
     from Stanza_functions_util import stanzaPipeLine, word_tokenize_stanza, sent_tokenize_stanza, lemmatize_stanza

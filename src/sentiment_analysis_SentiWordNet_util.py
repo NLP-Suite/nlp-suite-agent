@@ -19,7 +19,6 @@ http://www.nltk.org/howto/sentiwordnet.html
 #   would provide a single measure of polarity.
 
 import sys
-import GUI_util
 import IO_libraries_util
 
 import csv
@@ -33,11 +32,11 @@ import charts_util
 
 # if SentiWordNet fails, run: "python -m nltk.downloader all"
 
-IO_libraries_util.import_nltk_resource(GUI_util.window,'corpora/WordNet','wordnet')
-IO_libraries_util.import_nltk_resource(GUI_util.window,'corpora/WordNet','omw-1.4')
-IO_libraries_util.import_nltk_resource(GUI_util.window,'corpora/WordNet','sentiwordnet')
-IO_libraries_util.import_nltk_resource(GUI_util.window,'tokenizers/punkt','punkt')
-IO_libraries_util.import_nltk_resource(GUI_util.window,'averaged_perceptron_tagger','averaged_perceptron_tagger')
+IO_libraries_util.import_nltk_resource('corpora/WordNet','wordnet')
+IO_libraries_util.import_nltk_resource('corpora/WordNet','omw-1.4')
+IO_libraries_util.import_nltk_resource('corpora/WordNet','sentiwordnet')
+IO_libraries_util.import_nltk_resource('tokenizers/punkt','punkt')
+IO_libraries_util.import_nltk_resource('averaged_perceptron_tagger','averaged_perceptron_tagger')
 
 from nltk.corpus import wordnet as wn
 from nltk.corpus import sentiwordnet as swn
@@ -83,8 +82,7 @@ def analyzefile(inputFilename, outputDir, output_file, mode, documentID, documen
         fulltext = myfile.read()
     # end method if file is empty
     if len(fulltext) < 1:
-        mb.showerror(title='File empty', message='The file ' + inputFilename + ' is empty.\n\nPlease, use another file and try again.')
-        print('Empty file ', inputFilename)
+        print('File empty', 'The file ' + inputFilename + ' is empty.\n\nPlease, use another file and try again.')
         return
 
     from Stanza_functions_util import stanzaPipeLine, word_tokenize_stanza, sent_tokenize_stanza, lemmatize_stanza
