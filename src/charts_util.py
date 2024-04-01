@@ -3,10 +3,7 @@
 # Edited by Roberto Franzosi, Tony May 2022
 # Edited by Samir Kaddoura, March 2023
 
-import plotly
 from plotly.subplots import make_subplots
-
-plotly.offline.init_notebook_mode(connected=True)
 
 import numpy as np
 import re
@@ -627,7 +624,6 @@ def visualize_chart(chartPackage, dataTransformation, inputFilename, outputDir,
 
 def run_all(columns_to_be_plotted, inputFilename, outputDir, outputFileLabel,
             chartPackage, dataTransformation, chart_type_list, chart_title, column_xAxis_label_var,
-            charts_type_options_widget,
             hover_info_column_list=[],
             count_var=0,
             column_yAxis_label_var='Frequencies',
@@ -636,7 +632,7 @@ def run_all(columns_to_be_plotted, inputFilename, outputDir, outputFileLabel,
             series_label_list=[], second_y_var=0, second_yAxis_label='',
             complete_sid=False, remove_hyperlinks=False, csv_field_Y_axis_list=[], X_axis_var=[]):
     # get the chart type from the GUI user selection
-    chart_type_list = [charts_type_options_widget.split(' ')[0]]
+    chart_type_list = ["Bar chart"]
 
     use_Plotly = 'plotly' in chartPackage.lower()
     # added by Tony, May 2022 for complete sentence index

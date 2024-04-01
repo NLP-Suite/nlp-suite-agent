@@ -5,15 +5,8 @@ import GUI_IO_util
 import IO_libraries_util
 import lib_util
 
-def run_sentiment_analysis(inputFilename,
-                           inputDir,outputDir,
-        openOutputFiles,
-        chartPackage,
-        dataTransformation,
-        mean_var,
-        median_var,
-        SA_algorithm_var):
-
+def run_sentiment_analysis(inputDir,outputDir, openOutputFiles, chartPackage, dataTransformation, mean_var, median_var, SA_algorithm_var):
+    print(inputDir,outputDir, openOutputFiles, chartPackage, dataTransformation, mean_var, median_var, SA_algorithm_var)
     # get the NLP package and language options
     _, _, _, _, language, package_display_area_value, _, export_json_var, memory_var, document_length_var, limit_sentence_length_var = config_util.read_NLP_package_language_config()
     language_var = language
@@ -45,8 +38,8 @@ def run_sentiment_analysis(inputFilename,
     anew_var=0
 
     if SA_algorithm_var=='*':
-        if inputFilename != '':
-            inputBaseName = os.path.basename(inputFilename)[0:-4]  # without .txt
+        if "" != '':
+            inputBaseName = os.path.basename("")[0:-4]  # without .txt
         else:
             inputBaseName = os.path.basename(inputDir)
         # create a sentiment subdirectory of the output directory
@@ -95,7 +88,7 @@ def run_sentiment_analysis(inputFilename,
             model_path = "cardiffnlp/twitter-xlm-roberta-base-sentiment" # multilingual model
         else:
             model_path = "cardiffnlp/twitter-roberta-base-sentiment-latest" # English language model
-        outputFiles = BERT_util.sentiment_main(inputFilename, inputDir, outputDir, GUI_IO_util.config_filename, mode, chartPackage, dataTransformation, model_path)
+        BERT_util.sentiment_main("", inputDir, outputDir, GUI_IO_util.config_filename, mode, chartPackage, dataTransformation, model_path)
 
     # spaCy  _______________________________________________________
 
@@ -111,7 +104,7 @@ def run_sentiment_analysis(inputFilename,
         document_length_var = 1
         limit_sentence_length_var = 1000
         import spaCy_util
-        spaCy_util.spaCy_annotate(GUI_IO_util.config_filename, inputFilename, inputDir,
+        spaCy_util.spaCy_annotate(GUI_IO_util.config_filename, "", inputDir,
                                                     outputDir,
                                                     openOutputFiles,
                                                     chartPackage, dataTransformation,
@@ -131,7 +124,7 @@ def run_sentiment_analysis(inputFilename,
         import Stanford_CoreNLP_util
         if not IO_internet_util.check_internet_availability_warning('Stanford CoreNLP Sentiment Analysis'):
             return
-        Stanford_CoreNLP_util.CoreNLP_annotate(GUI_IO_util.config_filename, inputFilename, inputDir,
+        Stanford_CoreNLP_util.CoreNLP_annotate(GUI_IO_util.config_filename, "", inputDir,
                                                                           outputDir, openOutputFiles, chartPackage,dataTransformation, 'sentiment', False,
                                                                           language_var, export_json_var,
                                                                           memory_var)
@@ -148,7 +141,7 @@ def run_sentiment_analysis(inputFilename,
         document_length_var = 1
         limit_sentence_length_var = 1000
         import Stanza_util
-        Stanza_util.Stanza_annotate(GUI_IO_util.config_filename, inputFilename, inputDir,
+        Stanza_util.Stanza_annotate(GUI_IO_util.config_filename, "", inputDir,
                                                       outputDir,
                                                       openOutputFiles,
                                                       chartPackage, dataTransformation,
@@ -172,7 +165,7 @@ def run_sentiment_analysis(inputFilename,
             if IO_libraries_util.check_inputPythonJavaProgramFile('sentiment_analysis_ANEW_util.py') == False:
                 return
 
-            sentiment_analysis_ANEW_util.main(inputFilename, inputDir, outputDir, mode, 
+            sentiment_analysis_ANEW_util.main("", inputDir, outputDir, mode, 
                                                             chartPackage, dataTransformation)
             print('Analysis end', 'Finished running ANEW Sentiment Analysis at')
         else:
@@ -188,7 +181,7 @@ def run_sentiment_analysis(inputFilename,
         if language=='English':
 
             print('Analysis start', 'Started running HEDONOMETER Sentiment Analysis at')
-            sentiment_analysis_hedonometer_util.main(inputFilename, inputDir, outputDir, mode, chartPackage, dataTransformation)
+            sentiment_analysis_hedonometer_util.main("", inputDir, outputDir, mode, chartPackage, dataTransformation)
             print('Analysis end', 'Finished running HEDONOMETER Sentiment Analysis at')
         else:
             print('Warning','The HEDONOMETER algorithm is available only for the English language.\n\nYour currently selected language is '+language+'.\n\nYou can change the language using the Setup dropdownmenu at the bottom of this GUI and selecting "Setup NLP package and corpus language."')
@@ -200,7 +193,7 @@ def run_sentiment_analysis(inputFilename,
             if IO_libraries_util.check_inputPythonJavaProgramFile('sentiment_analysis_SentiWordNet_util.py')==False:
                 return
             print('Analysis start', 'Started running SentiWordNet Sentiment Analysis at')
-            sentiment_analysis_SentiWordNet_util.main(inputFilename, inputDir, outputDir, GUI_IO_util.config_filename, mode, chartPackage, dataTransformation)
+            sentiment_analysis_SentiWordNet_util.main("", inputDir, outputDir, GUI_IO_util.config_filename, mode, chartPackage, dataTransformation)
             print('Analysis end', 'Finished running SentiWordNet Sentiment Analysis at')
         else:
             print('Warning','The SentiWordNet algorithm is available only for the English language.\n\nYour currently selected language is '+language+'.\n\nYou can change the language using the Setup dropdownmenu at the bottom of this GUI and selecting "Setup NLP package and corpus language."')
@@ -214,7 +207,7 @@ def run_sentiment_analysis(inputFilename,
             if IO_libraries_util.check_inputPythonJavaProgramFile('sentiment_analysis_VADER_util.py')==False:
                 return
             print('Analysis start', 'Started running VADER Sentiment Analysis at')
-            sentiment_analysis_VADER_util.main(inputFilename, inputDir, outputDir, mode, chartPackage, dataTransformation)
+            sentiment_analysis_VADER_util.main("", inputDir, outputDir, mode, chartPackage, dataTransformation)
             print('Analysis end', 'Finished running VADER Sentiment Analysis at')
         else:
             print('Warning','The VADER algorithm is available only for the English language.\n\nYour currently selected language is '+language+'.\n\nYou can change the language using the Setup dropdownmenu at the bottom of this GUI and selecting "Setup NLP package and corpus language."')

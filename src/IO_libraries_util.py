@@ -612,7 +612,7 @@ def process_Mac_Applications(software_name, software_extension):
         installation_message = software_name.upper() + ' IS ALREADY INSTALLED ON YOUR MACHINE.\n\nIf you want to install a different version, please go to the Applications directory, delete ' + \
                                software_name + ', and use the dropdown menu "Software DOWNLOAD" to select ' + software_name + ' and download and install a different release.'
 
-    mb.showwarning(title='Install ' + software_name.upper(), message=installation_message)
+    print('Install ' + software_name.upper(), installation_message)
     # download_message, installation_message are set to '' when no new download or installation is desired
     download_message = installation_message
     return software_dir, download_message, installation_message
@@ -743,20 +743,15 @@ def display_download_installation_messages(download_install, software_name, soft
                     'where you can download and install this and any other required external software.' \
                     '\n\nDO YOU WANT TO OPEN THE GUI?'
                 if not silent:
-                    answer = tk.messagebox.askyesno(software_name + " installation", opening_message)
-                    if answer:
-                        download_message = ''
-                        call("python NLP_setup_external_software_main.py", shell=False)
-                        # must get software_dir in case it was changed in the NLP_setup_external_software_main GUI
-                        software_dir, software_url, missing_software, error_found = get_external_software_dir(calling_script,
-                                                                                                 software_name,
-                                                                                                 silent=True,
-                                                                                                 only_check_missing=True,
-                                                                                                 install_download='install')
-
-                    else:
-                        # download_message, installation_message are set to '' when no new download or installation is desired
-                        download_message = ''
+                    print(software_name + " installation", opening_message)
+                    download_message = ''
+                    call("python NLP_setup_external_software_main.py", shell=False)
+                    # must get software_dir in case it was changed in the NLP_setup_external_software_main GUI
+                    software_dir, software_url, missing_software, error_found = get_external_software_dir(calling_script,
+                                                                                                software_name,
+                                                                                                silent=True,
+                                                                                                only_check_missing=True,
+                                                                                                install_download='install')
                     return software_dir, title, opening_message, download_message, installation_message
 
 # DOWNLOAD  messages ------------------------------------------------------------------------------
@@ -812,8 +807,8 @@ def display_download_installation_messages(download_install, software_name, soft
                         software_name)
                     if not Java_errorFound:
                         software_dir = "Java version " + str(java_version) + " installed"
-                        mb.showwarning(title=software_name + ' installation.',
-                                       message=software_name + ' IS ALREADY INSTALLED ON YOUR MACHINE:\n\n' + software_dir + ' as saved in NLP_setup_external_software_config.csv.'
+                        print(software_name + ' installation.',
+                                       software_name + ' IS ALREADY INSTALLED ON YOUR MACHINE:\n\n' + software_dir + ' as saved in NLP_setup_external_software_config.csv.'
                                                 '\n\nIf you want to install a new version, you need to uninstall the current version, since Java is in your environment variables, and then download and/or install a different version.')
                         # download_message='' is used to detect a cancellation
                         download_message = ""
@@ -839,8 +834,8 @@ def display_download_installation_messages(download_install, software_name, soft
                     Java_errorFound, error_code, system_output, java_version = check_java_installation(software_name)
                     if not Java_errorFound:
                         software_dir = "Java version " + str(java_version) + " installed"
-                    mb.showwarning(title=software_name + ' installation.',
-                                   message=software_name + ' IS ALREADY INSTALLED ON YOUR MACHINE:\n\n' + software_dir + ' as saved in NLP_setup_external_software_config.csv.'
+                    print(software_name + ' installation.',
+                                   software_name + ' IS ALREADY INSTALLED ON YOUR MACHINE:\n\n' + software_dir + ' as saved in NLP_setup_external_software_config.csv.'
                                                         '\n\nIf you want to install a new version, you need to uninstall the current version, since Java is in your environment variables, and then download and/or install a different version.')
                     # download_message, installation_message are set to '' when no new download or installation is desired
                     download_message = ''
@@ -868,7 +863,7 @@ def display_download_installation_messages(download_install, software_name, soft
 # DOWNLOAD ask questions ---------------------------------------------------------------
 
         if download_message !='':
-            mb.showwarning(title='download ' + software_name.upper(), message=download_message)
+            print('download ' + software_name.upper(), download_message)
 
 # INSTALL messages -------------------------------------------------------------------------
 
@@ -889,8 +884,8 @@ def display_download_installation_messages(download_install, software_name, soft
                 if Java_errorFound:
                     software_dir = "Java version " + str(java_version) + " installed"
                     # @@@
-                    mb.showwarning(title=software_name + ' installation.',
-                                   message=software_name + ' IS ALREADY INSTALLED ON YOUR MACHINE (but the Java version is not saved in NLP_setup_external_software_config.csv; '
+                    print(software_name + ' installation.',
+                                   software_name + ' IS ALREADY INSTALLED ON YOUR MACHINE (but the Java version is not saved in NLP_setup_external_software_config.csv; '
                                                            'when you CLOSE this GUI make sure to save the changes).'
                                                            '\n\nIf you want to install a new version, you need to uninstall the current version, '
                                                            'since Java is in your environment variables, and then use the "Software DOWNLOAD" dropdown menu to download and install a different version.')
@@ -909,7 +904,7 @@ def display_download_installation_messages(download_install, software_name, soft
                                    + software_location_message
             # @@@ 9/1
             if not error_found:
-                mb.showwarning(title='Install ' + software_name.upper(), message=installation_message)
+                print('Install ' + software_name.upper(), installation_message)
 
 # INSTALL check software_dir ------------------------------------------------------------------------------
 
@@ -933,8 +928,8 @@ def display_download_installation_messages(download_install, software_name, soft
                 Java_errorFound, error_code, system_output, java_version = check_java_installation(software_name)
                 if not Java_errorFound:
                     software_dir = "Java version " + str(java_version) + " installed"
-                    mb.showwarning(title=software_name + ' installation.',
-                               message=software_name + ' IS ALREADY INSTALLED ON YOUR MACHINE:\n\n' + software_dir + ' as saved in NLP_setup_external_software_config.csv.\n\nIf you want to install a new version, '
+                    print(software_name + ' installation.',
+                               software_name + ' IS ALREADY INSTALLED ON YOUR MACHINE:\n\n' + software_dir + ' as saved in NLP_setup_external_software_config.csv.\n\nIf you want to install a new version, '
                                     'you need to uninstall the current version, since Java is in your environment variables, and then use the "Software DOWNLOAD" dropdown menu to download and install a different version.')
                 # download_message, installation_message are set to '' when no new download or installation is desired
                 download_message = ''
@@ -968,10 +963,9 @@ def display_download_installation_messages(download_install, software_name, soft
                                             "\n\nPress Esc or Cancel to exit when the dialogue box opens if you do not want to install " + software_name.upper() + '.\n\n' \
                                             + software_location_message
 
-        mb.showwarning(title='Install ' + software_name.upper(), message=installation_directory_message)
+        print('Install ' + software_name.upper(), installation_directory_message)
 
-        temp_software_dir = tk.filedialog.askdirectory(initialdir=software_dir,
-                                                       title='Select a directory for ' + software_name + '. Press Esc or Cancel to exit.')
+        temp_software_dir = GUI_IO_util.libPath
         if temp_software_dir != '':
             if not check_inputExternalProgramFile(calling_script, temp_software_dir, software_name,
                                                   False, False):

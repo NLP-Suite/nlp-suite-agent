@@ -212,28 +212,6 @@ def CoreNLP_annotate(config_filename,inputFilename,
     if not annotator_available:
         return filesToOpen
 
-    # check that the CoreNLPdir has been setup
-    CoreNLPdir, existing_software_config, errorFound = IO_libraries_util.external_software_install('Stanford_CoreNLP_util',
-                                                                                         'Stanford CoreNLP',
-                                                                                         '',
-                                                                                         silent=False, errorFound=False)
-    if CoreNLPdir== '' or CoreNLPdir== None:
-        return filesToOpen
-
-    # CoreNLPdir, software_url, missing_external_software = IO_libraries_util.get_external_software_dir('Stanford_CoreNLP_util', 'Stanford CoreNLP', silent=False, only_check_missing=False)
-    # if CoreNLPdir== '' or CoreNLPdir== None or 'corenlp' in missing_external_software.lower():
-    #     return filesToOpen
-    # check the version of CoreNLP
-    IO_libraries_util.check_CoreNLPVersion(CoreNLPdir)
-
-    # check for Java
-    errorFound, error_code, system_output, java_version=IO_libraries_util.check_java_installation('Stanford CoreNLP')
-    if errorFound:
-        return filesToOpen
-
-    # check available memory
-    IO_libraries_util.check_avaialable_memory('Stanford CoreNLP')
-
     # decide on directory or single file
     # TODO why these lines?
     # if inputDir != '':
@@ -412,7 +390,7 @@ def CoreNLP_annotate(config_filename,inputFilename,
                                      reminders_util.message_CoreNLP_normalized_date_timing,
                                      True)
 
-    lang_models = language_models(CoreNLPdir, language)
+    lang_models = language_models(GUI_IO_util.external_software, language)
     if lang_models == None:
         return filesToOpen
     param_number = 0
@@ -533,37 +511,6 @@ def CoreNLP_annotate(config_filename,inputFilename,
     if DoCleanXML:
         params['annotators'] = params['annotators'] + ',cleanXML'
         param_string_NN = param_string_NN + ',cleanXML'
-
-    # https://stanfordnlp.github.io/CoreNLP/corenlp-server.html)
-    # -d64 to use 64 bits JAVA, normally set to 32 as default; option not recognized in Mac
-    if sys.platform == 'darwin':  # Mac OS
-        # mx is the same as Xmx and refers to maximum Java heap size
-        # '-props spanish',
-        if language == 'English':
-            CoreNLP_nlp = subprocess.Popen(
-                ['java', '-mx' + str(memory_var) + "g", '-cp', os.path.join(CoreNLPdir, '*'),
-                 'edu.stanford.nlp.pipeline.StanfordCoreNLPServer',  '-parse.maxlen', str(sentence_length), '-timeout', '999999'])
-        else:
-            CoreNLP_nlp = subprocess.Popen(
-                ['java', '-mx' + str(memory_var) + "g", '-cp', os.path.join(CoreNLPdir, '*'),
-                 'edu.stanford.nlp.pipeline.StanfordCoreNLPServer','-props', language.lower(),
-                 '-parse.maxlen', str(sentence_length), '-timeout', '999999'])
-
-    else: # Windows
-        # CoreNLP_nlp = subprocess.Popen(
-        #     ['java', '-mx' + str(memory_var) + "g", '-d64', '-cp',  os.path.join(CoreNLPdir, '*'),
-        #      'edu.stanford.nlp.pipeline.StanfordCoreNLPServer', '-parse.maxlen' + str(sentence_length),'-timeout', '999999'])
-        if language == 'English':
-            CoreNLP_nlp = subprocess.Popen(
-                ['java', '-mx' + str(memory_var) + "g", '-cp',  os.path.join(CoreNLPdir, '*'),
-                 'edu.stanford.nlp.pipeline.StanfordCoreNLPServer', '-parse.maxlen', str(sentence_length),'-timeout', '999999'])
-        else:
-            CoreNLP_nlp = subprocess.Popen(
-                ['java', '-mx' + str(memory_var) + "g", '-cp',  os.path.join(CoreNLPdir, '*'),
-                 'edu.stanford.nlp.pipeline.StanfordCoreNLPServer', '-props', language.lower(),
-                 '-parse.maxlen', str(sentence_length),'-timeout', '999999'])
-
-    time.sleep(5)
 
     if 'POS' in str(annotator_params) or 'NER' in str(annotator_params):
         reminders_util.checkReminder(scriptName,
@@ -870,7 +817,6 @@ def CoreNLP_annotate(config_filename,inputFilename,
                     else:
                         filesToOpen.extend(outputFiles)
 
-    CoreNLP_nlp.kill()
     # print("Length of Files to Open after visualization: ", len(filesToOpen))
     # filesErroris a double list [[]] of headers and errors
     if len(filesError)>0:
