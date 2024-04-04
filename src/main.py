@@ -2,6 +2,7 @@ import os
 from threading import Thread
 from typing import Annotated
 
+import uvicorn
 from fastapi import FastAPI, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
@@ -79,3 +80,7 @@ def sentiment_analysis(
     )
     thread.start()
     return PlainTextResponse("", status_code=200)
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, port=3000, host="0.0.0.0")

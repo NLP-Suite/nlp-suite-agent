@@ -11,8 +11,7 @@ RUN python3.9 -m pip install --upgrade setuptools
 COPY . .
 
 RUN python3.9 -m pip install -r requirements.txt
-RUN python3.9 -m pip install "uvicorn[standard]"
 
 WORKDIR /nlp-suite/src
 EXPOSE 3000
-CMD ["uvicorn", "main:app", "--port", "3000"]
+CMD ["python3.9", "main.py"]
