@@ -1,0 +1,6 @@
+I/O configuration label,Path,Sort order,Item separator character(s),Date format,Date position
+Input txt filename with path,,,,,,
+Input files directory,/Users/athena/nlp-suite/input,1,_,,,
+Input files secondary directory,,,,,,
+Output files directory,/Users/athena/nlp-suite/output,,,,,
+
