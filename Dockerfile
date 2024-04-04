@@ -1,15 +1,18 @@
 FROM ubuntu:20.04 
 ARG DEBIAN_FRONTEND=noninteractive
-WORKDIR /nlpsuite
 
-RUN apt-get update && apt-get install -y python3.8 python3.8-dev python3-pip python3-tk 
+WORKDIR /nlp-suite
 
-RUN python3.8 -m pip install --upgrade pip
-RUN python3.8 -m pip install --upgrade setuptools
+RUN apt-get update && apt-get install -y python3.9 python3.9-dev python3-pip python3-tk 
 
-COPY src src
-COPY lib lib
+RUN python3.9 -m pip install --upgrade pip
+RUN python3.9 -m pip install --upgrade setuptools
 
-RUN python3.8 -m pip install -r requirements.txt
+COPY . .
 
-CMD ["python3.8", "./src/server.py"]
+RUN python3.9 -m pip install -r requirements.txt
+RUN python3.9 -m pip install "uvicorn[standard]"
+
+WORKDIR /nlp-suite/src
+EXPOSE 3000
+CMD ["uvicorn", "main:app", "--port", "3000"]
