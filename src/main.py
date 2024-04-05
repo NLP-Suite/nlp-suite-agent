@@ -6,10 +6,16 @@ import uvicorn
 from fastapi import FastAPI, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
+
 from sentiment_analysis import run_sentiment_analysis
 
 app = FastAPI()
-origins = ["http://172.16.0.11:8000", "http://0.0.0.0:8000"]
+origins = [
+    "*",
+    "http://172.16.0.11:8000",
+    "http://0.0.0.0:8000",
+    "http://localhost:8000",
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

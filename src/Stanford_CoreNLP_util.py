@@ -30,6 +30,11 @@ import sys
 import time
 from typing import Tuple
 
+# not using stanfordcorenlp because it is not recognizing sentiment annotator
+import nltk
+import pandas as pd
+from pycorenlp import StanfordCoreNLP
+
 import charts_util
 import file_splitter_ByLength_util
 import GUI_IO_util
@@ -37,15 +42,10 @@ import IO_csv_util
 import IO_files_util
 import IO_libraries_util
 import IO_user_interface_util
-
-# not using stanfordcorenlp because it is not recognizing sentiment annotator
-import nltk
-import pandas as pd
 import parsers_annotators_visualization_util
 import reminders_util
 import Stanford_CoreNLP_clause_util
 import Stanford_CoreNLP_SVO_enhanced_dependencies_util  # Enhanced++ dependencies
-from pycorenlp import StanfordCoreNLP
 
 url = "https://stanfordnlp.github.io/CoreNLP/human-languages.html"
 CoreNLP_web = (
@@ -906,7 +906,7 @@ def CoreNLP_annotate(
     # DOES NOT WORK Increase and decrease the total amount of words within file and test the performance
     # DOES NOT WORK Test to see if file splitting process influences the performance
 
-    nlp = StanfordCoreNLP("http://0.0.0.0:9000")
+    nlp = StanfordCoreNLP("http://172.16.0.12:9000")
     for docName in inputDocs:
         docID = docID + 1
         head, tail = os.path.split(docName)
