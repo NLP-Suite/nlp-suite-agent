@@ -520,6 +520,7 @@ def create_excel_chart(
                 #     chartName.y_axis.title = " Y_AXIS"
 
             if len(series_label_list) > n:
+                print(
                     "Series Label Warning",
                     "The system indicates that there are more series hover_over_values specified than the number of series ("
                     + str(n)

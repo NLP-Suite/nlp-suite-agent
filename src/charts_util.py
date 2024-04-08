@@ -37,7 +37,7 @@ def prepare_data_to_be_plotted_inExcel(
 ):
     # TODO change to pandas half of this function relies on csv half on pandas, reading in data twice!
     # TODO temporary to measure process time
-    # startTime=IO_user_interface_util.timed_alert(2000,'Analysis start', 'Started running Excel prepare_data_to_be_plotted_inExcel at',
+    # startTime=IO_ser_interface_util.timed_alert(2000,'Analysis start', 'Started running Excel prepare_data_to_be_plotted_inExcel at',
     #                                              True, '', True, '', True)
     withHeader_var = IO_csv_util.csvFile_has_header(
         inputFilename
