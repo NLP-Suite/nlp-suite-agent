@@ -2,6 +2,9 @@
 # BERT is available as a multilingual model in 102 languages
 import sys
 
+import sklearn
+from sklearn.manifold import TSNE
+from summarizer import Summarizer
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from transformers import pipeline
 from sentence_transformers import SentenceTransformer
@@ -15,8 +18,6 @@ import argparse
 import tkinter.messagebox as mb
 # Visualization
 ##from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
-from summarizer import Summarizer
 
 
 import IO_csv_util
