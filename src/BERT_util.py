@@ -15,7 +15,6 @@ import csv
 import time
 import stanza
 import argparse
-import tkinter.messagebox as mb
 # Visualization
 ##from sklearn.decomposition import PCA
 
@@ -474,8 +473,7 @@ def sentiment_analysis_BERT(inputFilename, outputDir, outputFilename, mode, Docu
         fulltext = myfile.read()
     # end method if file is empty
     if len(fulltext) < 1:
-        mb.showerror(title='File empty', message='The file ' + inputFilename +
-                                                 ' is empty.\n\nPlease, use another file and try again.')
+        print('File empty', 'The file ' + inputFilename + ' is empty.\n\nPlease, use another file and try again.')
         print('Empty file ', inputFilename)
         return
 
