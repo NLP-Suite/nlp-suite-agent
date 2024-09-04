@@ -1,6 +1,7 @@
 import os
 from threading import Thread
 from typing import Annotated
+from enum import Enum
 
 import uvicorn
 from fastapi import FastAPI, Form, Request
@@ -8,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 
 from sentiment_analysis import run_sentiment_analysis
-
+from svo import run_svo
 app = FastAPI()
 origins = [
     "*",
@@ -120,11 +121,11 @@ def svo(
     google_earth_maps: Annotated[bool, Form()] = Form(False),
     transformation: Annotated[TransformationType, Form()] = Form(...),
 ):
-    inputDir = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
-    outputDir = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     thread = Thread(
         target=lambda: run_svo(
-            inputFilename, inputDir, outputDir, openOutputFiles, chartPackage,
+            inputDirectory, outputDirectory,
             transformation, coreferenceResolution, manualCoreference, package.value, SOgender, SOquote,
             filterS, filterV, filterO,
             lemmatizeS, lemmatizeV, lemmatizeO,
