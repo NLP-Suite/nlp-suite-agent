@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 
 from sentiment_analysis import run_sentiment_analysis
+from topic_modeling import run_topic_modelling
 from svo import run_svo
 app = FastAPI()
 origins = [
@@ -87,6 +88,48 @@ def sentiment_analysis(
     )
     thread.start()
     return PlainTextResponse("", status_code=200)
+
+@app.post("/topic_modelling")
+def topic_modelling(
+    dataTransformation: Annotated[str, Form()],
+    num_topics: Annotated[int, Form()],
+    BERT_var: Annotated[bool, Form()],
+    split_docs_var: Annotated[bool, Form()],
+    MALLET_var: Annotated[bool, Form()],
+    optimize_intervals_var: Annotated[bool, Form()],
+    Gensim_var: Annotated[bool, Form()],
+    remove_stopwords_var: Annotated[bool, Form()],
+    lemmatize_var: Annotated[bool, Form()],
+    nounsOnly_var: Annotated[bool, Form()],
+    Gensim_MALLET_var: Annotated[bool, Form()],
+):
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_topic_modelling(
+                inputDirectory,
+                outputDirectory,
+                False,  # openOutputFiles
+                "Excel",  # chartPackage
+                dataTransformation,
+                num_topics,
+                BERT_var,
+                split_docs_var,
+                MALLET_var,
+                optimize_intervals_var,
+                Gensim_var,
+                remove_stopwords_var,
+                lemmatize_var,
+                nounsOnly_var,
+                Gensim_MALLET_var,
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+
 
 class PackageChoice(str, Enum):
     spaCy = "spaCy"
