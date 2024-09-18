@@ -9,8 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 
 from sentiment_analysis import run_sentiment_analysis
-from topic_modeling import run_topic_modelling
-from svo import run_svo
+from topic_modeling import run_topic_modeling
+#from svo import run_svo
 app = FastAPI()
 origins = [
     "*",
@@ -89,8 +89,8 @@ def sentiment_analysis(
     thread.start()
     return PlainTextResponse("", status_code=200)
 
-@app.post("/topic_modelling")
-def topic_modelling(
+@app.post("/topic_modeling")
+def topic_modeling(
     dataTransformation: Annotated[str, Form()],
     num_topics: Annotated[int, Form()],
     BERT_var: Annotated[bool, Form()],
@@ -144,39 +144,39 @@ class TransformationType(str, Enum):
     Square = "Square root"
     Z_score = "Z score"
 
-@app.post("/svo")
-def svo(
-    inputDirectory: Annotated[str, Form()] = Form(...),
-    outputDirectory: Annotated[str, Form()] = Form(...),
-    coreferenceResolution: Annotated[bool, Form()] = Form(False),
-    manualCoreference: Annotated[bool, Form()] = Form(False),
-    package: Annotated[PackageChoice, Form()] = Form(...),
-    lemmatizeS: Annotated[bool, Form()] = Form(False),
-    filterS: Annotated[bool, Form()] = Form(False),
-    lemmatizeV: Annotated[bool, Form()] = Form(False),
-    filterV: Annotated[bool, Form()] = Form(False),
-    lemmatizeO: Annotated[bool, Form()] = Form(False),
-    filterO: Annotated[bool, Form()] = Form(False),
-    SOgender: Annotated[bool, Form()] = Form(False),
-    SOquote: Annotated[bool, Form()] = Form(False),
-    network_graphs: Annotated[bool, Form()] = Form(False),
-    wordcloud: Annotated[bool, Form()] = Form(False),
-    google_earth_maps: Annotated[bool, Form()] = Form(False),
-    transformation: Annotated[TransformationType, Form()] = Form(...),
-):
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
-    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
-    thread = Thread(
-        target=lambda: run_svo(
-            inputDirectory, outputDirectory,
-            transformation, coreferenceResolution, manualCoreference, package.value, SOgender, SOquote,
-            filterS, filterV, filterO,
-            lemmatizeS, lemmatizeV, lemmatizeO,
-            network_graphs, wordcloud, google_earth_maps
-        )
-    )
-    thread.start()
-    return PlainTextResponse("SVO extraction initiated", status_code=200)
+# @app.post("/svo")
+# def svo(
+#     inputDirectory: Annotated[str, Form()] = Form(...),
+#     outputDirectory: Annotated[str, Form()] = Form(...),
+#     coreferenceResolution: Annotated[bool, Form()] = Form(False),
+#     manualCoreference: Annotated[bool, Form()] = Form(False),
+#     package: Annotated[PackageChoice, Form()] = Form(...),
+#     lemmatizeS: Annotated[bool, Form()] = Form(False),
+#     filterS: Annotated[bool, Form()] = Form(False),
+#     lemmatizeV: Annotated[bool, Form()] = Form(False),
+#     filterV: Annotated[bool, Form()] = Form(False),
+#     lemmatizeO: Annotated[bool, Form()] = Form(False),
+#     filterO: Annotated[bool, Form()] = Form(False),
+#     SOgender: Annotated[bool, Form()] = Form(False),
+#     SOquote: Annotated[bool, Form()] = Form(False),
+#     network_graphs: Annotated[bool, Form()] = Form(False),
+#     wordcloud: Annotated[bool, Form()] = Form(False),
+#     google_earth_maps: Annotated[bool, Form()] = Form(False),
+#     transformation: Annotated[TransformationType, Form()] = Form(...),
+# ):
+#     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+#     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+#     thread = Thread(
+#         target=lambda: run_svo(
+#             inputDirectory, outputDirectory,
+#             transformation, coreferenceResolution, manualCoreference, package.value, SOgender, SOquote,
+#             filterS, filterV, filterO,
+#             lemmatizeS, lemmatizeV, lemmatizeO,
+#             network_graphs, wordcloud, google_earth_maps
+#         )
+#     )
+#     thread.start()
+#     return PlainTextResponse("SVO extraction initiated", status_code=200)
 
 
 if __name__ == "__main__":

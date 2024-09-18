@@ -1,11 +1,6 @@
 import matplotlib.pyplot as plt
-import GUI_util
-import IO_files_util
-import re
 from sklearn.feature_extraction.text import CountVectorizer
 from sentence_transformers import SentenceTransformer
-import pandas as pd
-import argparse
 import os
 from gensim.parsing.preprocessing import STOPWORDS
 from bertopic import BERTopic
@@ -68,13 +63,13 @@ def run_BERTopic(inputDir, outputDir, openOutputFiles, split_docs_var):
     return filesToOpen
         
 
-def main():
+# def main():
 
-    inputDir = '/media/gog/external2/data/CGWR Cleaned Feb 20024'
-    outputDir = '/home/gog/work/TM-BERTopic_CGWR Cleaned Feb 20024'
-    openOutputFiles = 1
-    run_BERTopic(inputDir, outputDir, openOutputFiles)
+#     inputDir = '/media/gog/external2/data/CGWR Cleaned Feb 20024'
+#     outputDir = '/home/gog/work/TM-BERTopic_CGWR Cleaned Feb 20024'
+#     openOutputFiles = 1
+#     run_BERTopic(inputDir, outputDir, openOutputFiles)
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

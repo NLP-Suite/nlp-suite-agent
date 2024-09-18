@@ -17,7 +17,7 @@ args = parser.parse_args()
 """
 
 
-def run_topic_modelling(inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation, num_topics,
+def run_topic_modeling(inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation, num_topics,
         BERT_var,
         split_docs_var,
         MALLET_var,
