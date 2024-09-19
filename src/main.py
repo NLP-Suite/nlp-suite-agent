@@ -108,7 +108,7 @@ def topic_modeling(
     thread = Thread(
         target=lambda: run(
             app,
-            lambda: run_topic_modelling(
+            lambda: run_topic_modeling(
                 inputDirectory,
                 outputDirectory,
                 False,  # openOutputFiles
