@@ -47,6 +47,7 @@ psutil==5.9.8
 pycorenlp==0.3.0
 pydantic==2.6.4
 pydantic_core==2.16.3
+pyLDAvis==3.4.1
 pyparsing==3.1.2
 pyphen==0.14.0
 python-dateutil==2.9.0.post0

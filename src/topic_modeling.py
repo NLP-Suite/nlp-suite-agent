@@ -1,6 +1,6 @@
 import GUI_IO_util
 import topic_modeling_bert_util
-import topic_modeling_mallet_util
+# import topic_modeling_mallet_util
 import topic_modeling_gensim_util
 import IO_internet_util
 import reminders_util
@@ -61,9 +61,9 @@ def run_topic_modeling(inputDir, outputDir, openOutputFiles, chartPackage, dataT
         return
     if BERT_var:
         topic_modeling_bert_util.run_BERTopic(inputDir, outputDir, openOutputFiles, split_docs_var)
-    if MALLET_var:
-        topic_modeling_mallet_util.run_MALLET(inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
-                                                     optimize_intervals_var, num_topics)
+    # if MALLET_var:
+    #     topic_modeling_mallet_util.run_MALLET(inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
+    #                                                  optimize_intervals_var, num_topics)
     if Gensim_var:
         topic_modeling_gensim_util.run_Gensim(None, inputDir, outputDir, GUI_IO_util.config_filename, num_topics, #GUI_UTIL.window <- None
                                           remove_stopwords_var, lemmatize_var, nounsOnly_var, Gensim_MALLET_var, openOutputFiles, chartPackage, dataTransformation)
