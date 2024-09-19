@@ -1,10 +1,9 @@
 import os
 import subprocess
 from sys import platform
-
+import pandas as pd
 
 def run_MALLET(inputDir, outputDir, numTopics, chartPackage='Excel', dataTransformation='', OptimizeInterval=False):
-    # Ensure MALLET is installed and environment variables are set
     MALLETDir = os.getenv('MALLET_HOME')
     if not MALLETDir:
         print('The MALLET_HOME environment variable is not set. Please set it before running the application.')
@@ -12,7 +11,6 @@ def run_MALLET(inputDir, outputDir, numTopics, chartPackage='Excel', dataTransfo
 
     MALLETBinDir = os.path.join(MALLETDir, 'bin')
 
-    # Validate input and output directories
     if ' ' in inputDir:
         print('The selected INPUT directory contains a space, which is not allowed.')
         raise ValueError('Input directory contains spaces.')
@@ -29,7 +27,6 @@ def run_MALLET(inputDir, outputDir, numTopics, chartPackage='Excel', dataTransfo
         print('The selected output directory does not exist.')
         raise FileNotFoundError('Output directory does not exist.')
 
-    # Count the number of .txt files in inputDir
     numFiles = len([f for f in os.listdir(inputDir) if f.endswith('.txt')])
     if numFiles == 0:
         print('The input directory does not contain any .txt files.')
@@ -37,18 +34,15 @@ def run_MALLET(inputDir, outputDir, numTopics, chartPackage='Excel', dataTransfo
     elif numFiles < 50:
         print(f'The input directory contains only {numFiles} .txt files. Topic modeling may not produce valid results with so few files.')
 
-    # Define output filenames
     TXTFiles_MALLETFormatted_FileName = os.path.join(outputDir, "MALLETFormatted_TXTFiles.mallet")
-    Composition_FileName = os.path.join(outputDir, "NLP-MALLET_Output_Composition.tsv")
-    Keys_FileName = os.path.join(outputDir, "NLP-MALLET_Output_Keys.tsv")
+    Composition_FileName = os.path.join(outputDir, "NLP-MALLET_Output_Composition.txt")
+    Keys_FileName = os.path.join(outputDir, "NLP-MALLET_Output_Keys.txt")
     Compressed_FileName = os.path.join(outputDir, "NLP-MALLET_Output_Compressed.gz")
 
-    # List to store files generated for further processing or opening
     filesToOpen = []
 
     print('Started running MALLET Topic modeling.')
 
-    # First Step: Import Corpus
     import_command = [
         os.path.join(MALLETBinDir, 'mallet'),
         'import-dir',
@@ -61,7 +55,6 @@ def run_MALLET(inputDir, outputDir, numTopics, chartPackage='Excel', dataTransfo
     shell_flag = platform == "win32"
     subprocess.call(import_command, shell=shell_flag)
 
-    # Second Step: Train Topics
     train_command = [
         os.path.join(MALLETBinDir, 'mallet'),
         'train-topics',
@@ -79,25 +72,33 @@ def run_MALLET(inputDir, outputDir, numTopics, chartPackage='Excel', dataTransfo
 
     print('Finished running MALLET Topic modeling.')
 
-    # Convert TSV files to CSV if necessary (this requires a file conversion utility, not shown here)
-    # If you have a conversion function, you would call it here, for example:
-    # header_keys = ['Topic #', 'Weight', 'Keywords']
-    # Keys_FileName_csv = file_converter_util.tsv_converter(Keys_FileName, outputDir, header_keys)
-    # filesToOpen.append(Keys_FileName_csv)
+    if not os.path.isfile(Keys_FileName) or not os.path.isfile(Composition_FileName):
+        print('MALLET did not produce the expected output files.')
+        raise FileNotFoundError('MALLET output files not found.')
 
-    # header_composition = ['Document ID', 'Document'] + [f"Topic #{i} Weight in Document" for i in range(numTopics)]
-    # Composition_FileName_csv = file_converter_util.tsv_converter(Composition_FileName, outputDir, header_composition)
-    # filesToOpen.append(Composition_FileName_csv)
+    keys_df = pd.read_csv(Keys_FileName, sep='\t', header=None, names=['Topic #', 'Weight', 'Keywords'])
+    keys_csv_file = os.path.join(outputDir, 'NLP-MALLET_Output_Keys.csv')
+    keys_df.to_csv(keys_csv_file, index=False)
+    filesToOpen.append(keys_csv_file)
 
-    # For now, append the original files
-    filesToOpen.append(Keys_FileName)
-    filesToOpen.append(Composition_FileName)
-    filesToOpen.append(Compressed_FileName)
+    composition_df = pd.read_csv(Composition_FileName, sep='\t', header=None)
+    num_columns = composition_df.shape[1]
+    topic_columns = [f'Topic {i} Proportion' if i % 2 == 1 else f'Topic {i // 2}' for i in range(2, num_columns)]
+    composition_df.columns = ['Document ID', 'Document'] + topic_columns
+    composition_csv_file = os.path.join(outputDir, 'NLP-MALLET_Output_Composition.csv')
+    composition_df.to_csv(composition_csv_file, index=False)
+    filesToOpen.append(composition_csv_file)
 
-    # Generate charts if needed
     if chartPackage != 'No charts':
-        # Implement chart generation logic here, if needed
+        # use seaborn for charts
         pass
 
-    # Return the list of files generated
+
     return filesToOpen
+
+
+if __name__ == '__main__':
+    inputDir = 'C:/Users/sherry/OneDrive/Desktop/QTM446W/Input'
+    outputDir = 'C:/Users/sherry/OneDrive/Desktop/QTM446W/Output'
+    numTopics = 20
+    run_MALLET(inputDir, outputDir, numTopics)
