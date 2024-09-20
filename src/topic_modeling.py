@@ -1,6 +1,6 @@
 import topic_modeling_bert_util
 import topic_modeling_mallet_util
-#import topic_modeling_gensim_util
+import topic_modeling_gensim_util
 import IO_internet_util
 import reminders_util
 import IO_files_util
@@ -32,10 +32,6 @@ def run_topic_modeling(inputDir, outputDir, openOutputFiles, chartPackage, dataT
           remove_stopwords_var, lemmatize_var, nounsOnly_var, Gensim_MALLET_var)
     
     scriptName = "topic_modeling.py"
-
-    # Initialize filesToOpen list
-    filesToOpen = []
-
     
     labels = []
     if BERT_var:
@@ -80,10 +76,10 @@ def run_topic_modeling(inputDir, outputDir, openOutputFiles, chartPackage, dataT
         #     filesToOpen.extend(mallet_files)
     
     # Run Gensim
-    #if Gensim_var:
-        # gensim_files = topic_modeling_gensim_util.run_Gensim(inputDir, outputDir, num_topics,
-        #                                                      remove_stopwords_var, lemmatize_var, nounsOnly_var,
-        #                                                      Gensim_MALLET_var, chartPackage, dataTransformation)
+    if Gensim_var:
+        gensim_files = topic_modeling_gensim_util.run_Gensim(inputDir, outputDir, "", num_topics, remove_stopwords_var,
+                                                            lemmatize_var, nounsOnly_var,
+                                                            Gensim_MALLET_var)
         # if gensim_files:
         #     filesToOpen.extend(gensim_files)
     

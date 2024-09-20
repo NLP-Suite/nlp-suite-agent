@@ -3,8 +3,8 @@ import os
 from topic_modeling import run_topic_modeling
 
 # Replace with your input and output directories
-inputDir = 'C:/Users/sherry/OneDrive/Desktop/QTM446W/Input'
-outputDir = 'C:/Users/sherry/OneDrive/Desktop/QTM446W/Ouput'
+inputDir = '/Users/is2ac/nlp-suite/input'
+outputDir = '/Users/is2ac/nlp-suite/output'
 
 # Ensure the directories exist
 os.makedirs(inputDir, exist_ok=True)
@@ -15,15 +15,15 @@ openOutputFiles = 1
 chartPackage='Excel',
 dataTransformation='',
 num_topics = 10
-BERT_var = True
-split_docs_var = True
+BERT_var = False
+split_docs_var = False
 #MALLET_var = True
 MALLET_var = False
 optimize_intervals_var = 0
-Gensim_var = False
+Gensim_var = True
 remove_stopwords_var = False
-lemmatize_var = False
-nounsOnly_var = False
+lemmatize_var = True
+nounsOnly_var = True
 Gensim_MALLET_var = False
 
 

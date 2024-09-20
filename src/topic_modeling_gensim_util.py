@@ -1,10 +1,5 @@
 import sys
-import GUI_util
 import IO_libraries_util
-
-# If the user has not installed the required libraries, the program will exit
-if IO_libraries_util.install_all_Python_packages(GUI_util.window,"topic_modeling_gensim_util.py",['nltk','os','pandas','gensim','spacy','pyLDAvis','matplotlib','logging','IPython'])==False:
-    sys.exit(0)
 
 import os
 import pandas as pd
@@ -44,7 +39,7 @@ import reminders_util
 #	https://stackoverflow.com/questions/23704510/how-do-i-test-whether-an-nltk-resource-is-already-installed-on-the-machine-runni
 #	see also caveats
 # check stopwords
-IO_libraries_util.import_nltk_resource(GUI_util.window,'corpora/stopwords','stopwords')
+IO_libraries_util.import_nltk_resource('corpora/stopwords','stopwords')
 
 from nltk.corpus import stopwords
 
@@ -64,7 +59,10 @@ except:
                 '\n  At the command prompt, Enter "conda activate NLP" (if NLP is your environment)' + \
                 '\n  Then enter: "python -m spacy download en_core_web_sm" and Return'
     msg = msg + '\n\nThis imports the package.'
-    mb.showerror(title='Library error', message='The Gensim tool could not find the English language spacy library. This needs to be installed. At command promp type:\npython -m spacy download en_core_web_sm\n\nYOU MAY HAVE TO RUN THE COMMAND AS ADMINISTRATOR.\n\nHOW DO YOU DO THAT?' + msg)
+    title='Library error'
+    message='The Gensim tool could not find the English language spacy library. This needs to be installed. At command promp type:\npython -m spacy download en_core_web_sm\n\nYOU MAY HAVE TO RUN THE COMMAND AS ADMINISTRATOR.\n\nHOW DO YOU DO THAT?' + msg
+    print(message)
+    raise FileNotFoundError(title)
 
     # mb.showerror(title='Library error', message='The Gensim Topic modeling tool could not find the English language spacy library. This needs to be installed. At command promp type:\npython -m spacy download en_core_web_sm\n\nYOU MAY HAVE TO RUN THE COMMAND AS ADMINISTRATOR.\n\nHOW DO YOU DO THAT?'
     #     '\n\nIn Mac, at terminal, type sudo python -m spacy download en_core_web_sm'
@@ -82,17 +80,17 @@ except:
 
 # find the optimal number of topics for LDA
 def compute_coherence_values(MalletDir, dictionary, corpus, texts, start, limit, step):
-    startTime=IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis start', 'Started computing the coherence value for each topic')
+    startTime=IO_user_interface_util.timed_alert(2000,'Analysis start', 'Started computing the coherence value for each topic')
     coherence_values = []
     model_list = []
     for num_topics in range(start, limit, step):
-        startTime=IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis start',
+        startTime=IO_user_interface_util.timed_alert(2000,'Analysis start',
                                            'Computing coherence value for topic number ' + str(num_topics))
         model = gensim.models.wrappers.LdaMallet(MalletDir,corpus=corpus, num_topics=num_topics, id2word=dictionary)
         model_list.append(model)
         coherencemodel = CoherenceModel(model=model, texts=texts, dictionary=dictionary, coherence='c_v')
         coherence_values.append(coherencemodel.get_coherence())
-    IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis end', 'Finished computing the coherence value for each topic')
+    IO_user_interface_util.timed_alert('Analysis end', 'Finished computing the coherence value for each topic')
     return model_list, coherence_values
 
 # Finding the Dominance Topic in each sentence
@@ -120,7 +118,7 @@ def format_topics_sentences(ldamodel, corpus, texts):
     return sent_topics_df
 
 def malletModelling(MalletDir, outputDir, corpus,num_topics, id2word,data_lemmatized, lda_model, data):
-    startTime=IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis start', 'Started running Mallet LDA topic modeling at',True)
+    startTime=IO_user_interface_util.timed_alert(2000,'Analysis start', 'Started running Mallet LDA topic modeling at',True)
     config_filename='topic_modeling_gensim_config.csv'
     try:
         ldamallet = gensim.models.wrappers.LdaMallet(MalletDir, corpus=corpus, num_topics=num_topics, id2word=id2word)
@@ -144,11 +142,11 @@ def malletModelling(MalletDir, outputDir, corpus,num_topics, id2word,data_lemmat
 
     # Compute Coherence value
     coherence_model_ldamallet = CoherenceModel(model=ldamallet, texts=data_lemmatized, dictionary=id2word, coherence='c_v')
-    startTime=IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis start', 'Compute Mallet LDA coherence values for each topic.\n\nPlease, be patient...')
+    startTime=IO_user_interface_util.timed_alert(2000,'Analysis start', 'Compute Mallet LDA coherence values for each topic.\n\nPlease, be patient...')
     coherence_ldamallet = coherence_model_ldamallet.get_coherence()
     print('\nCoherence value: ', coherence_ldamallet)
     model_list, coherence_values = compute_coherence_values(MalletDir, dictionary=id2word, corpus=corpus, texts=data_lemmatized, start=2, limit=limit, step=6)
-    startTime=IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis start', 'Compute graph of optimal topics number.')
+    startTime=IO_user_interface_util.timed_alert(2000,'Analysis start', 'Compute graph of optimal topics number.')
     limit=limit; start=2; step=6;
     x = range(start, limit, step)
     plt.plot(x, coherence_values)
@@ -314,34 +312,41 @@ def malletModelling(MalletDir, outputDir, corpus,num_topics, id2word,data_lemmat
     #     filesToOpen.append(chart_outputFilename)
 
 
-    IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis end', 'Finished running Mallet LDA topic modeling at',True, '', True, startTime)
+    IO_user_interface_util.timed_alert(2000,'Analysis end', 'Finished running Mallet LDA topic modeling at',True, '', True, startTime)
 
-def run_Gensim(window, inputDir, outputDir, config_filename, num_topics, remove_stopwords_var,
-                                      lemmatize, nounsOnly, run_Mallet, openOutputFiles,chartPackage, dataTransformation):
+def run_Gensim(inputDir, outputDir, config_filename, num_topics, remove_stopwords_var,
+                                      lemmatize, nounsOnly, run_Mallet):
     global filesToOpen
     filesToOpen=[]
     if pd.__version__[0]=='2':
-        mb.showwarning(title='Warning',
-                       message='Gensim is incompatible with a version of pandas higher than 2.0\n\nIn command line, please, pip unistall pandas and pip install pandas==1.5.2 (or even pip install pandas==1.4.4).\n\nMake sure you are in the right NLP environment by typing conda activate NLP')
+        title='Warning'
+        message='Gensim is incompatible with a version of pandas higher than 2.0\n\nIn command line, please, pip unistall pandas and pip install pandas==1.5.2 (or even pip install pandas==1.4.4).\n\nMake sure you are in the right NLP environment by typing conda activate NLP'
+        print(message)
+        raise ValueError(title)
         return
 
     numFiles = IO_files_util.GetNumberOfDocumentsInDirectory(inputDir, 'txt')
     if numFiles == 0:
-        mb.showerror(title='Number of files error',
-                     message='The selected input directory does NOT contain any file of txt type.\n\nPlease, select a different directory and try again.')
+        title='Number of files error'
+        message='The selected input directory does NOT contain any file of txt type.\n\nPlease, select a different directory and try again.'
+        print(message)
+        raise ValueError(title)
         return
     elif numFiles == 1:
-        mb.showerror(title='Number of files error', message='The selected input directory contains only ' + str(
-            numFiles) + ' file of txt type.\n\nTopic modeling requires a large number of files to produce valid results. That is true even if the available file contains several different documents morged together.')
+        title='Number of files error'
+        message='The selected input directory contains only ' + str(
+            numFiles) + ' file of txt type.\n\nTopic modeling requires a large number of files to produce valid results. That is true even if the available file contains several different documents morged together.'
+        print(message)
+        raise ValueError(title)
         return
     elif numFiles < 50:
-        result = mb.askyesno(title='Number of files', message='The selected input directory contains only ' + str(
-            numFiles) + ' files of txt type.\n\nTopic modeling requires a large number of files (in the hundreds at least; read TIPS file) to produce valid results.\n\nAre you sure you want to continue?',
-                             default='no')
-        if result == False:
-            return
+        # result = mb.askyesno(title='Number of files warning', message='The selected input directory contains only ' + str(
+        #     numFiles) + ' files of txt type.\n\nTopic modeling requires a large number of files (in the hundreds at least; read TIPS file) to produce valid results.\n\nAre you sure you want to continue?',
+        #                      default='no')
+        message = 'Number of files warning:: The selected input directory contains only ' + str(numFiles) + ' files of txt type.\n\nTopic modeling requires a large number of files (in the hundreds at least; read TIPS file) to produce valid results.'
+        
 
-    startTime=IO_user_interface_util.timed_alert(GUI_util.window, 4000, 'Analysis start',
+    startTime=IO_user_interface_util.timed_alert(4000, 'Analysis start',
                                        'Started running Gensim Topic modeling at ', True,
                                        "Depending upon corpus size, computations may take a while... Please, be patient...")
 
@@ -498,20 +503,23 @@ def run_Gensim(window, inputDir, outputDir, config_filename, num_topics, remove_
     try:
         pyLDAvis.save_html(vis, outputFilename)
     except:
-        mb.showerror(title='Output html file error', message='Gensim failed to generate the html output file.')
+        title='Output html file error',
+        message='Gensim failed to generate the html output file.'
+        print(message) 
+        raise ValueError(title)
         return
 
-    IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis end', 'Finished running Gensim topic modeling at',True,'\n\nThe file ' + outputFilename + ' was created. The results will display shortly on the web browser.')
+    IO_user_interface_util.timed_alert(2000,'Analysis end', 'Finished running Gensim topic modeling at',True,'\n\nThe file ' + outputFilename + ' was created. The results will display shortly on the web browser.')
     # \n\nYou now need to exit the server.\n\nAt command prompt, enter Ctrl+C, perhaps repeatedly, to exit the server.'
 
-    # open and display on web
-    def show_web(vis):
-        pyLDAvis.display(vis)
-        pyLDAvis.show(vis)
-        pyLDAvis.kill()
+    # # open and display on web
+    # def show_web(vis):
+    #     pyLDAvis.display(vis)
+    #     pyLDAvis.show(vis)
+    #     pyLDAvis.kill()
 
-    # necessary to avoid having to do Ctrl+C to kill pyLDAvis to continue running the code
-    start_new_thread(show_web, (vis,))
+    # # necessary to avoid having to do Ctrl+C to kill pyLDAvis to continue running the code
+    # start_new_thread(show_web, (vis,))
 
     if run_Mallet==True:
         # check that the CoreNLPdir as been setup
@@ -530,8 +538,8 @@ def run_Gensim(window, inputDir, outputDir, config_filename, num_topics, remove_
         malletModelling(MalletDir, outputDir, corpus, num_topics, id2word, data_lemmatized,
                                                    lda_model, data)
 
-    if openOutputFiles==True:
-        IO_files_util.OpenOutputFiles(GUI_util.window, openOutputFiles, filesToOpen, outputDir)
-        filesToOpen=[] # to avoid opening files twice, here and in calling function
+    # if openOutputFiles==True:
+    #     IO_files_util.OpenOutputFiles(openOutputFiles, filesToOpen, outputDir)
+    #     filesToOpen=[] # to avoid opening files twice, here and in calling function
 
     return filesToOpen
