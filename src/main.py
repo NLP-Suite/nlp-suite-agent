@@ -65,9 +65,10 @@ def sentiment_analysis(
     inputDirectory: Annotated[str, Form()],
     outputDirectory: Annotated[str, Form()],
     transformation: Annotated[str, Form()],
-    calculateMean: Annotated[bool, Form()],
-    calculateMedian: Annotated[bool, Form()],
     algorithm: Annotated[str, Form()],
+    calculateMean: Annotated[bool, Form()] = False,
+    calculateMedian: Annotated[bool, Form()] = False,
+    
 ):
     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
@@ -95,13 +96,13 @@ def topic_modeling(
     outputDirectory: Annotated[str, Form()],
     transformation: Annotated[str, Form()],
     numberOfTopics: Annotated[int, Form()],
-    topicModelingBERT: Annotated[bool, Form()],
-    splitToSentence: Annotated[bool, Form()],
-    topicModelingMALLET: Annotated[bool, Form()],
-    optimizeTopicIntervals: Annotated[bool, Form()],
-    topicModelingGensim: Annotated[bool, Form()],
-    removeStopwords: Annotated[bool, Form()],
-    lemmatizeWords: Annotated[bool, Form()],
+    topicModelingBERT: Annotated[bool, Form()] = False,
+    splitToSentence: Annotated[bool, Form()] = False,
+    topicModelingMALLET: Annotated[bool, Form()] = False,
+    optimizeTopicIntervals: Annotated[bool, Form()] = False,
+    topicModelingGensim: Annotated[bool, Form()] = False,
+    removeStopwords: Annotated[bool, Form()] = False,
+    lemmatizeWords: Annotated[bool, Form()] = False,
     # dataTransformation: Annotated[str, Form()],
     # num_topics: Annotated[int, Form()],
     # BERT_var: Annotated[bool, Form()],
