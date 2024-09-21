@@ -52,8 +52,9 @@ def run_topic_modeling(inputDir, outputDir, openOutputFiles, chartPackage, dataT
         return
 
     if num_topics == 20:
-        reminders_util.checkReminder(scriptName, reminders_util.title_options_topic_modelling_number_of_topics,
-                                     reminders_util.message_topic_modelling_number_of_topics, True)
+        print('Warning: The default number of topics is 20. If you would like to specify a different number of topics, please do so and try again. YOU ARE STRONGLY ADVISED to run the algorithm repeatedly with different number of topics (e.g., 50, 40 30, 20, 10). You should then select the number of topics that gives you the best set of topics with no or minimum word overlap across topics. When running Gensim, the topic circles displayed in the Intertopic Distance Map (via multidimensional scaling) should be scattered throughout the four quadrants and should not be overlapping.')
+        # reminders_util.checkReminder(scriptName, reminders_util.title_options_topic_modelling_number_of_topics,
+        #                              reminders_util.message_topic_modelling_number_of_topics, True)
 
     # Create a subdirectory of the output directory
     outputDir = IO_files_util.make_output_subdirectory('', inputDir, outputDir, label='TM-' + label, silent=True)
