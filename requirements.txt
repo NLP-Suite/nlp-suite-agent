@@ -38,7 +38,7 @@ nltk==3.8.1
 numpy==1.26.4
 openpyxl==3.1.2
 packaging==24.0
-pandas==2.2.1
+pandas==1.5.2
 pillow==10.2.0
 plotly==5.20.0
 preshed==3.0.9
