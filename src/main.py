@@ -121,7 +121,7 @@ def topic_modeling(
         target=lambda: run(
             app,
             lambda: run_topic_modeling(
-                intputDir=inputDirectory,
+                inputDir=inputDirectory,
                 outputDir=outputDirectory,
                 openOutputFiles=False,  # openOutputFiles
                 chartPackage="Excel",  # chartPackage
