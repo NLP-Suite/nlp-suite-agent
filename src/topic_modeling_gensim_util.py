@@ -319,6 +319,7 @@ def run_Gensim(inputDir, outputDir, config_filename, num_topics, remove_stopword
     global filesToOpen
     filesToOpen=[]
     if pd.__version__[0]=='2':
+        print('Your current version is ', pd.__version__)
         title='Warning'
         message='Gensim is incompatible with a version of pandas higher than 2.0\n\nIn command line, please, pip unistall pandas and pip install pandas==1.5.2 (or even pip install pandas==1.4.4).\n\nMake sure you are in the right NLP environment by typing conda activate NLP'
         print(message)
