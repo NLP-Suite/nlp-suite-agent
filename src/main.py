@@ -121,19 +121,21 @@ def topic_modeling(
         target=lambda: run(
             app,
             lambda: run_topic_modeling(
-                inputDirectory,
-                outputDirectory,
-                False,  # openOutputFiles
-                "Excel",  # chartPackage
-                transformation,
-                numberOfTopics,
-                topicModelingBERT,
-                splitToSentence,
-                topicModelingMALLET,
-                optimizeTopicIntervals,
-                topicModelingGensim,
-                removeStopwords,
-                lemmatizeWords,
+                intputDir=inputDirectory,
+                outputDir=outputDirectory,
+                openOutputFiles=False,  # openOutputFiles
+                chartPackage="Excel",  # chartPackage
+                dataTransformation=transformation,
+                num_topics=numberOfTopics,
+                BERT_var=topicModelingBERT,
+                split_docs_var=splitToSentence,
+                MALLET_var=topicModelingMALLET,
+                optimize_intervals_var=optimizeTopicIntervals,
+                Gensim_var=topicModelingGensim,
+                remove_stopwords_var=removeStopwords,
+                lemmatize_var=lemmatizeWords,
+                nounsOnly_var=lemmatizeWords,
+                Gensim_MALLET_var=False,
                 # dataTransformation,
                 # num_topics,
                 # BERT_var,
