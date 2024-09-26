@@ -30,7 +30,7 @@ Replacing USERNAME with your GitHub username. It should return the statement "Lo
 docker push ghcr.io/nlp-suite/nlp-suite-agent:main
 ```
 ## 5. Check if update is successful
-Run the executable file from the nlp-suite-runner. If the ghcr still isn't updated, run the command
+Run the executable file from the nlp-suite-runner. If your container is cached and not pulling the latest image, run the command
 ```bash
 docker pull ghcr.io/nlp-suite/nlp-suite-agent:main
 ```
