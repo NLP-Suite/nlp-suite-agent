@@ -1,4 +1,4 @@
-## Updating GHCR ##
+## Update GHCR ##
 Updating the GHCR will allow the nlp-suite-runner to pull the latest version of the repository you're currently working on, allowing testing and execution of frontend and backend together.
 
 ## 1. Save Local Changes ##
@@ -11,9 +11,9 @@ docker build -t ghcr.io/nlp-suite/nlp-suite-agent:main .
 ```
 This command uses the Dockefile instructions to create an image of your local repository. This image will be tagged as `ghcr.io/nlp-suite/nlp-suite-agent:main`. It will be stored in the local Docker registry on your machine.
 
-## 3. Login to your account on the GHCR ##
+## 3. Login to your account on the GHCR with Docker ##
 A) Create a personal access token for your GitHub account. You can do this on GitHub by navigating to Settings>Developer Settings>Tokens(Classic)
-Make sure your token has **full control of private repos** as well as **full control of projects**
+Make sure your token has **full control of private repos, full control of projects, write:packages,** and **delete:packages**
 
 B) Export this person access token to your system's environment variables. You can this by this command:
 ```bash
@@ -23,4 +23,14 @@ C) Login to the GHCR
 ```bash
 echo $GHCR_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 ```
-Replacing USERNAME with your GitHub username
+Replacing USERNAME with your GitHub username. It should return the statement "Login Succeeded"
+
+## 4. Push the image to GHCR
+```bash
+docker push ghcr.io/nlp-suite/nlp-suite-agent:main
+```
+## 5. Check if update is successful
+Run the executable file from the nlp-suite-runner. If the ghcr still isn't updated, run the command
+```bash
+docker pull ghcr.io/nlp-suite/nlp-suite-agent:main
+```
