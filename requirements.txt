@@ -38,7 +38,6 @@ nltk==3.8.1
 numpy==1.26.4
 openpyxl==3.1.2
 packaging==24.0
-pandas==1.5.2
 pillow==10.2.0
 plotly==5.20.0
 preshed==3.0.9
@@ -48,6 +47,7 @@ pycorenlp==0.3.0
 pydantic==2.6.4
 pydantic_core==2.16.3
 pyLDAvis==3.4.1
+pandas==2.2.0
 pyparsing==3.1.2
 pyphen==0.14.0
 python-dateutil==2.9.0.post0
