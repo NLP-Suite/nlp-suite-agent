@@ -1,4 +1,4 @@
-## Update GHCR ##
+## How to Update GHCR ##
 Updating the GHCR will allow the nlp-suite-runner to pull the latest version of the repository you're currently working on, allowing testing and execution of frontend and backend together.
 
 ## 1. Save Local Changes ##
