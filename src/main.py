@@ -153,6 +153,48 @@ def topic_modeling(
     thread.start()
     return PlainTextResponse("", status_code=200)
 
+@app.post("/parsers_annotators")
+def parsers_annotators(
+    inputFilename: Annotated[str, Form()] = '',
+    transformation: Annotated[str, Form()] = '',
+    extra_GUIs_var: Annotated[bool, Form()] = False,
+    extra_GUIs_menu_var: Annotated[str, Form()] = '',
+    manual_Coref: Annotated[bool, Form()] = False,
+    open_GUI: Annotated[bool, Form()] = False,
+    parser_var: Annotated[bool, Form()] = False,
+    parser_menu_var: Annotated[str, Form()] = '',
+    single_quote: Annotated[bool, Form()] = False,
+    CoNLL_table_analyzer_var: Annotated[bool, Form()] = False,
+    annotators_var: Annotated[bool, Form()] = False,
+    annotators_menu_var: Annotated[str, Form()] = '',
+):
+    # Define input and output directories
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+
+    # Start the processing in a separate thread
+    thread = Thread(
+        target=lambda: run(
+            inputFilename=inputFilename,
+            inputDir=inputDirectory,
+            outputDir=outputDirectory,
+            openOutputFiles=False,  
+            chartPackage="Excel",    # Default chart package
+            dataTransformation=transformation,
+            extra_GUIs_var=extra_GUIs_var,
+            extra_GUIs_menu_var=extra_GUIs_menu_var,
+            manual_Coref=manual_Coref,
+            open_GUI=open_GUI,
+            parser_var=parser_var,
+            parser_menu_var=parser_menu_var,
+            single_quote=single_quote,
+            CoNLL_table_analyzer_var=CoNLL_table_analyzer_var,
+            annotators_var=annotators_var,
+            annotators_menu_var=annotators_menu_var,
+        )
+    )
+    thread.start()
+    return PlainTextResponse("Processing started.", status_code=200)
 
 class PackageChoice(str, Enum):
     spaCy = "spaCy"
