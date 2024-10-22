@@ -410,7 +410,7 @@ def getReminders_list(scriptName,silent=False):
         df = pd.read_csv(remindersFile,encoding='utf-8',on_bad_lines='skip')
     except FileNotFoundError:
         if silent == False:
-            mb.showwarning(title='Reminders file generated', message="The reminders.csv file saved in the reminders subdirectory was not found. If this is your first time running NLP Suite, do not worry. A default reminders.csv has been automatically generated for you.")
+            print("Reminders file generated: The reminders.csv file saved in the reminders subdirectory was not found. If this is your first time running NLP Suite, do not worry. A default reminders.csv has been automatically generated for you.")
         create_remindersFile()
         return getReminders_list(scriptName, silent)
     except Exception as e:
