@@ -2,6 +2,10 @@ import os
 import subprocess
 from sys import platform
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import charts_matplotlib_seaborn_util 
+import charts_util 
 
 def run_MALLET(inputDir, outputDir, numTopics, chartPackage='Excel', dataTransformation='', OptimizeInterval=False):
     MALLETDir = os.getenv('MALLET_HOME')
@@ -89,16 +93,34 @@ def run_MALLET(inputDir, outputDir, numTopics, chartPackage='Excel', dataTransfo
     composition_df.to_csv(composition_csv_file, index=False)
     filesToOpen.append(composition_csv_file)
 
-    if chartPackage != 'No charts':
-        # use seaborn for charts
-        pass
 
+    if chartPackage != 'No charts':
+        # Generate heatmap using custom function
+        heatmap_file = charts_matplotlib_seaborn_util.MALLET_heatmap(composition_csv_file, keys_csv_file, outputDir)
+        filesToOpen.append(heatmap_file)
+
+        # Optionally run additional charts using charts_util
+        additional_charts = charts_util.run_all(
+            columns_to_be_plotted=[(2, num_columns - 1)],
+            inputFilename=composition_csv_file,
+            outputDir=outputDir,
+            outputFileLabel='MALLET_TM',
+            chartPackage=chartPackage,
+            dataTransformation=dataTransformation,
+            chart_type_list=["bar"],
+            chart_title='MALLET Topics',
+            column_xAxis_label_var='Document',
+            hover_info_column_list=[],
+            column_yAxis_label_var='Topic weight'
+        )
+        if additional_charts:
+            filesToOpen.append(additional_charts)
 
     return filesToOpen
 
 
-if __name__ == '__main__':
-    inputDir = 'C:/Users/sherry/OneDrive/Desktop/QTM446W/Input'
-    outputDir = 'C:/Users/sherry/OneDrive/Desktop/QTM446W/Output'
-    numTopics = 20
-    run_MALLET(inputDir, outputDir, numTopics)
+# if __name__ == '__main__':
+#     inputDir = 'C:/Users/sherry/OneDrive/Desktop/QTM446W/Input'
+#     outputDir = 'C:/Users/sherry/OneDrive/Desktop/QTM446W/Output'
+#     numTopics = 20
+#     run_MALLET(inputDir, outputDir, numTopics)
