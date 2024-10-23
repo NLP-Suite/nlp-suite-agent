@@ -15,7 +15,6 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
     logger = logging.getLogger(__name__)
     
     config_filename = 'NLP_default_IO_config.csv'
-    scriptName = 'parsers_annotators_main.py'
     filesToOpen = []
 
     # Reading CoNLL file data

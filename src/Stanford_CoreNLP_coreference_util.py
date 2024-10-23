@@ -110,10 +110,9 @@ def manualCoref(original_file, corefed_file, outputFile):
     logger.info("Manual coreference completed successfully.")
     return 0
 
-
 def run(config_filename, inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
         language_var, memory_var, export_json_var, manual_Coref):
-
+    
     corefed_files = []
     errorFound = False
 
@@ -121,24 +120,36 @@ def run(config_filename, inputFilename, inputDir, outputDir, openOutputFiles, ch
                                                                             'Stanford CoreNLP', '', silent=False, errorFound=False)
 
     if CoreNLPdir == '' or CoreNLPdir is None:
-        return corefed_files
+        logger.error("CoreNLP directory is not configured properly.")
+        return corefed_files, errorFound
 
-    # Annotate with CoreNLP
-    corefed_files = Stanford_CoreNLP_util.CoreNLP_annotate(config_filename, inputFilename, inputDir,
-                                                           outputDir, openOutputFiles, chartPackage, dataTransformation,
-                                                           ['coref table', 'coref'], False, language_var, export_json_var, memory_var)
+    try:
+        # Annotate with CoreNLP
+        corefed_files = Stanford_CoreNLP_util.CoreNLP_annotate(config_filename, inputFilename, inputDir,
+                                                               outputDir, openOutputFiles, chartPackage, dataTransformation,
+                                                               ['coref table', 'coref'], False, language_var, export_json_var, memory_var)
 
-    # Handle manual coreference resolution if needed
-    if manual_Coref and inputDir == '' and inputFilename != '':
-        for file in corefed_files:
-            if file.endswith(".txt"):
-                error = manualCoref(inputFilename, file, file)
-    else:
-        IO_user_interface_util.timed_alert(2000, 'Manual Coreference Unavailable', 
-                                           'Manual Coreference only available when processing single file.', 
-                                           silent=True)
-
-    # Timed alert after completion
-    IO_user_interface_util.timed_alert(2000, 'Coreference Completed', 'Coreference resolution completed.')
+        # If manual coref is enabled and only a single file is being processed
+        if manual_Coref and inputDir == '' and inputFilename != '':
+            for file in corefed_files:
+                if file.endswith(".txt"):
+                    # Call manual coref on the processed file
+                    error = manualCoref(inputFilename, file, file)
+                    if error:
+                        logger.error("Error during manual coreference resolution.")
+                        return corefed_files, True  # Return error state if manual coref fails
+        else:
+            # Handle the case where manual coref is requested for directory processing
+            if manual_Coref:
+                IO_user_interface_util.timed_alert(2000, 'Manual Coreference Unavailable', 
+                                                   'Manual Coreference is only available when processing a single file, not a directory.', 
+                                                   silent=True)
+            else:
+                # If manual coref is not enabled, proceed normally
+                IO_user_interface_util.timed_alert(2000, 'Coreference Completed', 'Coreference resolution completed.')
+    
+    except Exception as e:
+        logger.error(f"Error in Coreference resolution: {e}")
+        return corefed_files, True  # Return error state in case of any exception
 
     return corefed_files, errorFound

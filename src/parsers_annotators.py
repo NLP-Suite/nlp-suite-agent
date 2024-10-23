@@ -4,25 +4,26 @@ import config_util
 import CoNLL_table_analyzer_main 
 import Stanford_CoreNLP_util
 import Stanford_CoreNLP_coreference_util
-import Stanza_util
 import spaCy_util
 
+import os
+from pycorenlp import StanfordCoreNLP
+
+
 def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
-        extra_GUIs_var,
-        extra_GUIs_menu_var,
-        manual_Coref, open_GUI,
+        manual_Coref, 
         parser_var,
         parser_menu_var,
         single_quote,
         CoNLL_table_analyzer_var, annotators_var, annotators_menu_var):
-
+    print("started")
+    
     # Set up logging
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
 
     # Set the config filename
     config_filename = 'NLP_default_IO_config.csv'
-    scriptName = 'parsers_annotators_main.py'
 
     filesToOpen = []
     outputCoNLLfilePath = ''
@@ -89,6 +90,7 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
                 elif 'OpenIE' in annotators_menu_var:
                     annotator = ['OpenIE']
                 elif 'Coreference PRONOMINAL resolution' in annotators_menu_var:
+                    print("Stanford_CoreNLP_coreference_util")
                     # Run Coreference resolution
                     outputFiles, error_indicator = Stanford_CoreNLP_coreference_util.run(
                         config_filename, inputFilename, inputDir, outputDir, openOutputFiles,
@@ -106,6 +108,7 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
                     return
 
             if len(annotator) > 0:
+                print("CoreNLP Annotate")
                 # Run CoreNLP annotate
                 outputFiles = Stanford_CoreNLP_util.CoreNLP_annotate(
                     config_filename, inputFilename, inputDir, outputDir,
@@ -190,9 +193,10 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
                     annotator = 'SVO'
                 else:
                     raise ValueError(f'The selected option "{annotators_menu_var}" is not available in Stanza. Please select another annotator and try again.')
+            from Stanza_util import Stanza_annotate 
 
             # Run Stanza annotate
-            outputFiles = Stanza_util.Stanza_annotate(
+            outputFiles = Stanza_annotate(
                 config_filename, inputFilename, inputDir, outputDir,
                 openOutputFiles, chartPackage, dataTransformation, [annotator], False,
                 language_list, memory_var, document_length_var, limit_sentence_length_var,
@@ -212,9 +216,14 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
         raise ValueError(f'The selected NLP package "{package}" is not supported.')
 
     if CoNLL_table_analyzer_var:
-        #outputFiles = CoNLL_table_analyzer_main.run(input_file, outputDir)
-        #filesToOpen.extend(outputFiles)
-        pass
-
+        logger.info('Running CoNLL Table Analyzer...')
+        outputFiles = CoNLL_table_analyzer_main.run(
+            inputFilename, inputDir, outputDir, openOutputFiles,
+            chartPackage, dataTransformation,
+            searchedCoNLLField='FORM', searchField_kw='e.g.: father', postag='NN', deprel='nsubj',
+            co_postag='VB', co_deprel='dobj', Begin_K_sent_var=1, End_K_sent_var=5
+        )
+        if outputFiles:
+            filesToOpen.extend(outputFiles)
     # Return the list of output files
     return filesToOpen
