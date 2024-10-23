@@ -4,6 +4,7 @@ import logging
 import Stanford_CoreNLP_util
 import IO_libraries_util
 import IO_user_interface_util
+from pycorenlp import StanfordCoreNLP
 
 # Set up logging for tracking errors and processes
 logger = logging.getLogger(__name__)
@@ -113,6 +114,7 @@ def manualCoref(original_file, corefed_file, outputFile):
 def run(config_filename, inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
         language_var, memory_var, export_json_var, manual_Coref):
     
+    nlp = StanfordCoreNLP("http://172.16.0.12:9000")
     corefed_files = []
     errorFound = False
 
