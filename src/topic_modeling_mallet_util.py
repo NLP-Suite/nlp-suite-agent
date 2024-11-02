@@ -93,8 +93,8 @@ def run_MALLET(inputDir, outputDir, numTopics, chartPackage='Excel', dataTransfo
     composition_df.to_csv(composition_csv_file, index=False)
     filesToOpen.append(composition_csv_file)
 
-
     if chartPackage != 'No charts':
+        print("making charts")
         # Generate heatmap using custom function
         heatmap_file = charts_matplotlib_seaborn_util.MALLET_heatmap(composition_csv_file, keys_csv_file, outputDir)
         filesToOpen.append(heatmap_file)
