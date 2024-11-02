@@ -3,8 +3,8 @@ import os
 from topic_modeling import run_topic_modeling
 
 # Replace with your input and output directories
-inputDir = '/Users/is2ac/nlp-suite/input'
-outputDir = '/Users/is2ac/nlp-suite/output'
+inputDir = '/Users/aidenamaya/nlp-suite/input'
+outputDir = '/Users/aidenamaya/nlp-suite/output'
 
 # Ensure the directories exist
 os.makedirs(inputDir, exist_ok=True)
@@ -15,9 +15,9 @@ chartPackage='Excel',
 dataTransformation='',
 num_topics = 10
 #BERT_var = True
-BERT_var = False
+BERT_var = True
 split_docs_var = True
-MALLET_var = True
+MALLET_var = False
 #MALLET_var = False
 optimize_intervals_var = 0
 Gensim_var = True

@@ -80,10 +80,3 @@ def run_BERTopic(inputDir, outputDir, split_docs_var=False): # split_docs_var=Tr
     filesToOpen = [info_file, hierarchy_file]
 
     return filesToOpen
-
-
-if __name__ == '__main__':
-    inputDir = 'C:/Users/sherry/OneDrive/Desktop/QTM446W/Input'
-    outputDir = 'C:/Users/sherry/OneDrive/Desktop/QTM446W/Ouput'
-    openOutputFiles = 1
-    run_BERTopic(inputDir, outputDir, openOutputFiles)
