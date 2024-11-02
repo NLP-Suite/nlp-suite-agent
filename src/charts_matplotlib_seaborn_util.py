@@ -26,7 +26,7 @@ def MALLET_heatmap(composition_file, topics_file, outputDir, fig_set={"figure.fi
 
     document_titles = composition["Document"]
 
-    sns.set(rc=fig_set)
+    sns.set_theme(style="whitegrid", rc=fig_set)
 
     heatmap = sns.heatmap(composition.iloc[:, 1:].applymap(float),
                           vmin=0, vmax=1,
