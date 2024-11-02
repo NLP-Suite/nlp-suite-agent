@@ -158,7 +158,6 @@ def parsers_annotators(
             inputFilename=inputFilename,
             inputDir=inputDirectory,
             outputDir=outputDirectory,
-            openOutputFiles=False,  
             chartPackage="Excel",    # Default chart package
             dataTransformation=transformation,
             extra_GUIs_var=extra_GUIs_var,
