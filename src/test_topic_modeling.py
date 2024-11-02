@@ -11,7 +11,6 @@ os.makedirs(inputDir, exist_ok=True)
 os.makedirs(outputDir, exist_ok=True)
 
 # Set parameters
-openOutputFiles = 1
 chartPackage='Excel',
 dataTransformation='',
 num_topics = 10
@@ -33,7 +32,6 @@ Gensim_MALLET_var = False
 run_topic_modeling(
     inputDir=inputDir,
     outputDir=outputDir,
-    openOutputFiles=openOutputFiles,
     chartPackage=chartPackage,
     dataTransformation=dataTransformation,
     num_topics=num_topics,
