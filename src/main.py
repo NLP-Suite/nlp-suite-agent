@@ -115,7 +115,6 @@ def topic_modeling(
             lambda: run_topic_modeling(
                 inputDir=inputDirectory,
                 outputDir=outputDirectory,
-                openOutputFiles=False,  # openOutputFiles
                 chartPackage="Excel",  # chartPackage
                 dataTransformation=transformation,
                 num_topics=numberOfTopics,
