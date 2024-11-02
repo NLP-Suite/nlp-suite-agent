@@ -10,14 +10,14 @@ import os
 from pycorenlp import StanfordCoreNLP
 
 
-def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
+def run_parsers_annotators(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
         manual_Coref, 
         parser_var,
         parser_menu_var,
         single_quote,
         CoNLL_table_analyzer_var, annotators_var, annotators_menu_var):
     print("started")
-    
+    nlp = StanfordCoreNLP("http://172.16.0.12:9000")
     # Set up logging
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
