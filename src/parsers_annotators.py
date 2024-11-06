@@ -18,6 +18,9 @@ def run_parsers_annotators(inputFilename, inputDir, outputDir, openOutputFiles, 
         CoNLL_table_analyzer_var, annotators_var, annotators_menu_var):
     print("started")
     print(inputFilename)
+    print('parser_var',parser_var)
+    print('parser_menu_var',parser_menu_var)
+    print()
     nlp = StanfordCoreNLP("http://172.16.0.12:9000")
     # Set up logging
     logging.basicConfig(level=logging.INFO)
@@ -30,17 +33,18 @@ def run_parsers_annotators(inputFilename, inputDir, outputDir, openOutputFiles, 
     outputCoNLLfilePath = ''
 
     if '--------------' in annotators_menu_var:
+        print('annotator is invalid')
         raise ValueError('Your annotator selection is invalid. It is only a label to make readability of menu options easier. Please select a different option and try again.')
 
     # Get the NLP package and language options
     error, package, parsers, package_basics, language, package_display_area_value, encoding_var, export_json_var, memory_var, document_length_var, limit_sentence_length_var = \
         config_util.read_NLP_package_language_config()
-
+    print(package)
     language_var = language
     language_list = [language]
     if package_display_area_value == '':
         raise ValueError('The default NLP package and language has not been set up. Please set up the NLP package and language and try again.')
-
+    print("past1")
     # Placeholder for date options (adjust as needed)
     filename_embeds_date_var = False
     date_format_var = ''
@@ -49,12 +53,15 @@ def run_parsers_annotators(inputFilename, inputDir, outputDir, openOutputFiles, 
 
     # Check for invalid combinations
     if parser_var == 0 and CoNLL_table_analyzer_var == 1:
+        print(parser_var,CoNLL_table_analyzer_var,"Error1")
         raise ValueError('You have selected to open the CoNLL table analyser. This option expects to run the parser first. Please select the CoreNLP parser option and try again.')
 
     if annotators_var and annotators_menu_var == '':
+        print(annotators_var,annotators_menu_var,"Error2")
         raise ValueError('You have selected to run an annotator but no annotator has been selected. Please select an annotator and try again.')
 
     if annotators_menu_var == 'Word embeddings (Word2Vec)':
+        print("was word2vec")
         raise ValueError('The "Word embeddings (Word2Vec)" annotator is not available yet for either BERT or spaCy. Please select a different annotator and try again.')
 
     # **Stanford CoreNLP**

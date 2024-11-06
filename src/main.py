@@ -173,20 +173,23 @@ def parsers_annotators(
         #     annotators_var=annotators_var,
         #     annotators_menu_var=annotators_menu_var,
         # )
-        target=lambda: run_parsers_annotators(
-            inputFilename=inputFilename,
-            inputDir=inputDirectory,
-            outputDir=outputDirectory,
-            openOutputFiles=False,
-            chartPackage=chartPackage,
-            dataTransformation=dataTransformation,
-            manual_Coref=manual_Coref, 
-            parser_var=parser_var,
-            parser_menu_var=parser_menu_var,
-            single_quote=single_quote,
-            CoNLL_table_analyzer_var=False,
-            annotators_var=annotators_var,
-            annotators_menu_var=annotators_menu_var
+        target=lambda: run(
+            app,
+            lambda: run_parsers_annotators(
+                inputFilename=inputFilename,
+                inputDir=inputDirectory,
+                outputDir=outputDirectory,
+                openOutputFiles=False,
+                chartPackage=chartPackage,
+                dataTransformation=dataTransformation,
+                manual_Coref=manual_Coref, 
+                parser_var=parser_var,
+                parser_menu_var=parser_menu_var,
+                single_quote=single_quote,
+                CoNLL_table_analyzer_var=False,
+                annotators_var=annotators_var,
+                annotators_menu_var=annotators_menu_var
+            )
         )
     )
     thread.start()
