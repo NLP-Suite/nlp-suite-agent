@@ -3,7 +3,7 @@ import os
 from parsers_annotators import run
 
 def test_parsers_annotators():
-    inputFilename = 'C:/Users/sherry/OneDrive/Desktop/QTM446W/Input/Steinbeck_Grapes of wrath_14.txt'
+    inputFilename = '/Users/is2ac/nlp-suite/input/example.txt'
     inputDir = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
     outputDir = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     openOutputFiles = False

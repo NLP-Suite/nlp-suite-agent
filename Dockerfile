@@ -11,6 +11,7 @@ RUN python3.9 -m pip install --upgrade setuptools
 COPY . .
 
 RUN python3.9 -m pip install -r requirements.txt
+RUN python3.9 -m nltk.downloader all
 
 WORKDIR /nlp-suite/src
 EXPOSE 3000

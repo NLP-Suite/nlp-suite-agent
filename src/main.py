@@ -135,41 +135,58 @@ def topic_modeling(
 
 @app.post("/parsers_annotators")
 def parsers_annotators(
-    inputFilename: Annotated[str, Form()] = '',
-    transformation: Annotated[str, Form()] = '',
-    extra_GUIs_var: Annotated[bool, Form()] = False,
-    extra_GUIs_menu_var: Annotated[str, Form()] = '',
+    inputDir: Annotated[str, Form()] = '',
+    dataTransformation: Annotated[str, Form()] = '',
+    # extra_GUIs_var: Annotated[bool, Form()] = False,
+    # extra_GUIs_menu_var: Annotated[str, Form()] = '',
     manual_Coref: Annotated[bool, Form()] = False,
-    open_GUI: Annotated[bool, Form()] = False,
+    # open_GUI: Annotated[bool, Form()] = False,
     parser_var: Annotated[bool, Form()] = False,
     parser_menu_var: Annotated[str, Form()] = '',
     single_quote: Annotated[bool, Form()] = False,
-    CoNLL_table_analyzer_var: Annotated[bool, Form()] = False,
+    # CoNLL_table_analyzer_var: Annotated[bool, Form()] = False,
+    chartPackage: Annotated[str, Form()] = '',
     annotators_var: Annotated[bool, Form()] = False,
     annotators_menu_var: Annotated[str, Form()] = '',
 ):
     # Define input and output directories
+    inputFilename = inputDir
     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
 
     # Start the processing in a separate thread
     thread = Thread(
+        # target=lambda: run_parsers_annotators(
+        #     inputFilename=inputFilename,
+        #     inputDir=inputDirectory,
+        #     outputDir=outputDirectory,
+        #     chartPackage="Excel",    # Default chart package
+        #     dataTransformation=transformation,
+        #     extra_GUIs_var=extra_GUIs_var,
+        #     extra_GUIs_menu_var=extra_GUIs_menu_var,
+        #     manual_Coref=manual_Coref,
+        #     open_GUI=open_GUI,
+        #     parser_var=parser_var,
+        #     parser_menu_var=parser_menu_var,
+        #     single_quote=single_quote,
+        #     CoNLL_table_analyzer_var=CoNLL_table_analyzer_var,
+        #     annotators_var=annotators_var,
+        #     annotators_menu_var=annotators_menu_var,
+        # )
         target=lambda: run_parsers_annotators(
             inputFilename=inputFilename,
             inputDir=inputDirectory,
             outputDir=outputDirectory,
-            chartPackage="Excel",    # Default chart package
-            dataTransformation=transformation,
-            extra_GUIs_var=extra_GUIs_var,
-            extra_GUIs_menu_var=extra_GUIs_menu_var,
-            manual_Coref=manual_Coref,
-            open_GUI=open_GUI,
+            openOutputFiles=False,
+            chartPackage=chartPackage,
+            dataTransformation=dataTransformation,
+            manual_Coref=manual_Coref, 
             parser_var=parser_var,
             parser_menu_var=parser_menu_var,
             single_quote=single_quote,
-            CoNLL_table_analyzer_var=CoNLL_table_analyzer_var,
+            CoNLL_table_analyzer_var=False,
             annotators_var=annotators_var,
-            annotators_menu_var=annotators_menu_var,
+            annotators_menu_var=annotators_menu_var
         )
     )
     thread.start()

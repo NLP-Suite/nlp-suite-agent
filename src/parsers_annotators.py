@@ -17,6 +17,7 @@ def run_parsers_annotators(inputFilename, inputDir, outputDir, openOutputFiles, 
         single_quote,
         CoNLL_table_analyzer_var, annotators_var, annotators_menu_var):
     print("started")
+    print(inputFilename)
     nlp = StanfordCoreNLP("http://172.16.0.12:9000")
     # Set up logging
     logging.basicConfig(level=logging.INFO)
@@ -69,7 +70,7 @@ def run_parsers_annotators(inputFilename, inputDir, outputDir, openOutputFiles, 
             elif annotators_var and annotators_menu_var != '':
                 if 'NER annotator' in annotators_menu_var:
                     annotator = 'NER'
-                elif 'Sentence splitter (with sentence length)' in annotators_menu_var:
+                elif 'Sentence splitter' in annotators_menu_var:
                     annotator = 'Sentence'
                 elif 'Lemma annotator' in annotators_menu_var:
                     annotator = 'Lemma'
@@ -104,6 +105,7 @@ def run_parsers_annotators(inputFilename, inputDir, outputDir, openOutputFiles, 
                         else:
                             filesToOpen.extend(outputFiles)
                 else:
+                    print("Selected annotator not available")
                     logger.warning('Selected annotator is not available. Please select a different option.')
                     return
 
