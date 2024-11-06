@@ -31,9 +31,10 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
         logger.info("Running LEMMA-based search")
 
     # Clause Analysis
-    outputFiles = CoNLL_clause_analysis_util.clause_stats(inputFilename, '', outputDir, data, all_CoNLL_records, openOutputFiles, chartPackage, dataTransformation)
-    if outputFiles:
-        filesToOpen.extend(outputFiles)
+    if 'CoNLL' in inputFilename and not '_nn_' in inputFilename:
+        outputFiles = CoNLL_clause_analysis_util.clause_stats(inputFilename, '', outputDir, data, all_CoNLL_records, openOutputFiles, chartPackage, dataTransformation)
+        if outputFiles:
+            filesToOpen.extend(outputFiles)
     
     # Noun Analysis
     outputFiles = CoNLL_noun_analysis_util.noun_stats(inputFilename, outputDir, data, all_CoNLL_records, openOutputFiles, chartPackage, dataTransformation)

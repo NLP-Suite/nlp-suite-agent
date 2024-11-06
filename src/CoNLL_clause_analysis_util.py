@@ -29,12 +29,14 @@ output_dir = ''
 def process_Json(inputFilename, outputDir):
     head, tail = os.path.split(inputFilename)
     subtree_string_fileName = head + os.sep + 'subtree_string.csv'
+    print("hte SDOIFJOSIDJF",subtree_string_fileName)
     if not os.path.exists(subtree_string_fileName):
         if os.path.exists(head):
             import Stanford_CoreNLP_clause_util
             sent_list_clause = []
             subtree_string = []
             # JsonDir = head+os.sep+"Json_"+ tail[:-4]
+            JsonDir=''
             for file in os.listdir(head):
                 if 'Json_' in file:
                     JsonDir=file
@@ -42,7 +44,6 @@ def process_Json(inputFilename, outputDir):
             if not os.path.exists(JsonDir):
                 return None
             inputDocs = IO_files_util.getFileList('', JsonDir, fileType='.txt',silent=True,configFileName='')
-
             Ndocs = len(inputDocs)
             if Ndocs==0:
                 return None
