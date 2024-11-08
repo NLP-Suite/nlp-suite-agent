@@ -449,7 +449,8 @@ def displayReminder(df, row_num, title, message, currentStatus, question, seeMsg
     else:
         # message = message + question # the question "Do you want to see this message again?" is asked
         #   in GUI_IO_util.message_box_widget so that it can be placed n red
-        answer = GUI_IO_util.message_box_widget(1, title, message, buttonType='Yes-No', timeout=30000)
+        # answer = GUI_IO_util.message_box_widget(1, title, message, buttonType='Yes-No', timeout=30000)
+        answer = "this feature isn't set up"
 
     answer=answer.capitalize() # Yes/No
     if seeMsgAgain==True:
