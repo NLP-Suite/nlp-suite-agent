@@ -22,7 +22,7 @@ fin = open('../lib/wordLists/stopwords.txt', 'r')
 stop_words = set(fin.read().splitlines())
 punctuations = set(string.punctuation)
 
-def run_Gensim_word2vec(inputFilename, inputDir, outputDir, configFileName, openOutputFiles, chartPackage, dataTransformation,
+def run_Gensim_word2vec(inputFilename, inputDir, outputDir, configFileName, chartPackage, dataTransformation,
                         remove_stopwords_var, lemmatize_var,
                         keywords_var,
                         compute_distances_var, top_words_var,
@@ -39,8 +39,8 @@ def run_Gensim_word2vec(inputFilename, inputDir, outputDir, configFileName, open
     filesToOpen = []
     sentences_out = []
 
-    startTime = IO_user_interface_util.timed_alert("",2000,'Analysis start',
-                                                   'Started running Gensim Word2Vec at', True)
+    # startTime = IO_user_interface_util.timed_alert("",2000,'Analysis start',
+    #                                                'Started running Gensim Word2Vec at', True)
 
     import IO_internet_util
     if not IO_internet_util.check_internet_availability_warning("Word2Vec_Gensim_util.py"):
@@ -225,8 +225,8 @@ def run_Gensim_word2vec(inputFilename, inputDir, outputDir, configFileName, open
 
         filesToOpen.extend(outputFiles)
 
-    IO_user_interface_util.timed_alert("",2000,'Analysis end',
-                                       'Finished running Gensim Word2Vec at', True, '', True, startTime)
+    # IO_user_interface_util.timed_alert("",2000,'Analysis end',
+    #                                    'Finished running Gensim Word2Vec at', True, '', True, startTime)
 
     return filesToOpen
 

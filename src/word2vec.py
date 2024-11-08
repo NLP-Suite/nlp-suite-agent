@@ -3,13 +3,13 @@ import IO_files_util
 
 # RUN section ______________________________________________________________________________________________________________________________________________________
 
-def run_word2vec(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
+def run_word2vec(inputFilename, inputDir, outputDir, chartPackage, dataTransformation,
                  remove_stopwords_var, lemmatize_var, WSI_var,
                  BERT_var, Gensim_var,
                  sg_menu_var, vector_size_var, window_var, min_count_var,
                  vis_menu_var, dim_menu_var, compute_distances_var, top_words_var, keywords_var,
                  keywordInput, range4, range6, range20, ngramsDropDown):
-
+    
     config_filename = ""
     scriptName = "word2vec.py"
 
@@ -97,7 +97,7 @@ def run_word2vec(inputFilename, inputDir, outputDir, openOutputFiles, chartPacka
                                      reminders_util.message_BERT_Word2Vec_timing,
                                      True)
         import BERT_util
-        BERT_output = BERT_util.word_embeddings_BERT(inputFilename, inputDir, Word2Vec_Dir, openOutputFiles, 
+        BERT_output = BERT_util.word_embeddings_BERT(inputFilename, inputDir, Word2Vec_Dir, False, 
                                                      chartPackage, dataTransformation, vis_menu_var, dim_menu_var, compute_distances_var,
                                                      top_words_var, keywords_var, lemmatize_var, remove_stopwords_var, config_filename)
         filesToOpen.append(BERT_output)
@@ -108,7 +108,7 @@ def run_word2vec(inputFilename, inputDir, outputDir, openOutputFiles, chartPacka
         #                              reminders_util.message_Gensim_Word2Vec_timing,
         #                              True)
         import word2vec_Gensim_util
-        Gensim_output = word2vec_Gensim_util.run_Gensim_word2vec(inputFilename, inputDir, Word2Vec_Dir, config_filename, openOutputFiles, chartPackage, dataTransformation,
+        Gensim_output = word2vec_Gensim_util.run_Gensim_word2vec(inputFilename, inputDir, Word2Vec_Dir, config_filename, chartPackage, dataTransformation,
                                  remove_stopwords_var, lemmatize_var,
                                  keywords_var,
                                  compute_distances_var, top_words_var,

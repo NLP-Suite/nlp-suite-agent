@@ -138,10 +138,11 @@ def get_centroids(all_sent, all_vocab, Word2Vec_Dir, k_range, sample=None):
             seq = [tpl for tpl in all_sent if w in tpl[1].split()]
         else:
             seq = random.sample([tpl for tpl in all_sent if w in tpl[1].split()], sample)
+    
         if len(seq) == 0:
             print(f':-( There are no occurrences of "{w}" in the dataset. Check for misspellings and/or input other forms of the word, e.g., plural/singular forms, different tenses, etc.')
-
-            raise
+            raise ValueError(f':-( There are no occurrences of "{w}" in the dataset. Check for misspellings and/or input other forms of the word, e.g., plural/singular forms, different tenses, etc.') 
+        
         batched_data, batched_words, batched_masks, batched_users = model.get_batches(seq, batch_size)
         embeddings, do_wordpiece = model.get_embeddings(batched_data, batched_words, batched_masks, batched_users, w)
         data = model.group_wordpiece(embeddings, w, do_wordpiece)
@@ -191,20 +192,12 @@ def get_cluster_sentences(Word2Vec_Dir):
             for i, tok in enumerate(s_occs):
                 idx = int(tok[0].split('<sep>')[0])
                 f_name = tok[0].split('<sep>')[1]
-                print("File Name:")
-                print(f_name)
-                print("Path Name:")
-                print((f'{Word2Vec_Dir}/output/{f_name.split(".txt")[0]}/sentences.pickle', 'rb'))
                 head, tail = os.path.split(f_name)
                 f_name_no_ext = os.path.splitext(tail)[0]
                 pickle_path = os.path.join(Word2Vec_Dir, 'output', f_name_no_ext, 'sentences.pickle')
 
                 with open(pickle_path, 'rb') as f: # TODO: remove redundant path
                     sentences = pickle.load(f)
-                    print("File Name:")
-                    print(f_name)
-                    print("Path Name:")
-                    print((f'{Word2Vec_Dir}/output/{f_name.split(".txt")[0]}/sentences.pickle', 'rb'))
                 sents.append(sentences[idx])
             d[w][s] = [sent[1] for sent in sents]
             for sent in sents:
