@@ -39,7 +39,7 @@ def run_Gensim_word2vec(inputFilename, inputDir, outputDir, configFileName, open
     filesToOpen = []
     sentences_out = []
 
-    startTime = IO_user_interface_util.timed_alert("",2000,'Analysis start',
+    startTime = IO_user_interface_util.timed_alert(2000,'Analysis start',
                                                    'Started running Gensim Word2Vec at', True)
 
     import IO_internet_util
@@ -225,7 +225,7 @@ def run_Gensim_word2vec(inputFilename, inputDir, outputDir, configFileName, open
 
         filesToOpen.extend(outputFiles)
 
-    IO_user_interface_util.timed_alert("",2000,'Analysis end',
+    IO_user_interface_util.timed_alert(2000,'Analysis end',
                                        'Finished running Gensim Word2Vec at', True, '', True, startTime)
 
     return filesToOpen
