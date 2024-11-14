@@ -23,15 +23,6 @@ def run_topic_modeling(inputDir, outputDir, chartPackage, dataTransformation, nu
                        Gensim_var,
                        remove_stopwords_var, lemmatize_var, nounsOnly_var, Gensim_MALLET_var):
 
-    print(inputDir, outputDir, chartPackage, dataTransformation, num_topics,
-          BERT_var,
-          split_docs_var,
-          MALLET_var,
-          optimize_intervals_var,
-          Gensim_var,
-          remove_stopwords_var, lemmatize_var, nounsOnly_var, Gensim_MALLET_var)
-    
-    scriptName = "topic_modeling.py"
     filesToOpen = []
     
     labels = []
