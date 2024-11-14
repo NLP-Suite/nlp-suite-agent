@@ -22,7 +22,7 @@ fin = open('../lib/wordLists/stopwords.txt', 'r')
 stop_words = set(fin.read().splitlines())
 punctuations = set(string.punctuation)
 
-def run_Gensim_word2vec(inputFilename, inputDir, outputDir, configFileName, openOutputFiles, chartPackage, dataTransformation,
+def run_Gensim_word2vec(inputFilename, inputDir, outputDir, configFileName, chartPackage, dataTransformation,
                         remove_stopwords_var, lemmatize_var,
                         keywords_var,
                         compute_distances_var, top_words_var,
