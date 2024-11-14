@@ -31,7 +31,6 @@ import time
 from typing import Tuple
 
 # not using stanfordcorenlp because it is not recognizing sentiment annotator
-import nltk
 import pandas as pd
 from pycorenlp import StanfordCoreNLP
 
