@@ -95,6 +95,7 @@ def sentiment_analysis(
 def topic_modeling(
     inputDirectory: Annotated[str, Form()],
     outputDirectory: Annotated[str, Form()],
+    chartPackage: Annotated[str, Form()],
     transformation: Annotated[str, Form()],
     numberOfTopics: Annotated[int, Form()],
     topicModelingBERT: Annotated[bool, Form()] = False,
@@ -115,7 +116,7 @@ def topic_modeling(
             lambda: run_topic_modeling(
                 inputDir=inputDirectory,
                 outputDir=outputDirectory,
-                chartPackage="Excel",  # chartPackage
+                chartPackage=chartPackage, 
                 dataTransformation=transformation,
                 num_topics=numberOfTopics,
                 BERT_var=topicModelingBERT,
@@ -145,12 +146,12 @@ def parsers_annotators(
     parser_menu_var: Annotated[str, Form()] = '',
     single_quote: Annotated[bool, Form()] = False,
     # CoNLL_table_analyzer_var: Annotated[bool, Form()] = False,
-    chartPackage: Annotated[str, Form()] = '',
+    chartPackage: Annotated[str, Form()] = 'Excel',
     annotators_var: Annotated[bool, Form()] = False,
     annotators_menu_var: Annotated[str, Form()] = '',
 ):
     # Define input and output directories
-    inputFilename = inputDir
+    inputFilename = inputDir # TODO
     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
 
@@ -197,10 +198,11 @@ def parsers_annotators(
 
 @app.post("/word2vec")
 def word2vec(
-    inputFilename: Annotated[str, Form()],
+    # inputFilename: Annotated[str, Form()], 
     inputDirectory: Annotated[str, Form()],
     outputDirectory: Annotated[str, Form()],
     transformation: Annotated[str, Form()],
+    chartPackage: Annotated[str, Form()] = 'Excel',
     removeStopwords: Annotated[bool, Form()] = False,
     lemmatize: Annotated[bool, Form()] = False,
     wordSenseInduction: Annotated[bool, Form()] = False,
@@ -218,38 +220,83 @@ def word2vec(
     keywordInput: Annotated[str, Form()] = "",
     kMeansMin: Annotated[int, Form()] = 4,
     kMeansMax: Annotated[int, Form()] = 6,
+    range20: Annotated[int, Form()] = 10,
     ngrams: Annotated[str, Form()] = "1-grams"
 ):
+    inputFilename = ""
     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     thread = Thread(
         target=lambda: run(
             app,
             lambda: run_word2vec(
-                inputFilename,
-                inputDirectory,
-                outputDirectory,
-                False,
-                "Excel",
-                transformation,
-                removeStopwords,
-                lemmatize,
-                wordSenseInduction,
-                BERT,
-                Gensim,
-                skipGram,
-                vectorSize,
-                windowSize,
-                minCount,
-                visualize,
-                dimension,
-                computeDistances,
-                topWords,
-                keywords,
-                keywordInput,
-                kMeansMin,
-                kMeansMax,
-                ngrams,
+                inputFilename=inputFilename,
+                inputDir=inputDirectory,
+                outputDir=outputDirectory,
+                chartPackage=chartPackage,
+                dataTransformation=transformation, 
+                remove_stopwords_var=removeStopwords,
+                lemmatize_var=lemmatize,
+                WSI_var=wordSenseInduction,
+                BERT_var=BERT,
+                Gensim_var=Gensim,
+                sg_menu_var=skipGram,
+                vector_size_var=vectorSize,
+                window_var=windowSize,
+                min_count_var=minCount,
+                vis_menu_var=visualize,
+                dim_menu_var=dimension,
+                compute_distances_var=computeDistances,
+                top_words_var=topWords,
+                keywords_var=keywords,
+                keywordInput=keywordInput,
+                range4=kMeansMin,
+                range6=kMeansMax,
+                range20=range20,
+                ngramsDropDown=ngrams
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+
+
+@app.post("/style_analysis")
+def style_analysis(
+        # inputFilename: Annotated[str, Form()],
+        inputDirectory: Annotated[str, Form()],
+        outputDirectory: Annotated[str, Form()],
+        chartPackage: Annotated[str, Form()] = 'Excel',
+        transformation: Annotated[str, Form()] = 'no_transformation',
+        extra_GUIs_var: Annotated[bool, Form()] = False,
+        complexity_analysis: Annotated[bool, Form()] = False,
+        analysis_dropdown: Annotated[str, Form()] = '*',
+        vocabulary_analysis: Annotated[bool, Form()] = False,
+        voc_options: Annotated[str, Form()] = '*',
+        gender_guesser: Annotated[bool, Form()] = False, 
+        min_rating: Annotated[int, Form()] = 5,
+        max_rating_sd: Annotated[int, Form()] = 2
+):
+    inputFilename = ""
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_word2vec(
+                inputFilename = inputFilename,
+                inputDir = inputDirectory,
+                outputDir = outputDirectory,
+                chartPackage = chartPackage, 
+                dataTransformation = transformation,
+                extra_GUIs_var = extra_GUIs_var,
+                complexity_readability_analysis_var = complexity_analysis,
+                complexity_readability_analysis_menu_var = analysis_dropdown,
+                vocabulary_analysis_var = vocabulary_analysis,
+                vocabulary_analysis_menu_var = voc_options,
+                gender_guesser_var = gender_guesser,
+                min_rating = min_rating,
+                max_rating_sd = max_rating_sd
             ),
         )
     )
