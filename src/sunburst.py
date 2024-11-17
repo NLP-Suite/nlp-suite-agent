@@ -2,18 +2,18 @@ import IO_files_util
 import charts_util
 
 
-def run_run_burst(inputFilename, inputDir, outputDir,
+def run_sun_burst(inputFilename, inputDir, outputDir,
         case_sensitive_var,
         csv_file_categorical_field_list, # TODO: frontend checks that this is > 2, need to transform into list
         filter_options_var,
         fixed_param_var,
         rate_param_var,
         base_param_var,
-        categorical_menu_var, #TODO: add this var to frontend
         pie_char_var, # TODO: Add to frontend
         tree_map_var # TODO: Add to frontend
         ):
         filesToOpen = []
+        categorical_menu_var = "Sunbursts"
         # categorical
         outputFilename = IO_files_util.generate_output_file_name(inputFilename, inputDir, outputDir,
                                                                 '.html', categorical_menu_var)
