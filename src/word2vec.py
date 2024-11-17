@@ -9,8 +9,8 @@ def run_word2vec(inputFilename, inputDir, outputDir, chartPackage, dataTransform
                  sg_menu_var, vector_size_var, window_var, min_count_var,
                  vis_menu_var, dim_menu_var, compute_distances_var, top_words_var, keywords_var,
                  keywordInput, range4, range6, range20, ngramsDropDown):
-    
-    config_filename = ""
+
+    config_filename = "NLP_default_IO_config.csv"
     scriptName = "word2vec.py"
 
     if not BERT_var and not Gensim_var and not WSI_var and not compute_distances_var:

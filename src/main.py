@@ -12,6 +12,9 @@ from parsers_annotators import run_parsers_annotators
 from sentiment_analysis import run_sentiment_analysis
 from topic_modeling import run_topic_modeling
 from word2vec import run_word2vec
+from sunburst_charts import run_sun_burst
+from style_analysis import run_style_analysis
+
 app = FastAPI()
 origins = [
     "*",
@@ -95,6 +98,7 @@ def sentiment_analysis(
 def topic_modeling(
     inputDirectory: Annotated[str, Form()],
     outputDirectory: Annotated[str, Form()],
+    chartPackage: Annotated[str, Form()],
     transformation: Annotated[str, Form()],
     numberOfTopics: Annotated[int, Form()],
     topicModelingBERT: Annotated[bool, Form()] = False,
@@ -115,7 +119,7 @@ def topic_modeling(
             lambda: run_topic_modeling(
                 inputDir=inputDirectory,
                 outputDir=outputDirectory,
-                chartPackage="Excel",  # chartPackage
+                chartPackage=chartPackage, 
                 dataTransformation=transformation,
                 num_topics=numberOfTopics,
                 BERT_var=topicModelingBERT,
@@ -145,12 +149,12 @@ def parsers_annotators(
     parser_menu_var: Annotated[str, Form()] = '',
     single_quote: Annotated[bool, Form()] = False,
     # CoNLL_table_analyzer_var: Annotated[bool, Form()] = False,
-    chartPackage: Annotated[str, Form()] = '',
+    chartPackage: Annotated[str, Form()] = 'Excel',
     annotators_var: Annotated[bool, Form()] = False,
     annotators_menu_var: Annotated[str, Form()] = '',
 ):
     # Define input and output directories
-    inputFilename = inputDir
+    inputFilename = inputDir # TODO
     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
 
@@ -196,10 +200,11 @@ def parsers_annotators(
 
 @app.post("/word2vec")
 def word2vec(
-    inputFilename: Annotated[str, Form()],
+    # inputFilename: Annotated[str, Form()], 
     inputDirectory: Annotated[str, Form()],
     outputDirectory: Annotated[str, Form()],
     transformation: Annotated[str, Form()],
+    chartPackage: Annotated[str, Form()] = 'Excel',
     removeStopwords: Annotated[bool, Form()] = False,
     lemmatize: Annotated[bool, Form()] = False,
     wordSenseInduction: Annotated[bool, Form()] = False,
@@ -220,42 +225,114 @@ def word2vec(
     range20: Annotated[int, Form()] = 10,
     ngrams: Annotated[str, Form()] = "1-grams"
 ):
+    inputFilename = ""
     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     thread = Thread(
         target=lambda: run(
             app,
             lambda: run_word2vec(
-                inputFilename = inputFilename,
-                inputDir = inputDirectory,
-                outputDir = outputDirectory,
-                chartPackage = "Excel",
-                dataTransformation = transformation,
-                remove_stopwords_var = removeStopwords,
-                lemmatize_var = lemmatize,
-                WSI_var = wordSenseInduction,
-                BERT_var = wordEmbeddingsBERT,
-                Gensim_var = word2VecGensim,
-                sg_menu_var = skipGram,
-                vector_size_var = vectorSize,
-                window_var = windowSize,
-                min_count_var = minCount,
-                vis_menu_var = plotWordVectors,
-                dim_menu_var = dimension,
-                compute_distances_var = computeWordDistances,
-                top_words_var = topWords,
-                keywords_var = keyWords,
-                keywordInput = keywordInput,
-                range4 = kMeansMin,
-                range6 = kMeansMax,
-                range20 = range20,
-                ngramsDropDown = ngrams,
+                inputFilename=inputFilename,
+                inputDir=inputDirectory,
+                outputDir=outputDirectory,
+                chartPackage=chartPackage,
+                dataTransformation=transformation, 
+                remove_stopwords_var=removeStopwords,
+                lemmatize_var=lemmatize,
+                WSI_var=wordSenseInduction,
+                BERT_var=wordEmbeddingsBERT,
+                Gensim_var=word2VecGensim,
+                sg_menu_var=skipGram,
+                vector_size_var=vectorSize,
+                window_var=windowSize,
+                min_count_var=minCount,
+                vis_menu_var=plotWordVectors,
+                dim_menu_var=dimension,
+                compute_distances_var=computeWordDistances,
+                top_words_var=topWords,
+                keywords_var=keyWords,
+                keywordInput=keywordInput,
+                range4=kMeansMin,
+                range6=kMeansMax,
+                range20=range20,
+                ngramsDropDown=ngrams
             ),
         )
     )
     thread.start()
     return PlainTextResponse("", status_code=200)
 
+
+@app.post("/style_analysis")
+def style_analysis(
+        # inputFilename: Annotated[str, Form()],
+        inputDirectory: Annotated[str, Form()],
+        outputDirectory: Annotated[str, Form()],
+        chartPackage: Annotated[str, Form()] = 'Excel',
+        transformation: Annotated[str, Form()] = 'no_transformation',
+        extra_GUIs_var: Annotated[bool, Form()] = False,
+        complexity_analysis: Annotated[bool, Form()] = False,
+        analysis_dropdown: Annotated[str, Form()] = '*',
+        vocabulary_analysis: Annotated[bool, Form()] = False,
+        voc_options: Annotated[str, Form()] = '*',
+        gender_guesser: Annotated[bool, Form()] = False, 
+        min_rating: Annotated[int, Form()] = 5,
+        max_rating_sd: Annotated[int, Form()] = 2
+):
+    inputFilename = ""
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_style_analysis(
+                inputFilename = inputFilename,
+                inputDir = inputDirectory,
+                outputDir = outputDirectory,
+                chartPackage = chartPackage, 
+                dataTransformation = transformation,
+                extra_GUIs_var = extra_GUIs_var,
+                complexity_readability_analysis_var = complexity_analysis,
+                complexity_readability_analysis_menu_var = analysis_dropdown,
+                vocabulary_analysis_var = vocabulary_analysis,
+                vocabulary_analysis_menu_var = voc_options,
+                gender_guesser_var = gender_guesser,
+                min_rating = min_rating,
+                max_rating_sd = max_rating_sd
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+
+
+
+@app.post("/sunburst_charts")
+def sunburst_charts(
+        sunburst_file_input: Annotated[str, Form()],
+        inputDirectory: Annotated[str, Form()],
+        outputDirectory: Annotated[str, Form()],
+        search_field: Annotated[str, Form()] = "", 
+        piechar_var: Annotated[bool, Form()] = False, 
+        treemap_var: Annotated[bool, Form()] = False,
+):
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_sun_burst(
+                inputFilename = sunburst_file_input,
+                inputDir = inputDirectory,
+                outputDir = outputDirectory,
+                csv_file_categorical_field_list = search_field, 
+                piechar_var = piechar_var,
+                treemap_var = treemap_var 
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
 
 if __name__ == "__main__":
     uvicorn.run(app, port=3000, host="0.0.0.0")
