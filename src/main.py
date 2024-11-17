@@ -312,8 +312,9 @@ def sunburst_charts(
         sunburst_file_input: Annotated[str, Form()],
         inputDirectory: Annotated[str, Form()],
         outputDirectory: Annotated[str, Form()],
+        filter_options_var: Annotated[str, Form()], 
         search_field: Annotated[str, Form()] = "", 
-        piechar_var: Annotated[bool, Form()] = False, 
+        piechart_var: Annotated[bool, Form()] = False, 
         treemap_var: Annotated[bool, Form()] = False,
 ):
     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
@@ -325,8 +326,9 @@ def sunburst_charts(
                 inputFilename = sunburst_file_input,
                 inputDir = inputDirectory,
                 outputDir = outputDirectory,
+                filter_options_var = filter_options_var,
                 csv_file_categorical_field_list = search_field, 
-                piechar_var = piechar_var,
+                piechart_var = piechart_var,
                 treemap_var = treemap_var 
             ),
         )
