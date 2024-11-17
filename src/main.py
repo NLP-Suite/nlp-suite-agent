@@ -13,7 +13,7 @@ from sentiment_analysis import run_sentiment_analysis
 from topic_modeling import run_topic_modeling
 from word2vec import run_word2vec
 from sunburst_charts import run_sun_burst
-from style_analysis import run_style_analysis
+#from style_analysis import run_style_analysis
 
 app = FastAPI()
 origins = [
@@ -263,47 +263,47 @@ def word2vec(
     return PlainTextResponse("", status_code=200)
 
 
-@app.post("/style_analysis")
-def style_analysis(
-        # inputFilename: Annotated[str, Form()],
-        inputDirectory: Annotated[str, Form()],
-        outputDirectory: Annotated[str, Form()],
-        chartPackage: Annotated[str, Form()] = 'Excel',
-        transformation: Annotated[str, Form()] = 'no_transformation',
-        extra_GUIs_var: Annotated[bool, Form()] = False,
-        complexity_analysis: Annotated[bool, Form()] = False,
-        analysis_dropdown: Annotated[str, Form()] = '*',
-        vocabulary_analysis: Annotated[bool, Form()] = False,
-        voc_options: Annotated[str, Form()] = '*',
-        gender_guesser: Annotated[bool, Form()] = False, 
-        min_rating: Annotated[int, Form()] = 5,
-        max_rating_sd: Annotated[int, Form()] = 2
-):
-    inputFilename = ""
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
-    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
-    thread = Thread(
-        target=lambda: run(
-            app,
-            lambda: run_style_analysis(
-                inputFilename = inputFilename,
-                inputDir = inputDirectory,
-                outputDir = outputDirectory,
-                chartPackage = chartPackage, 
-                dataTransformation = transformation,
-                extra_GUIs_var = extra_GUIs_var,
-                complexity_readability_analysis_var = complexity_analysis,
-                complexity_readability_analysis_menu_var = analysis_dropdown,
-                vocabulary_analysis_var = vocabulary_analysis,
-                vocabulary_analysis_menu_var = voc_options,
-                gender_guesser_var = gender_guesser,
-                min_rating = min_rating,
-                max_rating_sd = max_rating_sd
-            ),
-        )
-    )
-    thread.start()
-    return PlainTextResponse("", status_code=200)
+# @app.post("/style_analysis")
+# def style_analysis(
+#         # inputFilename: Annotated[str, Form()],
+#         inputDirectory: Annotated[str, Form()],
+#         outputDirectory: Annotated[str, Form()],
+#         chartPackage: Annotated[str, Form()] = 'Excel',
+#         transformation: Annotated[str, Form()] = 'no_transformation',
+#         extra_GUIs_var: Annotated[bool, Form()] = False,
+#         complexity_analysis: Annotated[bool, Form()] = False,
+#         analysis_dropdown: Annotated[str, Form()] = '*',
+#         vocabulary_analysis: Annotated[bool, Form()] = False,
+#         voc_options: Annotated[str, Form()] = '*',
+#         gender_guesser: Annotated[bool, Form()] = False, 
+#         min_rating: Annotated[int, Form()] = 5,
+#         max_rating_sd: Annotated[int, Form()] = 2
+# ):
+#     inputFilename = ""
+#     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+#     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+#     thread = Thread(
+#         target=lambda: run(
+#             app,
+#             lambda: run_style_analysis(
+#                 inputFilename = inputFilename,
+#                 inputDir = inputDirectory,
+#                 outputDir = outputDirectory,
+#                 chartPackage = chartPackage, 
+#                 dataTransformation = transformation,
+#                 extra_GUIs_var = extra_GUIs_var,
+#                 complexity_readability_analysis_var = complexity_analysis,
+#                 complexity_readability_analysis_menu_var = analysis_dropdown,
+#                 vocabulary_analysis_var = vocabulary_analysis,
+#                 vocabulary_analysis_menu_var = voc_options,
+#                 gender_guesser_var = gender_guesser,
+#                 min_rating = min_rating,
+#                 max_rating_sd = max_rating_sd
+#             ),
+#         )
+#     )
+#     thread.start()
+#     return PlainTextResponse("", status_code=200)
 
 
 
