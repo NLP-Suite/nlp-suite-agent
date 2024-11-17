@@ -309,17 +309,12 @@ def style_analysis(
 
 @app.post("/sunburst_charts")
 def sunburst_charts(
-        inputFilename: Annotated[str, Form()],
+        sunburst_file_input: Annotated[str, Form()],
         inputDirectory: Annotated[str, Form()],
         outputDirectory: Annotated[str, Form()],
-        case_sensitive_var: Annotated[bool, Form()] = False,
-        csv_file_categorical_field_list: Annotated[str, Form()] = "", # TODO: frontend checks that this is > 2, need to transform into list
-        filter_options_var: Annotated[bool, Form()] = False,
-        fixed_param_var: Annotated[int, Form()] = 50,
-        rate_param_var: Annotated[int, Form()] = 3,
-        base_param_var: Annotated[int, Form()] = 40,
-        pie_char_var: Annotated[bool, Form()] = False, # TODO: Add to frontend
-        tree_map_var: Annotated[bool, Form()] = False, # TODO: Add to frontend
+        search_field: Annotated[str, Form()] = "", 
+        piechar_var: Annotated[bool, Form()] = False, 
+        treemap_var: Annotated[bool, Form()] = False,
 ):
     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
@@ -327,17 +322,12 @@ def sunburst_charts(
         target=lambda: run(
             app,
             lambda: run_sun_burst(
-                inputFilename = inputFilename,
+                inputFilename = sunburst_file_input,
                 inputDir = inputDirectory,
                 outputDir = outputDirectory,
-                case_sensitive_var = case_sensitive_var,
-                csv_file_categorical_field_list = csv_file_categorical_field_list, # TODO: frontend checks that this is > 2, need to transform into list
-                filter_options_var = filter_options_var,
-                fixed_param_var = fixed_param_var,
-                rate_param_var = rate_param_var,
-                base_param_var = base_param_var,
-                pie_char_var = pie_char_var, # TODO: Add to frontend
-                tree_map_var = tree_map_var # TODO: Add to frontend
+                csv_file_categorical_field_list = search_field, 
+                piechar_var = piechar_var,
+                treemap_var = treemap_var 
             ),
         )
     )
