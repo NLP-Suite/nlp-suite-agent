@@ -1,16 +1,24 @@
 import IO_files_util
 import charts_util
 import os
-
+import json
 
 def run_sun_burst(inputFilename, inputDir, outputDir,
         filter_options_var,
-        csv_file_categorical_field_list,
+        selected_pairs_data,
         piechart_var, 
         treemap_var 
         ):
-        case_sensitive_var = True
-        csv_file_categorical_field_list = [word.strip() for word in csv_file_categorical_field_list.split(',') if word.strip()]
+        try:
+            saved_pairs = json.loads(selected_pairs_data)
+        except json.JSONDecodeError:
+            print("Invalid JSON in selected_pairs_data, status_code=400")
+            return
+
+        
+        csv_file_categorical_field_list = [
+        [f"{pair['searchField']}|{pair['csvFieldList']}"] for pair in saved_pairs]
+
         filesToOpen = []
         categorical_menu_var = "Sunbursts"
         # categorical
@@ -18,7 +26,6 @@ def run_sun_burst(inputFilename, inputDir, outputDir,
                                                                 '.html', categorical_menu_var)
         
         # NOTE: set to default values, can allow user input flexibility later 
-        
         fixed_param_var = 50
         rate_param_var = 3
         base_param_var = 40
@@ -50,4 +57,31 @@ def run_sun_burst(inputFilename, inputDir, outputDir,
                 else:
                     filesToOpen.extend(tree_map_output)
         return filesToOpen
+    
+
+def main():
+    inputFilename = "dogs.csv"
+    inputDir = "C:/Users/sherry/OneDrive/Desktop/QTM446W/Input"
+    outputDir = "C:/Users/sherry/OneDrive/Desktop/QTM446W/Ouput"
+    filter_options_var = "No filtering"
+    selected_pairs_data = json.dumps([
+        {"searchField": "Color", "csvFieldList": "Black, Reddish, Light brown"},
+        {"searchField": "Size", "csvFieldList": "Small, Medium, Large"}
+    ])
+    piechart_var = True 
+    treemap_var = True
+
+    run_sun_burst(
+        inputFilename=inputFilename,
+        inputDir=inputDir,
+        outputDir=outputDir,
+        filter_options_var=filter_options_var,
+        selected_pairs_data=selected_pairs_data,
+        piechart_var=piechart_var,
+        treemap_var=treemap_var
+    )
+
+if __name__ == "__main__":
+    main()
+
 
