@@ -41,10 +41,10 @@ def run_sun_burst(inputFilename, inputDir, outputDir,
             fixed_param_var=None
 
         # TODO: join with input file dir
-        inputFilename = os.path.join(inputDir, inputFilename)
+        inputFilePath = os.path.join(inputDir, inputFilename)
         if piechart_var:    
             piechart_outputFilename = IO_files_util.generate_output_file_name(inputFilename, inputDir, outputDir, '.html', "Sunburst")
-            pie_output = charts_util.Sunburst_Treemap(file_data, piechart_outputFilename, outputDir, csv_file_categorical_field_list, 1, fixed_param_var, rate_param_var, base_param_var, filter_options_var)
+            pie_output = charts_util.Sunburst_Treemap(inputFilePath, piechart_outputFilename, outputDir, csv_file_categorical_field_list, 1, fixed_param_var, rate_param_var, base_param_var, filter_options_var, file_data = file_data)
             if pie_output: 
                 if isinstance(pie_output, str):
                     filesToOpen.append(pie_output)
@@ -52,7 +52,7 @@ def run_sun_burst(inputFilename, inputDir, outputDir,
                     filesToOpen.extend(pie_output)
         if treemap_var:
             treemap_outputFilename = IO_files_util.generate_output_file_name(inputFilename, inputDir, outputDir, '.html', "Treemap")
-            tree_map_output = charts_util.Sunburst_Treemap(file_data, treemap_outputFilename, outputDir, csv_file_categorical_field_list, 0, fixed_param_var, rate_param_var, base_param_var, filter_options_var)    
+            tree_map_output = charts_util.Sunburst_Treemap(inputFilePath, treemap_outputFilename, outputDir, csv_file_categorical_field_list, 0, fixed_param_var, rate_param_var, base_param_var, filter_options_var, file_data = file_data)    
             if tree_map_output:  
                 if isinstance(tree_map_output, str):
                     filesToOpen.append(tree_map_output)
