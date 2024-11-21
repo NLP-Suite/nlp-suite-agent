@@ -18,6 +18,7 @@ import charts_Plotly_util
 import IO_csv_util
 import IO_user_interface_util
 import statistics_csv_util
+import io
 
 # Prepare the data (data_to_be_plotted) to be used in charts_Excel_util.create_excel_chart with the format:
 #   one series: [[['Name1','Frequency'], ['A', 7]]]
@@ -27,37 +28,42 @@ import statistics_csv_util
 # inputFilename has the full path
 # columns_to_be_plotted is a double list [[0, 1], [0, 2], [0, 3]]
 
-
 def prepare_data_to_be_plotted_inExcel(
     inputFilename,
     columns_to_be_plotted,
     chart_type_list,
     count_var=0,
     column_yAxis_field_list=[],
+    inputFileData=""  # Optional parameter with default value
 ):
-    # TODO change to pandas half of this function relies on csv half on pandas, reading in data twice!
-    # TODO temporary to measure process time
-    # startTime=IO_ser_interface_util.timed_alert(2000,'Analysis start', 'Started running Excel prepare_data_to_be_plotted_inExcel at',
-    #                                              True, '', True, '', True)
-    withHeader_var = IO_csv_util.csvFile_has_header(
-        inputFilename
-    )  # check if the file has header
-    data, headers = IO_csv_util.get_csv_data(
-        inputFilename, withHeader_var
-    )  # get the data and header
-    if len(data) == 0:
-        return None
-    headers = list(headers)
+    # Check if inputFileData is provided; if so, use it instead of inputFilename
+    if inputFileData:
+        try:
+            # Convert inputFileData to a DataFrame
+            data = pd.read_csv(io.StringIO(inputFileData), encoding="utf-8", on_bad_lines="skip")
+        except ValueError as err:
+            print("Input data read error", str(err))
+            return None
+        headers = list(data.columns)
+        withHeader_var = True  
+    else:
+        withHeader_var = IO_csv_util.csvFile_has_header(
+            inputFilename, inputFileData=inputFileData
+        )  # check if the file has header
+        data, headers = IO_csv_util.get_csv_data(
+            inputFilename, withHeader_var,  inputFileData=inputFileData
+        )  # get the data and header
+        if len(data) == 0:
+            return None
+        headers = list(headers)
+
     count_msg, withHeader_msg = build_timed_alert_message(
         chart_type_list[0], withHeader_var, count_var
     )
     if count_var == 1:
         dataRange = get_dataRange(columns_to_be_plotted, data)
-        # TODO hover_over_values not being passed, neither are any potential aggregate columns
-        #   get_data_to_be_plotted_with_counts is less general than
+        # Get data with counts
         data_to_be_plotted = get_data_to_be_plotted_with_counts(
-            inputFilename,
-            withHeader_var,
             headers,
             columns_to_be_plotted,
             column_yAxis_field_list,
@@ -65,22 +71,24 @@ def prepare_data_to_be_plotted_inExcel(
         )
     else:
         try:
-            data = pd.read_csv(inputFilename, encoding="utf-8", on_bad_lines="skip")
+            if not inputFileData:  
+                data = pd.read_csv(inputFilename, encoding="utf-8", on_bad_lines="skip")
         except:
             try:
-                data = pd.read_csv(
-                    inputFilename, encoding="ISO-8859-1", on_bad_lines="skip"
-                )
-                IO_user_interface_util.timed_alert(
-                    2000,
-                    "Warning",
-                    "Excel-util encountered errors with utf-8 encoding and switched to ISO-8859-1 in reading into pandas the csv file "
-                    + inputFilename,
-                )
-                print(
-                    "Excel-util encountered errors with utf-8 encoding and switched to ISO-8859-1 encoding in reading into pandas the csv file "
-                    + inputFilename
-                )
+                if not inputFileData:  # Handle encoding fallback only for inputFilename
+                    data = pd.read_csv(
+                        inputFilename, encoding="ISO-8859-1", on_bad_lines="skip"
+                    )
+                    IO_user_interface_util.timed_alert(
+                        2000,
+                        "Warning",
+                        "Excel-util encountered errors with utf-8 encoding and switched to ISO-8859-1 in reading into pandas the csv file "
+                        + inputFilename,
+                    )
+                    print(
+                        "Excel-util encountered errors with utf-8 encoding and switched to ISO-8859-1 encoding in reading into pandas the csv file "
+                        + inputFilename
+                    )
             except ValueError as err:
                 if "codec" in str(err):
                     err = (
@@ -90,10 +98,15 @@ def prepare_data_to_be_plotted_inExcel(
                         + "\n\nPlease, check carefully the data in the csv file; it may contain filenames with non-utf-8/ISO-8859-1 characters; less likely, the data in the txt files that generated the csv file may also contain non-compliant characters. Run the utf-8 compliance algorithm and, perhaps, run the cleaning algorithm that converts apostrophes.\n\nNO EXCEL CHART PRODUCED."
                     )
                 print("Input file read error", str(err))
-                return
+                return None
         data_to_be_plotted = get_data_to_be_plotted_NO_counts(
-            inputFilename, withHeader_var, headers, columns_to_be_plotted, data
+            inputFilename if not inputFileData else None,
+            withHeader_var,
+            headers,
+            columns_to_be_plotted,
+            data,
         )
+
     return data_to_be_plotted
 
 
@@ -809,9 +822,11 @@ def run_all(
     remove_hyperlinks=False,
     csv_field_Y_axis_list=[],
     X_axis_var=[],
+    inputFileData = ""
 ):
+    from io import StringIO
     # get the chart type from the GUI user selection
-    chart_type_list = ["bar"]
+    # TODO: 
 
     use_Plotly = "plotly" in chartPackage.lower()
     # added by Tony, May 2022 for complete sentence index
@@ -819,7 +834,7 @@ def run_all(
     # the extra parameter "complete_sid" is set to True by default to avoid extra code mortification elsewhere
     if complete_sid:
         # TODO Samir
-        inputFilename = add_missing_IDs(inputFilename, inputFilename)
+        inputFilename = add_missing_IDs(pd.read_csv(StringIO(inputFileData)), inputFilename)
         # complete_sentence_index(inputFilename)
     if use_Plotly:
         if "static" in chartPackage.lower():
@@ -842,6 +857,7 @@ def run_all(
             static_flag=static_flag,
             csv_field_Y_axis_list=csv_field_Y_axis_list,
             X_axis_var=X_axis_var,
+            inputFileData=inputFileData
         )
         print("Visualized using plotly")
         return Plotly_outputFilename
@@ -851,6 +867,7 @@ def run_all(
         chart_type_list,
         count_var,
         column_yAxis_field_list,
+        inputFileData=inputFileData
     )
 
     def list_of_lists_to_csv(data, csv_file_path):
@@ -889,10 +906,10 @@ def run_all(
     else:
         # the lines below handle specifically the "Form-Lemma" annotator because "form-lemma" is not processed in statistics_csv_util.py
         withHeader_var = IO_csv_util.csvFile_has_header(
-            inputFilename
+            inputFilename, inputFileData=inputFileData
         )  # check if the file has header
         data, headers = IO_csv_util.get_csv_data(
-            inputFilename, withHeader_var
+            inputFilename, withHeader_var, inputFileData=inputFileData
         )  # get the data and header
 
         def double_level_grouping_and_frequency(data, plot_cols, group_cols):
@@ -959,6 +976,7 @@ def run_all(
             series_label_list,
             second_y_var,
             second_yAxis_label,
+            inputFileData=inputFileData
         )
 
     return outputFiles
@@ -1028,8 +1046,6 @@ def get_dataRange(columns_to_be_plotted, data):
 
 
 def get_data_to_be_plotted_with_counts(
-    inputFilename,
-    withHeader_var,
     headers,
     columns_to_be_plotted,
     specific_column_value_list,
@@ -1271,6 +1287,7 @@ def add_missing_IDs(input, outputFilename):
         True,
     )
     if isinstance(input, pd.DataFrame):
+        print("YES")
         df = input
     else:
         df = pd.read_csv(input, encoding="utf-8", on_bad_lines="skip")
@@ -1519,54 +1536,45 @@ def complete_sentence_index(file_path):
 # var is variable of choice
 # ntopchoices is the n max values
 def multiple_barchart(datalist, outputFilename, var, ntopchoices):
-    if pd.__version__[0] == "2":
-        print(
-            "Warning",
-            "The multiple_barchart algorithm is incompatible with a version of pandas higher than 2.0\n\nIn command line, please, pip unistall pandas and pip install pandas==1.5.2 (or even pip install pandas==1.4.4).\n\nMake sure you are in the right NLP environment by typing conda activate NLP",
-        )
-        return
+    # Read each file in datalist into a pandas DataFrame
+    tempdatalist = [
+        pd.read_csv(i, encoding="utf-8", on_bad_lines="skip") for i in datalist
+    ]
+    
+    # Process each DataFrame to count the top 'ntopchoices' values of the column 'var'
+    newDatalist = [
+        df[var]
+        .value_counts()
+        .reset_index()
+        .rename(columns={"index": var, var: "Frequency"})
+        .head(ntopchoices)
+        for df in tempdatalist
+    ]
 
-    tempdatalist = []
-    for i in datalist:
-        tempdatalist.append(pd.read_csv(i, encoding="utf-8", on_bad_lines="skip"))
-    newDatalist = []
-    for i in tempdatalist:
-        newDatalist.append(
-            pd.DataFrame(i[var].value_counts())
-            .reset_index()
-            .rename(columns={"index": var, var: "Frequency"})
-            .head(ntopchoices)
+    # Create a subplot layout
+    fig = make_subplots(
+        rows=2,
+        cols=(len(datalist) // 2) + (len(datalist) % 2),
+        subplot_titles=[f"Algorithm {i + 1}" for i in range(len(datalist))]
+    )
+
+    # Add the bar charts for the first row
+    for i in range(len(newDatalist)):
+        row = 1 if i < (len(datalist) + 1) // 2 else 2
+        col = i % ((len(datalist) + 1) // 2) + 1
+        fig.add_trace(
+            go.Bar(
+                x=newDatalist[i][var],
+                y=newDatalist[i]["Frequency"],
+                name=f"Algorithm {i + 1}",
+            ),
+            row=row,
+            col=col,
         )
-    fig = make_subplots(rows=2, cols=int(len(datalist) / 2) + len(datalist) % 2)
-    cols = 1
-    for i in range(0, len(newDatalist)):
-        if i < int(len(datalist) / 2) + len(datalist) % 2:
-            fig.add_trace(
-                go.Bar(
-                    x=newDatalist[i][var],
-                    y=newDatalist[i]["Frequency"],
-                    name="Algorithm " + str(i + 1),
-                ),
-                row=1,
-                col=cols,
-            )
-            cols = cols + 1
-    cols = 1
-    for i in range(0, len(newDatalist)):
-        if i >= int(len(datalist) / 2) + len(datalist) % 2:
-            fig.add_trace(
-                go.Bar(
-                    x=newDatalist[i][var],
-                    y=newDatalist[i]["Frequency"],
-                    name="Algorithm " + str(i + 1),
-                ),
-                row=2,
-                col=cols,
-            )
-            cols = cols + 1
+
+    # Save the plot to an HTML file
     fig.write_html(outputFilename)
     return outputFilename
-
 
 # written by Samir Kaddoura, March 2023
 
@@ -1576,7 +1584,7 @@ def multiple_barchart(datalist, outputFilename, var, ntopchoices):
 # points is the choice to represent all points of data, the outliers, or none of them, it should be given through a dropdown menu
 # color is another choice of categorical variable to split the data along
 def boxplot(
-    data, outputFilename, var, points, bycategory=None, category=None, color=None
+    data, outputFilename, var, points, bycategory=None, category=None, color=None, inputFileData=""
 ):
     if points == "All points":
         points = "all"
@@ -1587,8 +1595,10 @@ def boxplot(
     if color == "":
         color = None
 
-    if type(data) == str:
-        data = pd.read_csv(data, encoding="utf-8", on_bad_lines="skip")
+    if inputFileData:
+        data =  pd.read_csv(io.StringIO(inputFileData), encoding='utf-8', on_bad_lines='skip')
+    elif type(data) == str:
+        data = pd.read_csv(inputFileData, encoding='utf-8', on_bad_lines='skip')
 
     if not "int" in str(type(data[var][0])) and not "float" in str(type(data[var][0])):
         print(
@@ -2749,8 +2759,9 @@ def rate_prop(df, rt, base):
 
 
 # THIS IS AN ABBREVIATED VERSION FOR The sunburst / treemap
+
 def Sunburst_Treemap(
-    inputFilename,
+    inputFileName, # Change inputFileName to use string contents of csv 
     outputFilename,
     outputDir,
     csv_file_categorical_field_list,
@@ -2759,10 +2770,15 @@ def Sunburst_Treemap(
     rate_param_var,
     base_param_var,
     filter_options_var,
+    file_data = ""
 ):
+    import io
     print(fixed_param_var, rate_param_var, base_param_var, filter_options_var)
     # print("======")
-    data = pd.read_csv(inputFilename)
+    if file_data != "":
+        data = pd.read_csv(io.StringIO(file_data))
+    else:
+        data = pd.read_csv(inputFileName)
     WHERE, GROUPBY = special_sql_commands(csv_file_categorical_field_list, data)
     data = where_data(data, where_column=WHERE)
     select_and_count = [GROUPBY]
