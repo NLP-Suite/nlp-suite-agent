@@ -3,73 +3,112 @@ import pandas as pd
 import os
 import IO_files_util
 import IO_user_interface_util
+import io
 
 #if any column header contains just numbers the function will return FALSE
-def csvFile_has_header(file_path):
-    is_header=False
-    if not os.path.exists(file_path):
-        return is_header
-    reader = csv.reader(open(file_path, "r",encoding='utf-8',errors='ignore'))
-    i = next(reader)
-    is_header = not any(cell.isdigit() for cell in i)
+def csvFile_has_header(file_path, inputFileData=""):
+    is_header = False
+
+    if inputFileData:
+        try:
+            # Convert inputFileData to a reader object
+            reader = csv.reader(io.StringIO(inputFileData))
+            first_row = next(reader)
+            is_header = not any(cell.isdigit() for cell in first_row)
+        except Exception as e:
+            print(f"Error processing inputFileData: {e}")
+    else:
+        if not os.path.exists(file_path):
+            return is_header
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            reader = csv.reader(f)
+            first_row = next(reader)
+            is_header = not any(cell.isdigit() for cell in first_row)
+
     return is_header
 
 # Take in file name, output is a list of rows each with columns 1->11 in the conll table
 # Used to divide sentences etc.
-def get_csv_data(inputFilename,withHeader):
-    data=[]
-    headers=''
-    delimiter=','
-    filename, file_extension = os.path.splitext(inputFilename)
-    # file_extension will return any extension .xlsx, .csv, …
-    if filename=='' or file_extension!='.csv':
-        print('File type error', 'The file\n\n' + inputFilename + '\n\nis not an expected csv file. Please, check the file and try again.')
-        return data, headers
-    #numColumns=get_csvfile_numberofColumns(file_name)
-    withHeader=csvFile_has_header(inputFilename)
-    #print("io IO delimiter ",get_csvfile_numberofColumns(file_name))
-    #TODO does not work; gives an error
-    #print ("\n\n\n\ndetectCsvHeader(file_name) ",detectCsvHeader(file_name))
+def get_csv_data(inputFilename, withHeader, inputFileData=""):
+    data = []
+    headers = ""
+    delimiter = ","
 
-    # Write empty string to all null bytes before we open the file.
-    fi = open(inputFilename, 'rb')
-    data = fi.read()
-    fi.close()
-    fo = open(inputFilename, 'wb')
-    # remove NUL bytes that would break the code in line 53
-    fo.write(data.replace(b'\x00', b''))
-    fo.close()
+    if inputFileData:
+        try:
+            # Convert inputFileData to a reader object
+            reader = csv.reader(io.StringIO(inputFileData), delimiter=delimiter)
+            if withHeader:
+                headers = next(reader, None)  # Skip header if specified
+            data = [row for row in reader]
+        except Exception as e:
+            print(f"Error processing inputFileData: {e}")
+            return data, headers
+    else:
+        # File extension check
+        filename, file_extension = os.path.splitext(inputFilename)
+        if filename == "" or file_extension != ".csv":
+            print(
+                "File type error",
+                f"The file\n\n{inputFilename}\n\nis not an expected CSV file. Please, check the file and try again.",
+            )
+            return data, headers
 
-    with open(inputFilename,encoding='utf-8-sig',errors='ignore') as f:
-        reader = csv.reader(f,delimiter=delimiter)
-        if withHeader == True:
-            headers = next(reader, None) #ADDED to skip header in new .csv CoNLL
-        #data = [r[:numColumns] for r in reader]
-        data = [r for r in reader]
-        #f.close()
-    if len(data)==0:
-        print('Empty csv file', 'The csv file\n\n' + inputFilename + '\n\nis empty. Please, check the file and try again.')
+        # Check for null bytes in the file
+        with open(inputFilename, "rb") as fi:
+            file_data = fi.read()
+        with open(inputFilename, "wb") as fo:
+            fo.write(file_data.replace(b"\x00", b""))  # Remove null bytes
+
+        # Read the file content
+        with open(inputFilename, encoding="utf-8-sig", errors="ignore") as f:
+            reader = csv.reader(f, delimiter=delimiter)
+            if withHeader:
+                headers = next(reader, None)  # Skip header if specified
+            data = [row for row in reader]
+
+        if len(data) == 0:
+            print(
+                "Empty csv file",
+                f"The CSV file\n\n{inputFilename}\n\nis empty. Please, check the file and try again.",
+            )
+
     return data, headers
+
 
 # csv file contains headers,
 #   then the first row will be headers
-def get_csvfile_headers (csvFile,ask_Question=False):
+def get_csvfile_headers(csvFile, ask_Question=False, inputFileData=""):
     headers = ''
     answer = True
-    if not os.path.isfile(csvFile):
-        print("Warning", "The csv file " + csvFile + " does not exist.")
+
+    if inputFileData:
+        # Handle inputFileData if provided
+        try:
+            data = pd.read_csv(io.StringIO(inputFileData), encoding="utf-8-sig", on_bad_lines="skip")
+            headers = data.columns.tolist()
+        except Exception as e:
+            print(f"Error while processing inputFileData: {e}")
+            headers = ''
         return headers
+
+    # Fallback to using csvFile if inputFileData is not provided
+    if not os.path.isfile(csvFile):
+        print("Warning: The csv file " + csvFile + " does not exist.")
+        return headers
+
     if ask_Question:
-        print("File headers","Does the selected input file\n\n"+csvFile+"\n\nhave headers?")
-    if csvFile!='' and answer ==True:
-        with open(csvFile,'r',encoding="utf-8-sig",errors='ignore') as f:
-            reader = csv.DictReader(f)
-            try:
-                headers=reader.fieldnames
-            except IOError as e: # empty files will break the next
-                print("Warning","Opening the csv file " + csvFile + " encountered an error.\n\n" + str(e))
-                headers=''
-            # f.seek(0)
+        print("File headers", "Does the selected input file\n\n" + csvFile + "\n\nhave headers?")
+
+    if csvFile != '' and answer:
+        try:
+            with open(csvFile, 'r', encoding="utf-8-sig", errors='ignore') as f:
+                reader = csv.DictReader(f)
+                headers = reader.fieldnames
+        except IOError as e:  # Handle errors for empty or invalid files
+            print("Warning: Opening the csv file " + csvFile + " encountered an error.\n\n" + str(e))
+            headers = ''
+
     return headers
 
 def get_csvfile_headers_pandas(inputFilename):
@@ -83,17 +122,30 @@ def get_csvfile_headers_pandas(inputFilename):
 
 # convert header alphabetic value for CSV files with or without headers to its numeric column value
 # column numbers start at 0
-def get_columnNumber_from_headerValue(headers,header_value, inputFilename):
+def get_columnNumber_from_headerValue(headers, header_value, inputFilename="", inputFileData=""):
     column_number = None
+
+    # Validate the headers
+    if not headers or not isinstance(headers, list):
+        print("Error: Headers must be a non-empty list.")
+        return column_number
+
     for i in range(len(headers)):
         if header_value == headers[i]:
             column_number = i
-            if column_number == None:
-                IO_user_interface_util.timed_alert(1000, 'Wrong header value',
-                                                   'csv filename: ' + inputFilename + '\n  Header values "' + str(
-                                                       header_value) + '" not found among file headers ' + str(headers),
-                                                   False, '', True)
-                break
+            break
+
+    if column_number is None:
+        source = "inputFileData" if inputFileData else inputFilename
+        IO_user_interface_util.timed_alert(
+            1000,
+            "Wrong header value",
+            f"Source: {source}\nHeader value '{header_value}' not found among file headers {headers}",
+            False,
+            "",
+            True,
+        )
+
     return column_number
 
 # convert header alphabetic value for CSV files with or without headers to its numeric column value
@@ -139,14 +191,22 @@ def get_csv_field_values(inputFilename, column_name, uniqueValues=True, returnLi
     return unique_values
 
 # get the number of records and columns of a csv file
-def GetNumberOf_Records_Columns_inCSVFile(inputFilename,encodingValue='utf-8'):
-    nRecords=0
-    nColumns=0
+def GetNumberOf_Records_Columns_inCSVFile(inputFilename, encodingValue='utf-8', inputFileData=""):
+    nRecords = 0
+    nColumns = 0
+
     try:
-        maxnum = pd.read_csv(inputFilename, encoding=encodingValue,on_bad_lines='skip').shape
-    except:
+        if inputFileData:
+            data = pd.read_csv(io.StringIO(inputFileData), encoding=encodingValue, on_bad_lines='skip')
+        else:
+            data = pd.read_csv(inputFilename, encoding=encodingValue, on_bad_lines='skip')
+
+        maxnum = data.shape  
+    except Exception as e:
+        print(f"Error reading CSV data: {e}")
         return nRecords, nColumns
-    return maxnum # tuple with first value number of records, second value number of columns
+
+    return maxnum  
 
 # inputFile has path
 def GetMaxValueInCSVField(inputFilename,algorithm='',columnHeader='Document ID',encodingValue='utf-8'):

@@ -34,14 +34,18 @@ def checkExcel_extension(output_file_name, hover_info_column_list):
 
 
 # when hover-over data (Labels) are displayed the Excel filename extension MUST be xlsm (for macro VBA enabling)
-def prepare_hover_data(inputFilename, hover_info_column, index):
+def prepare_hover_data(inputFilename, hover_info_column, index, inputFileData=""):
     hover_data = []
-    withHeader_var = IO_csv_util.csvFile_has_header(
-        inputFilename
-    )  # check if the file has header
-    data, headers = IO_csv_util.get_csv_data(
-        inputFilename, withHeader_var
-    )  # get the data and header
+
+    if inputFileData:
+        # Use inputFileData if provided
+        withHeader_var = IO_csv_util.csvFile_has_header("", inputFileData=inputFileData)
+        data, headers = IO_csv_util.get_csv_data("", withHeader_var, inputFileData=inputFileData)
+    else:
+        # Fallback to using inputFilename
+        withHeader_var = IO_csv_util.csvFile_has_header(inputFilename)
+        data, headers = IO_csv_util.get_csv_data(inputFilename, withHeader_var)
+
     if withHeader_var:
         if hover_info_column >= 0:
             hover_data.append([headers[hover_info_column]])
@@ -55,7 +59,7 @@ def prepare_hover_data(inputFilename, hover_info_column, index):
             hover_data.append([data[i][hover_info_column]])
         else:
             hover_data.append([""])
-        # print("hover_data",hover_data)
+
     return hover_data
 
 
@@ -137,6 +141,7 @@ def create_excel_chart(
     series_label_list=[],
     second_y_var=0,
     second_yAxis_label="",
+    inputFileData=""
 ):
     # TODO perhaps all these different imports can be consolidated into a single import?
     if "pie" in str(chart_type_list).lower():
@@ -167,7 +172,7 @@ def create_excel_chart(
     # 1048576 is simply 2 to the 20th power, and thus this number is the largest that can be represented in twenty bits.
     # https://stackoverflow.com/questions/33775423/how-to-set-a-data-type-for-a-column-with-closedxml
     nRecords, nColumns = IO_csv_util.GetNumberOf_Records_Columns_inCSVFile(
-        inputFilename
+        inputFilename, inputFileData=inputFileData
     )
     if nRecords > 1048575:
         IO_user_interface_util.timed_alert(
@@ -395,16 +400,16 @@ def create_excel_chart(
             ws1.append(row)
 
         withHeader_var = IO_csv_util.csvFile_has_header(
-            inputFilename
+            inputFilename, inputFileData=inputFileData
         )  # check if the file has header
         data, headers = IO_csv_util.get_csv_data(
-            inputFilename, withHeader_var
+            inputFilename, withHeader_var, inputFileData=inputFileData
         )  # get the data and header
         hover_column_numbers = get_hover_column_numbers(
             withHeader_var, headers, hover_info_column_list
         )
         for i in range(len(hover_column_numbers)):
-            hover_data = prepare_hover_data(inputFilename, hover_column_numbers[i], i)
+            hover_data = prepare_hover_data(inputFilename, hover_column_numbers[i], i, inputFileData=inputFileData)
             for j in range(len(hover_data)):
                 if j > 1048575:
                     print(

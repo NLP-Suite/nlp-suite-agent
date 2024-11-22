@@ -1067,227 +1067,243 @@ class GexfImport:
 
 # returns a gexf file
 
-def create_gexf(window,fileBase, OutputDir, inputFilename, col1, col2, col3, spellCol='',logic='default'):
-    """
-    Create gexf format file that can be used in Gephi to visualize result dynamically.
-    :param corpus: A Corpus Object
-    :return: gexf file path.
-    """
-    # check that the CoreNLPdir has been setup
-    GephiDir, existing_software_config, errorFound = IO_libraries_util.external_software_install('Gephi_util',
-                                                                                         'Gephi',
-                                                                                         '',
-                                                                                         silent=False, errorFound=False)
-    if GephiDir == None or GephiDir=='':
-        return
 
-    startTime = IO_user_interface_util.timed_alert(window, 2000, 'Analysis start',
-                                                   'Started running Gephi network graphs at', True)
+def create_gexf(fileBase, OutputDir, inputFilename, col1, col2, col3, spellCol='', logic='default', inputFileData=None):
+    """
+    Create a GEXF format file that can be used in Gephi to visualize results dynamically.
+    :param fileBase: Base name for the output GEXF file.
+    :param OutputDir: Directory where the output GEXF file will be saved.
+    :param inputFilename: Path to the input CSV file.
+    :param col1: Name of the first node column in the CSV file.
+    :param col2: Name of the edge label column in the CSV file.
+    :param col3: Name of the second node column in the CSV file.
+    :param spellCol: (Optional) Name of the dynamic field column in the CSV file.
+    :param logic: (Optional) Logic for date parsing, default is 'default'.
+    :param inputFileData: (Optional) CSV data as a string. If provided, the CSV will be read from this string.
+    :return: Path to the generated GEXF file.
+    """
+    import io
+    startTime = datetime.datetime.now()
 
     EPOCH = datetime.datetime.today()
-    graph_name = fileBase +".gexf"
-    gexf = Gexf(fileBase,"Author")
-    graph = gexf.addGraph("directed","dynamic","network graph",timeformat="date")
-    with open(inputFilename, encoding='utf-8', errors='ignore',) as result:
+    graph_name = fileBase + ".gexf"
+    gexf = Gexf(fileBase, "Author")
+    graph = gexf.addGraph("directed", "dynamic", "network graph", timeformat="date")
 
-        print("GEPHI inputFilename ", inputFilename)
+    if inputFileData is not None:
+        result = io.StringIO(inputFileData)
+    else:
+        result = open(inputFilename, encoding='utf-8', errors='ignore')
 
-        reader = csv.DictReader(result)
+    with result as result_file:
+        reader = csv.DictReader(result_file)
 
         for row in reader:
-            # skip processing rows that any of the column is empty
+            # Skip processing rows that have any empty columns
             if row[col1] == '' or row[col2] == '' or row[col3] == '':
                 continue
+
+            # Handle the first node (col1)
             if row[col1] not in graph.nodes:
-                # https://www.datacamp.com/tutorial/converting-strings-datetime-objects
                 date_format = "%Y-%m-%d"
-                # % Y: 4-digit year
-                # % y: 2-digit year
-                # % m: 2-digit month(01 - 12)
-                # % d: 2-digit day of the month(01 - 31)
-                # % H: 2-digit hour(00 - 23)
-                # % M: 2-digit minute(00 - 59)
-                # % S: 2-digit second(00 - 59)
-                #print("i am here")
-                if logic=='default':
-                    date_str = row[spellCol]
+                if logic == 'default':
                     date_format = "%m-%d-%Y"
-                    # date_format = "%Y-%m-%d" # Old code
-                    try:
-                        import dateutil.parser
-                        date_obj = dateutil.parser.parse(date_str)
-                    except:
-                        if '/' in row[spellCol] and spellCol == 'Date':
-                            raise Exception('Error in date value ' + row[
-                                                spellCol] + '.\n\nDate values should not be separated by / but by - (e.g., ' +
-                                                    row[spellCol] + ' should be ' + row[spellCol].replace('/', '-') + ').')
-                            # mb.showwarning(title='Warning',
-                            #                message='Error in date value ' + row[
-                            #                    spellCol] + '.\n\nDate values should not be separated by / but by - (e.g., ' +
-                            #                        row[spellCol] + ' should be ' + row[spellCol].replace('/', '-') + ').')
-                            return
+                    if spellCol != '':
+                        date_str = row[spellCol]
+                        try:
+                            import dateutil.parser
+                            date_obj = dateutil.parser.parse(date_str)
+                        except Exception as e:
+                            raise Exception(f"Error parsing date '{date_str}' in column '{spellCol}': {e}")
                 else:
-                    if spellCol != "":
+                    if spellCol != '':
                         date_str = row[spellCol]
                         date_format = "%m-%d-%Y"
-                        # date_format = "%Y-%m-%d"  # Old code
                         try:
                             date_obj = datetime.datetime.strptime(date_str, date_format)
-                        except:
-                            if '/' in row[spellCol] and spellCol == 'Date':
-                                raise Exception('Error in date value ' + row[
-                                                   spellCol] + '.\n\nDate values should not be separated by / but by - (e.g., ' +
-                                                       row[spellCol] + ' should be ' + row[spellCol].replace('/',
-                                                                                                             '-') + ').')
-                                #                message='Error in date value ' + row[
-                                #                    spellCol] + '.\n\nDate values should not be separated by / but by - (e.g., ' +
-                                #                        row[spellCol] + ' should be ' + row[spellCol].replace('/',
-                                #                                                                              '-') + ').')
-                                return
-                # days = int(float(date_obj))
-                # date(row[spellCol]).strftime(date_format)
-                if spellCol != "": #this could be a Date field
+                        except Exception as e:
+                            raise Exception(f"Error parsing date '{date_str}' in column '{spellCol}': {e}")
+
+                # Create the node with dynamic spells if spellCol is provided
+                if spellCol != '':
                     try:
-                        if spellCol =='Date':
+                        if spellCol == 'Date':
                             import dateutil.parser
-                            node = Node(graph, row[col1], row[col1],
-                                        r=random.randint(0, 255), g=random.randint(0, 255), b=random.randint(0, 255),
-                                        size="50",
-                                        spells=[
-                                            {"start": dateutil.parser.parse(row[spellCol]).strftime(date_format),
-                                             "end": dateutil.parser.parse(row[spellCol]).strftime(date_format)}
-                                        ])
+                            node = Node(
+                                graph, row[col1], row[col1],
+                                r=random.randint(0, 255), g=random.randint(0, 255), b=random.randint(0, 255),
+                                size="50",
+                                spells=[
+                                    {
+                                        "start": dateutil.parser.parse(row[spellCol]).strftime(date_format),
+                                        "end": dateutil.parser.parse(row[spellCol]).strftime(date_format)
+                                    }
+                                ]
+                            )
                         else:
-                            #pass
-                            node = Node(graph,row[col1],row[col1],
-                                        r = random.randint(0,255),g = random.randint(0,255),b = random.randint(0,255),
-                                        size = "50",
-                                        spells = [
-                                            {"start":(EPOCH+datetime.timedelta(days = int(row[spellCol])))
-                                                .strftime(date_format),
-                                             "end":(EPOCH+datetime.timedelta(days = int(row[spellCol])))
-                                                .strftime(date_format)}
-                                            # {"start":(EPOCH+datetime.timedelta(days = int(float(row[spellCol]))))
-                                            #     .strftime(date_format),
-                                            #  "end":(EPOCH+datetime.timedelta(days = int(float(row[spellCol]))+1))
-                                            #     .strftime(date_format)}
-                                        ])
-                    except:
-                        if '/' in row[spellCol] and spellCol == 'Date':
-                            # mb.showwarning(title='Warning',
-                            #     message='Date error in date value' + row[spellCol] + '. Date values should not be separated by / but by - (e.g., ' + row[spellCol] + row[spellCol].replace('/','-') + ')')
-                            # return
-                            print('Date values should not be separated by / but by - (e.g., ' + row[spellCol] + row[spellCol].replace('/','-') + ')')
-                        print('Error in row value (cannot convert string to float)',row[spellCol])
-                        raise Exception('Error in row value (cannot convert string to float) ' + row[spellCol])
-                        continue
-                else:
-                    node = Node(graph, row[col1], row[col1],
+                            node = Node(
+                                graph, row[col1], row[col1],
                                 r=random.randint(0, 255), g=random.randint(0, 255), b=random.randint(0, 255),
-                                size="50")
+                                size="50",
+                                spells=[
+                                    {
+                                        "start": (EPOCH + datetime.timedelta(days=int(float(row[spellCol]))))
+                                        .strftime(date_format),
+                                        "end": (EPOCH + datetime.timedelta(days=int(float(row[spellCol])) + 1))
+                                        .strftime(date_format)
+                                    }
+                                ]
+                            )
+                    except Exception as e:
+                        raise Exception(f"Error creating node for '{row[col1]}': {e}")
+                else:
+                    node = Node(
+                        graph, row[col1], row[col1],
+                        r=random.randint(0, 255), g=random.randint(0, 255), b=random.randint(0, 255),
+                        size="50"
+                    )
                 graph.nodes[row[col1]] = node
-
-
             else:
-                graph.nodes[row[col1]].size = str(int(graph.nodes[row[col1]].size)+50)
-                if spellCol != "":
+                graph.nodes[row[col1]].size = str(int(graph.nodes[row[col1]].size) + 50)
+                if spellCol != '':
                     if spellCol == 'Date':
                         import dateutil.parser
-                        graph.nodes[row[col1]].spells.append({"start": dateutil.parser.parse(row[spellCol]).strftime(date_format),
-                                         "end": dateutil.parser.parse(row[spellCol]).strftime(date_format)})
-
+                        graph.nodes[row[col1]].spells.append(
+                            {
+                                "start": dateutil.parser.parse(row[spellCol]).strftime(date_format),
+                                "end": dateutil.parser.parse(row[spellCol]).strftime(date_format)
+                            }
+                        )
                     else:
-                        graph.nodes[row[col1]].spells.append({
-                            "start": (EPOCH + datetime.timedelta(days=int(float(row[spellCol]))))
+                        graph.nodes[row[col1]].spells.append(
+                            {
+                                "start": (EPOCH + datetime.timedelta(days=int(float(row[spellCol]))))
                                 .strftime(date_format),
-                            "end": (EPOCH + datetime.timedelta(days=int(float(row[spellCol])) + 1))
+                                "end": (EPOCH + datetime.timedelta(days=int(float(row[spellCol])) + 1))
                                 .strftime(date_format)
-                        })
+                            }
+                        )
 
+            # Handle the second node (col3)
             if row[col3] not in graph.nodes:
-                if spellCol != "":
+                if spellCol != '':
                     if spellCol == 'Date':
                         import dateutil.parser
-                        node = Node(graph, row[col1], row[col1],
-                                    r=random.randint(0, 255), g=random.randint(0, 255), b=random.randint(0, 255),
-                                    size="50",
-                                    spells=[
-                                        {"start": dateutil.parser.parse(row[spellCol]).strftime(date_format),
-                                         "end": dateutil.parser.parse(row[spellCol]).strftime(date_format)}
-                                    ])
+                        node = Node(
+                            graph, row[col3], row[col3],
+                            r=random.randint(0, 255), g=random.randint(0, 255), b=random.randint(0, 255),
+                            size="50",
+                            spells=[
+                                {
+                                    "start": dateutil.parser.parse(row[spellCol]).strftime(date_format),
+                                    "end": dateutil.parser.parse(row[spellCol]).strftime(date_format)
+                                }
+                            ]
+                        )
                     else:
-                        node = Node(graph, row[col3], row[col3],
-                                    r=random.randint(0,255), g=random.randint(0,255), b=random.randint(0,255),
-                                    size="50",
-                                    spells=[
-                                        {"start": (EPOCH + datetime.timedelta(days=int(float(row[spellCol]))))
-                                            .strftime(date_format),
-                                         "end": (EPOCH + datetime.timedelta(days=int(float(row[spellCol])) + 1))
-                                            .strftime(date_format)}
-                                    ])
+                        node = Node(
+                            graph, row[col3], row[col3],
+                            r=random.randint(0, 255), g=random.randint(0, 255), b=random.randint(0, 255),
+                            size="50",
+                            spells=[
+                                {
+                                    "start": (EPOCH + datetime.timedelta(days=int(float(row[spellCol]))))
+                                    .strftime(date_format),
+                                    "end": (EPOCH + datetime.timedelta(days=int(float(row[spellCol])) + 1))
+                                    .strftime(date_format)
+                                }
+                            ]
+                        )
                 else:
-                    node = Node(graph, row[col3], row[col3],
-                                r=random.randint(0, 255), g=random.randint(0, 255), b=random.randint(0, 255),
-                                size="50")
+                    node = Node(
+                        graph, row[col3], row[col3],
+                        r=random.randint(0, 255), g=random.randint(0, 255), b=random.randint(0, 255),
+                        size="50"
+                    )
                 graph.nodes[row[col3]] = node
-
             else:
-                graph.nodes[row[col3]].size = str(int(graph.nodes[row[col3]].size)+50)
-                if spellCol != "":
+                graph.nodes[row[col3]].size = str(int(graph.nodes[row[col3]].size) + 50)
+                if spellCol != '':
                     if spellCol == 'Date':
                         import dateutil.parser
-                        graph.nodes[row[col3]].spells.append({
-                            "start": dateutil.parser.parse(row[spellCol]).strftime(date_format),
-                            "end": dateutil.parser.parse(row[spellCol]).strftime(date_format)
-                        })
-
+                        graph.nodes[row[col3]].spells.append(
+                            {
+                                "start": dateutil.parser.parse(row[spellCol]).strftime(date_format),
+                                "end": dateutil.parser.parse(row[spellCol]).strftime(date_format)
+                            }
+                        )
                     else:
-                        graph.nodes[row[col3]].spells.append({
-                            "start": (EPOCH + datetime.timedelta(days=int(float(row[spellCol]))))
+                        graph.nodes[row[col3]].spells.append(
+                            {
+                                "start": (EPOCH + datetime.timedelta(days=int(float(row[spellCol]))))
                                 .strftime(date_format),
-                            "end": (EPOCH + datetime.timedelta(days=int(float(row[spellCol])) + 1))
+                                "end": (EPOCH + datetime.timedelta(days=int(float(row[spellCol])) + 1))
                                 .strftime(date_format)
-                        })
-            edge_id = row[col1]+" "+row[col3]
+                            }
+                        )
+
+            # Handle the edge between col1 and col3
+            edge_id = row[col1] + " " + row[col3]
             if edge_id not in graph.edges:
-                if spellCol != "":
+                if spellCol != '':
                     if spellCol == 'Date':
                         import dateutil.parser
-                        edge = Edge(graph,edge_id,row[col1],row[col3],
-                                    spells=[
-                                        {"start": dateutil.parser.parse(row[spellCol]).strftime(date_format),
-                                         "end": dateutil.parser.parse(row[spellCol]).strftime(date_format)}],
-                                        label = row[col2]
-                                    )
+                        edge = Edge(
+                            graph, edge_id, row[col1], row[col3],
+                            spells=[
+                                {
+                                    "start": dateutil.parser.parse(row[spellCol]).strftime(date_format),
+                                    "end": dateutil.parser.parse(row[spellCol]).strftime(date_format)
+                                }
+                            ],
+                            label=row[col2]
+                        )
                     else:
-                        edge = Edge(graph,edge_id,row[col1],row[col3],
-                                    spells = [{"start": (EPOCH + datetime.timedelta(days=int(float(row[spellCol]))))
-                                            .strftime(date_format),
-                                               "end": (EPOCH + datetime.timedelta(days=int(float(row[spellCol])) + 1))
-                                            .strftime(date_format)}],
-                                    label = row[col2])
+                        edge = Edge(
+                            graph, edge_id, row[col1], row[col3],
+                            spells=[
+                                {
+                                    "start": (EPOCH + datetime.timedelta(days=int(float(row[spellCol]))))
+                                    .strftime(date_format),
+                                    "end": (EPOCH + datetime.timedelta(days=int(float(row[spellCol])) + 1))
+                                    .strftime(date_format)
+                                }
+                            ],
+                            label=row[col2]
+                        )
                 else:
-                    edge = Edge(graph, edge_id, row[col1], row[col3],
-                                label=row[col2])
+                    edge = Edge(
+                        graph, edge_id, row[col1], row[col3],
+                        label=row[col2]
+                    )
                 graph.edges[edge_id] = edge
             else:
-                if spellCol != "":
+                if spellCol != '':
                     if spellCol == 'Date':
                         import dateutil.parser
                         graph.edges[edge_id].spells.append(
-                            {"start": dateutil.parser.parse(row[spellCol]).strftime(date_format),
-                             "end": dateutil.parser.parse(row[spellCol]).strftime(date_format)})
-
-
+                            {
+                                "start": dateutil.parser.parse(row[spellCol]).strftime(date_format),
+                                "end": dateutil.parser.parse(row[spellCol]).strftime(date_format)
+                            }
+                        )
                     else:
                         graph.edges[edge_id].spells.append(
-                            {"start": (EPOCH + datetime.timedelta(days=int(float(row[spellCol]))))
-                                            .strftime(date_format),
-                             "end": (EPOCH + datetime.timedelta(days=int(float(row[spellCol])) + 1))
-                                            .strftime(date_format)})
-    gexf.write(open(os.path.join(OutputDir,graph_name),'wb'))
+                            {
+                                "start": (EPOCH + datetime.timedelta(days=int(float(row[spellCol]))))
+                                .strftime(date_format),
+                                "end": (EPOCH + datetime.timedelta(days=int(float(row[spellCol])) + 1))
+                                .strftime(date_format)
+                            }
+                        )
 
-    IO_user_interface_util.timed_alert(window, 2000, 'Analysis end', 'Finished running Gephi network graphs at', True,
-                                       '', True, startTime, True)
+    # Write the GEXF file
+    output_path = os.path.join(OutputDir, graph_name)
+    with open(output_path, 'wb') as f:
+        gexf.write(f)
 
-    return os.path.join(OutputDir,graph_name)
+    endTime = datetime.datetime.now()
+    elapsedTime = endTime - startTime
+    print(f"Finished running Gephi network graphs in {elapsedTime.total_seconds()} seconds.")
+
+    return output_path

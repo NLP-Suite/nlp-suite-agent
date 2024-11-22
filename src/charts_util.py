@@ -2057,345 +2057,6 @@ def Treemap(
 # import numpy as np
 # import Plotly.express as px
 
-
-def timechart(
-    data, outputFilename, var, date_format_var, cumulative, monthly=None, yearly=None
-):
-    # convert csv to pandas
-    headers = IO_csv_util.get_csvfile_headers(data)
-    if "Date" in headers:
-        date_field = "Date"
-    elif "Document" in headers:
-        date_field = "Document"
-    else:
-        print(
-            "Warning",
-            "The time mapper algorithm requires a csv input file with either a Date or a Document field in the headers.\n\nPlease, select the expected csv file and try again.",
-        )
-        return
-    if type(data) == str:
-        data = pd.read_csv(data, encoding="utf-8", on_bad_lines="skip")
-    date = []
-    year = []
-    month = []
-    day = []
-
-    if date_format_var == "yyyy":  # creates year variable based on yyyy format
-        for i in range(0, len(data["Document"])):
-            year.append(re.search("\d{4}", data[date_field][i])[0])
-            data["year"] = year
-    elif (
-        date_format_var == "mm-yyyy"
-    ):  # creates year and month variable in yyyy-mm format
-        for i in range(0, len(data["Document"])):
-            date.append(re.search("\d.*\d", data[date_field][i])[0])
-        for i in range(0, len(data["Document"])):
-            year.append(re.search("\d{4}", date[i])[0])
-        for i in range(0, len(data["Document"])):
-            month.append(year[i] + "-" + date[i][0:2])
-        data["year"] = year
-        data["month"] = month
-    elif (
-        date_format_var == "yyyy-mm"
-    ):  # creates year and month variable in yyyy-mm format
-        for i in range(0, len(data[date_field])):
-            date.append(re.search("\d.*\d", data[date_field][i])[0])
-        for i in range(0, len(data[date_field])):
-            year.append(re.search("\d{4}", date[i])[0])
-        for i in range(0, len(data[date_field])):
-            month.append(year[i] + "-" + date[i][-2:])
-        data["year"] = year
-        data["month"] = month
-    elif (
-        date_format_var == "dd-mm-yyyy"
-    ):  # creates year,month and day variable in yyyy-mm-dd format
-        for i in range(0, len(data[date_field])):
-            date.append(re.search("\d.*\d", data[date_field][i])[0])
-        for i in range(0, len(data[date_field])):
-            year.append(re.search("\d{4}", date[i])[0])
-        for i in range(0, en(data[date_field])):
-            month.append(year[i] + "-" + date[i][3:5])
-        for i in range(0, len(data[date_field])):
-            day.append(month[i] + "-" + date[i][0:2])
-        data["day"] = day
-        data["year"] = year
-        data["month"] = month
-    elif (
-        date_format_var == "mm-dd-yyyy"
-    ):  # creates year,month and day variable in yyyy-mm-dd format
-        for i in range(0, len(data[date_field])):
-            try:
-                date.append(re.search("\d.*\d", data[date_field][i])[0])
-            except:
-                continue
-        for i in range(0, len(data[date_field])):
-            try:
-                year.append(re.search("\d{4}", date[i])[0])
-            except:
-                continue
-        for i in range(0, len(data[date_field])):
-            try:
-                month.append(year[i] + "-" + date[i][0:2])
-            except:
-                continue
-        for i in range(0, len(data[date_field])):
-            try:
-                day.append(month[i] + "-" + date[i][3:5])
-            except:
-                continue
-        data["year"] = year
-        data["month"] = month
-        data["day"] = day
-    elif (
-        date_format_var == "yyyy-mm-dd"
-    ):  # creates year,month and day variable in yyyy-mm-dd format
-        for i in range(0, len(data[date_field])):
-            date.append(re.search("\d.*\d", data[date_field][i])[0])
-        for i in range(0, len(data[date_field])):
-            year.append(re.search("\d{4}", date[i])[0])
-        for i in range(0, len(data[date_field])):
-            month.append(year[i] + "-" + date[i][5:7])
-        data["year"] = year
-        data["month"] = month
-        data["day"] = date
-    elif (
-        date_format_var == "yyyy-dd-mm"
-    ):  # creates year,month and day variable in yyyy-mm-dd format
-        for i in range(0, len(data[date_field])):
-            date.append(re.search("\d.*\d", data[date_field][i])[0])
-        for i in range(0, len(data[date_field])):
-            year.append(re.search("\d{4}", date[i])[0])
-        for i in range(0, len(data[date_field])):
-            month.append(year[i] + "-" + date[i][-2:])
-        for i in range(0, len(data[date_field])):
-            day.append(month[i] + "-" + date[i][5:7])
-        data["year"] = year
-        data["month"] = month
-        data["day"] = day
-
-    # Plot corresponding graph depending on the options
-    if cumulative == False:
-        if monthly == True and yearly == True:
-            return (
-                "Choose one of the following: daily graph, monthly graph, yearly graph"
-            )
-        elif monthly == True:
-            data = data.sort_values("month")
-            finalframe = pd.DataFrame()
-            for i in sorted(set(data["month"])):
-                tester = (
-                    pd.DataFrame(data[data["month"] == i][var].value_counts())
-                    .reset_index()
-                    .rename(columns={"index": var, var: "Frequency"})
-                )
-                for j in set(data[var]):
-                    if j not in set(tester[var]):
-                        temp = (
-                            pd.DataFrame([j, 0])
-                            .T.rename(columns={0: var})
-                            .rename(columns={0: var, 1: "Frequency"})
-                        )
-                        tester = pd.concat([tester, temp])
-                tester = tester.sort_values(var)
-                tester
-                date = np.repeat(i, len(tester))
-                tester["date"] = date
-                tester = tester.reset_index(drop=True)
-                finalframe = pd.concat([finalframe, tester])
-                value = []
-                for i in list(set(finalframe[var])):
-                    value.append(max(finalframe[finalframe[var] == i]["Frequency"]))
-            fig = px.bar(
-                finalframe,
-                y=var,
-                x="Frequency",
-                animation_frame="date",
-                orientation="h",
-                range_x=[0, max(value)],
-            ).update_yaxes(categoryorder="total ascending")
-        elif yearly == True:
-            data = data.sort_values("year")
-            finalframe = pd.DataFrame()
-            for i in sorted(set(data["year"])):
-                tester = (
-                    pd.DataFrame(data[data["year"] == i][var].value_counts())
-                    .reset_index()
-                    .rename(columns={"index": var, var: "Frequency"})
-                )
-                for j in set(data[var]):
-                    if j not in set(tester[var]):
-                        temp = (
-                            pd.DataFrame([j, 0])
-                            .T.rename(columns={0: var})
-                            .rename(columns={0: var, 1: "Frequency"})
-                        )
-                        tester = pd.concat([tester, temp])
-                tester = tester.sort_values(var)
-                tester
-                date = np.repeat(i, len(tester))
-                tester["date"] = date
-                tester = tester.reset_index(drop=True)
-                finalframe = pd.concat([finalframe, tester])
-                value = []
-                for i in list(set(finalframe[var])):
-                    value.append(max(finalframe[finalframe[var] == i]["Frequency"]))
-            fig = px.bar(
-                finalframe,
-                y=var,
-                x="Frequency",
-                animation_frame="date",
-                orientation="h",
-                range_x=[0, max(value)],
-            ).update_yaxes(categoryorder="total ascending")
-        else:
-            data = data.sort_values("day")
-            finalframe = pd.DataFrame()
-            for i in sorted(set(data["day"])):
-                tester = (
-                    pd.DataFrame(data[data["day"] == i][var].value_counts())
-                    .reset_index()
-                    .rename(columns={"index": var, var: "Frequency"})
-                )
-                for j in set(data[var]):
-                    if j not in set(tester[var]):
-                        temp = (
-                            pd.DataFrame([j, 0])
-                            .T.rename(columns={0: var})
-                            .rename(columns={0: var, 1: "Frequency"})
-                        )
-                        tester = pd.concat([tester, temp])
-                tester = tester.sort_values(var)
-                tester
-                date = np.repeat(i, len(tester))
-                tester["date"] = date
-                tester = tester.reset_index(drop=True)
-                finalframe = pd.concat([finalframe, tester])
-                value = []
-                for i in list(set(finalframe[var])):
-                    value.append(max(finalframe[finalframe[var] == i]["Frequency"]))
-            fig = px.bar(
-                finalframe,
-                y=var,
-                x="Frequency",
-                animation_frame="date",
-                orientation="h",
-                range_x=[0, max(value)],
-            ).update_yaxes(categoryorder="total ascending")
-    else:
-        if monthly == True and yearly == True:
-            return (
-                "Choose one of the following: daily graph, monthly graph, yearly graph"
-            )
-        elif yearly == True:
-            data = data.sort_values("year")
-            finalframe = pd.DataFrame()
-            for i in sorted(set(data["year"])):
-                tester = (
-                    pd.DataFrame(data[data["year"] <= i][var].value_counts())
-                    .reset_index()
-                    .rename(columns={"index": var, var: "Frequency"})
-                )
-                for j in set(data[var]):
-                    if j not in set(tester[var]):
-                        temp = (
-                            pd.DataFrame([j, 0])
-                            .T.rename(columns={0: var})
-                            .rename(columns={0: var, 1: "Frequency"})
-                        )
-                        tester = pd.concat([tester, temp])
-                tester = tester.sort_values(var)
-                tester
-                date = np.repeat(i, len(tester))
-                tester["date"] = date
-                tester = tester.reset_index(drop=True)
-                finalframe = pd.concat([finalframe, tester])
-                value = []
-                for i in list(set(finalframe[var])):
-                    value.append(max(finalframe[finalframe[var] == i]["Frequency"]))
-            fig = px.bar(
-                finalframe,
-                y=var,
-                x="Frequency",
-                animation_frame="date",
-                orientation="h",
-                range_x=[0, max(value)],
-            ).update_yaxes(categoryorder="total ascending")
-        elif monthly == True:
-            data = data.sort_values("month")
-            finalframe = pd.DataFrame()
-            for i in sorted(set(data["month"])):
-                tester = (
-                    pd.DataFrame(data[data["month"] <= i][var].value_counts())
-                    .reset_index()
-                    .rename(columns={"index": var, var: "Frequency"})
-                )
-                for j in set(data[var]):
-                    if j not in set(tester[var]):
-                        temp = (
-                            pd.DataFrame([j, 0])
-                            .T.rename(columns={0: var})
-                            .rename(columns={0: var, 1: "Frequency"})
-                        )
-                        tester = pd.concat([tester, temp])
-                tester = tester.sort_values(var)
-                tester
-                date = np.repeat(i, len(tester))
-                tester["date"] = date
-                tester = tester.reset_index(drop=True)
-                finalframe = pd.concat([finalframe, tester])
-                value = []
-                for i in list(set(finalframe[var])):
-                    value.append(max(finalframe[finalframe[var] == i]["Frequency"]))
-            fig = px.bar(
-                finalframe,
-                y=var,
-                x="Frequency",
-                animation_frame="date",
-                orientation="h",
-                range_x=[0, max(value)],
-            ).update_yaxes(categoryorder="total ascending")
-        else:
-            data = data.sort_values("day")
-            finalframe = pd.DataFrame()
-            for i in sorted(set(data["day"])):
-                tester = (
-                    pd.DataFrame(data[data["day"] <= i][var].value_counts())
-                    .reset_index()
-                    .rename(columns={"index": var, var: "Frequency"})
-                )
-                for j in set(data[var]):
-                    if j not in set(tester[var]):
-                        temp = (
-                            pd.DataFrame([j, 0])
-                            .T.rename(columns={0: var})
-                            .rename(columns={0: var, 1: "Frequency"})
-                        )
-                        tester = pd.concat([tester, temp])
-                tester = tester.sort_values(var)
-                tester
-                date = np.repeat(i, len(tester))
-                tester["date"] = date
-                tester = tester.reset_index(drop=True)
-                finalframe = pd.concat([finalframe, tester])
-                value = []
-                for i in list(set(finalframe[var])):
-                    value.append(max(finalframe[finalframe[var] == i]["Frequency"]))
-            fig = px.bar(
-                finalframe,
-                y=var,
-                x="Frequency",
-                animation_frame="date",
-                orientation="h",
-                range_x=[0, max(value)],
-            ).update_yaxes(categoryorder="total ascending")
-    fig = fig.update_geos(
-        projection_type="equirectangular", visible=True, resolution=110
-    )
-    fig.write_html(outputFilename)
-
-    return outputFilename
-
-
 # written by Simon Bian
 # September 2023
 
@@ -2671,8 +2332,11 @@ def cmaps(start_color, end_color):
         return "YlOrBr"
 
 
-def main_colormap(inputFilename, outputDir, csv_file_categorical_field_list, params):
-    dataFrame = read_filename_color(inputFilename)
+def main_colormap(inputFilename, outputDir, csv_file_categorical_field_list, params, inputFileData=""):
+    if inputFileData:
+        dataFrame = pd.read_csv(io.StringIO(inputFileData))
+    else:
+        dataFrame = read_filename_color(inputFilename)
     WHERE, GROUPBY, SELECT = sql_commands(csv_file_categorical_field_list, dataFrame)
     step1 = process_and_aggregate_data(
         dataFrame, where_column=WHERE, groupby_column=GROUPBY, select_column=SELECT
@@ -2787,6 +2451,7 @@ def Sunburst_Treemap(
     df_grouped = df.groupby(select_and_count).size().reset_index(name="counts")
 
     df_grouped.to_csv(outputDir + os.sep + "Output_Csv_intermediate.csv", index=False)
+    print(df_grouped)
     # df_grouped.head(5)
     if filter_options_var == "Fixed parameter":
         df_grouped = fixed_transform(df_grouped, int(fixed_param_var))
@@ -2803,3 +2468,335 @@ def Sunburst_Treemap(
         fig = px.treemap(df_grouped, path=select_and_count, values="counts")
     fig.write_html(outputFilename)
     return outputFilename
+
+
+def visualize_colormap_data(data, top_n=60, figsize=(15, 10), y_label='Lemma', x_label='Document', normalize='log',
+                   color='YlOrBr', outputname='output_figure'):
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    numeric_data = data.select_dtypes(include=[np.number])
+    sorted_columns = numeric_data.columns.sort_values()
+    sorted_pivot_data = numeric_data[sorted_columns][::-1]
+    sorted_rows = numeric_data.sum(axis=1).sort_values(ascending=False).index
+    sorted_pivot_data = sorted_pivot_data.loc[sorted_rows]
+    transposed_data = sorted_pivot_data.head(top_n)
+    # print("doing calculations...complete!")
+    plt.figure(figsize=figsize)
+    try:
+        sns.heatmap(transposed_data, annot=False, fmt='.2f', cmap=color, cbar_kws={'label': normalize})
+    except:
+        print("There appears to be ann error with cmap; we revert to default ")
+        sns.heatmap(transposed_data, annot=False, fmt='.2f', cmap='YlOrBr', cbar_kws={'label': normalize})
+    ax = plt.gca()
+    ax.set_yticks(np.arange(len(transposed_data.index)))
+    ax.set_yticklabels(transposed_data.index)
+    ax.set_xticks(np.arange(len(transposed_data.columns)))
+    ax.set_xticklabels(transposed_data.columns, rotation=90)
+    ax.set_ylabel(y_label)
+    x_label = x_label.replace('Real_','')
+    ax.set_xlabel(x_label)
+    ax.set_title('Colormap/heatmap of ' + y_label + ' Frequency by ' + x_label + ' Values (' + normalize + ' Scale)')
+    plt.savefig(outputname + '.png')
+    print(f"Data visualization saved as {outputname}.png.")
+    # plt.show() // we don't need to show it because we have that other option
+
+def colormap(inputFilename, outputDir, csv_file_categorical_field_list, params, inputFileData=""):
+    filesToOpen = []
+    if inputFileData:
+        dataFrame = pd.read_csv(io.StringIO(inputFileData))
+    else:
+        dataFrame = read_filename_color(inputFilename)
+
+    WHERE, GROUPBY, SELECT = sql_commands(csv_file_categorical_field_list, dataFrame)
+    # step1 is a dataframe
+    step1 = process_and_aggregate_data(dataFrame, where_column=WHERE, groupby_column=GROUPBY, select_column=SELECT)
+    if step1.empty:
+        print(title='No search values found',
+                       message='No combination of csv file fields and search values were found in your input file.\n\n' + str(csv_file_categorical_field_list) + '\n\nPlease, make sure to check whether\n   1. you have not entered the same field twice;\n   2. you are using a case sensitive search option.\n\nPlease, click on the Reset button and start again.')
+        return
+    colormap_dataframe_csv_filename =outputDir + os.sep + "colormap_dataframe.csv"
+    filesToOpen.append(colormap_dataframe_csv_filename)
+    # add headers to dataframe
+    if GROUPBY == 'Document':
+        if len(WHERE)==0:
+            for i in range(len(list(step1.columns.values))):
+                header = list(step1.columns.values)[i]
+                head, tail = os.path.split(header)
+                step1 = step1.rename(columns={header: 'Frequency in: ' + tail})
+    step1.to_csv(colormap_dataframe_csv_filename, index=True)
+
+    # val = 1 #get_transformation_choice(), but we will connect it....
+    step2 = transform_data(step1)  # There needs to be a GUI to allow transformation, but...
+    # We proceed with default instead perhaps...
+    if GROUPBY == 'Document':
+        # if len(WHERE)==0:
+            # when a specific document part (e.g., Book1 for Harry Potter) is not entered by the user
+            #   the document will contain the entire path along with an hypewrlink and this may be very cumbersome to display in the X axis
+            #   must remove hyperlink and display document tail only
+            # print('Must REMOVE hyperlink and display document tail only, not path')
+            # for i in range(len(list(step2.columns.values))):
+            #     header=list(step2.columns.values)[i]
+            #     head, tail = os.path.split(header)
+            #     step2 = step2.rename(columns = {header:tail})
+        renamedf(step2)  # We rename to file relative location, not absolute location
+    try:
+        cmap = cmaps(eval(params[1]), eval(params[2]))
+    except:
+        cmap = cmaps((135, 207, 236), (0, 0, 255))
+    import IO_files_util
+    outputFilename = IO_files_util.generate_output_file_name(inputFilename, '', outputDir,
+                                                             '.colormetric')
+
+    visualize_colormap_data(step2, top_n=params[0], y_label = SELECT, x_label = GROUPBY,
+                   normalize=params[-1], color=cmap, outputname=outputFilename)  # There is no GUI yet...
+    filesToOpen.append(outputFilename)
+    return filesToOpen
+
+def timechart(data, outputFilename, var, date_format_var, cumulative, monthly=None, yearly=None, inputFileData=""):
+    if inputFileData:
+        try:
+            data = pd.read_csv(io.StringIO(inputFileData), encoding='utf-8', on_bad_lines='skip')
+            headers = IO_csv_util.get_csvfile_headers(data, inputFileData=inputFileData)
+        except Exception as e:
+            print(f"Error processing inputFileData: {e}")
+            return
+    elif isinstance(data, str):
+        try:
+            headers = IO_csv_util.get_csvfile_headers(data)
+            data = pd.read_csv(data, encoding='utf-8', on_bad_lines='skip')
+        except Exception as e:
+            print(f"Error loading file {data}: {e}")
+            return
+    if 'Date' in headers:
+        date_field = 'Date'
+    elif 'Document' in headers:
+        date_field = 'Document'
+    else:
+        print("Warning. The time mapper algorithm requires a csv input file with either a 'Date' or 'Document' field in the headers.\n\nPlease, select the expected csv file and try again.")
+        return
+    date = []
+    year = []
+    month = []
+    day = []
+
+    if date_format_var == 'yyyy':  # creates year variable based on yyyy format
+        for i in range(0, len(data['Document'])):
+            year.append(re.search('\d{4}', data[date_field][i])[0])
+            data['year'] = year
+    elif date_format_var == 'mm-yyyy':  # creates year and month variable in yyyy-mm format
+        for i in range(0, len(data['Document'])):
+            date.append(re.search('\d.*\d', data[date_field][i])[0])
+        for i in range(0, len(data['Document'])):
+            year.append(re.search('\d{4}', date[i])[0])
+        for i in range(0, len(data['Document'])):
+            month.append(year[i] + '-' + date[i][0:2])
+        data['year'] = year
+        data['month'] = month
+    elif date_format_var == 'yyyy-mm':  # creates year and month variable in yyyy-mm format
+        for i in range(0, len(data[date_field])):
+            date.append(re.search('\d.*\d', data[date_field][i])[0])
+        for i in range(0, len(data[date_field])):
+            year.append(re.search('\d{4}', date[i])[0])
+        for i in range(0, len(data[date_field])):
+            month.append(year[i] + '-' + date[i][-2:])
+        data['year'] = year
+        data['month'] = month
+    elif date_format_var == 'dd-mm-yyyy':  # creates year,month and day variable in yyyy-mm-dd format
+        for i in range(0, len(data[date_field])):
+            date.append(re.search('\d.*\d', data[date_field][i])[0])
+        for i in range(0, len(data[date_field])):
+            year.append(re.search('\d{4}', date[i])[0])
+        for i in range(0, en(data[date_field])):
+            month.append(year[i] + '-' + date[i][3:5])
+        for i in range(0, len(data[date_field])):
+            day.append(month[i] + '-' + date[i][0:2])
+        data['day'] = day
+        data['year'] = year
+        data['month'] = month
+    elif date_format_var == 'mm-dd-yyyy':  # creates year,month and day variable in yyyy-mm-dd format
+        for i in range(0, len(data[date_field])):
+            try:
+                date.append(re.search('\d.*\d', data[date_field][i])[0])
+            except:
+                continue
+        for i in range(0, len(data[date_field])):
+            try:
+                year.append(re.search('\d{4}', date[i])[0])
+            except:
+                continue
+        for i in range(0, len(data[date_field])):
+            try:
+                month.append(year[i] + '-' + date[i][0:2])
+            except:
+                continue
+        for i in range(0, len(data[date_field])):
+            try:
+                day.append(month[i] + '-' + date[i][3:5])
+            except:
+                continue
+        data['year'] = year
+        data['month'] = month
+        data['day'] = day
+    elif date_format_var == 'yyyy-mm-dd':  # creates year,month and day variable in yyyy-mm-dd format
+        for i in range(0, len(data[date_field])):
+            date.append(re.search('\d.*\d', data[date_field][i])[0])
+        for i in range(0, len(data[date_field])):
+            year.append(re.search('\d{4}', date[i])[0])
+        for i in range(0, len(data[date_field])):
+            month.append(year[i] + '-' + date[i][5:7])
+        data['year'] = year
+        data['month'] = month
+        data['day'] = date
+    elif date_format_var == 'yyyy-dd-mm':  # creates year,month and day variable in yyyy-mm-dd format
+        for i in range(0, len(data[date_field])):
+            date.append(re.search('\d.*\d', data[date_field][i])[0])
+        for i in range(0, len(data[date_field])):
+            year.append(re.search('\d{4}', date[i])[0])
+        for i in range(0, len(data[date_field])):
+            month.append(year[i] + '-' + date[i][-2:])
+        for i in range(0, len(data[date_field])):
+            day.append(month[i] + '-' + date[i][5:7])
+        data['year'] = year
+        data['month'] = month
+        data['day'] = day
+
+    # Plot corresponding graph depending on the options
+    if cumulative == False:
+        if monthly == True and yearly == True:
+            return "Choose one of the following: daily graph, monthly graph, yearly graph"
+        elif monthly == True:
+            data = data.sort_values('month')
+            finalframe = pd.DataFrame()
+            for i in sorted(set(data['month'])):
+                tester = pd.DataFrame(data[data['month'] == i][var].value_counts()).reset_index().rename(
+                    columns={'index': var, var: 'Frequency'})
+                for j in set(data[var]):
+                    if j not in set(tester[var]):
+                        temp = pd.DataFrame([j, 0]).T.rename(columns={0: var}).rename(columns={0: var, 1: 'Frequency'})
+                        tester = pd.concat([tester, temp])
+                tester = tester.sort_values(var)
+                tester
+                date = np.repeat(i, len(tester))
+                tester['date'] = date
+                tester = tester.reset_index(drop=True)
+                finalframe = pd.concat([finalframe, tester])
+                value = []
+                for i in list(set(finalframe[var])):
+                    value.append(max(finalframe[finalframe[var] == i]['Frequency']))
+            fig = px.bar(finalframe, y=var, x='Frequency', animation_frame='date', orientation='h',
+                         range_x=[0, max(value)]).update_yaxes(categoryorder='total ascending')
+        elif yearly == True:
+            data = data.sort_values('year')
+            finalframe = pd.DataFrame()
+            for i in sorted(set(data['year'])):
+                tester = pd.DataFrame(data[data['year'] == i][var].value_counts()).reset_index().rename(
+                    columns={'index': var, var: 'Frequency'})
+                for j in set(data[var]):
+                    if j not in set(tester[var]):
+                        temp = pd.DataFrame([j, 0]).T.rename(columns={0: var}).rename(columns={0: var, 1: 'Frequency'})
+                        tester = pd.concat([tester, temp])
+                tester = tester.sort_values(var)
+                tester
+                date = np.repeat(i, len(tester))
+                tester['date'] = date
+                tester = tester.reset_index(drop=True)
+                finalframe = pd.concat([finalframe, tester])
+                value = []
+                for i in list(set(finalframe[var])):
+                    value.append(max(finalframe[finalframe[var] == i]['Frequency']))
+            fig = px.bar(finalframe, y=var, x='Frequency', animation_frame='date', orientation='h',
+                         range_x=[0, max(value)]).update_yaxes(categoryorder='total ascending')
+        else:
+            data = data.sort_values('day')
+            finalframe = pd.DataFrame()
+            for i in sorted(set(data['day'])):
+                tester = pd.DataFrame(data[data['day'] == i][var].value_counts()).reset_index().rename(
+                    columns={'index': var, var: 'Frequency'})
+                for j in set(data[var]):
+                    if j not in set(tester[var]):
+                        temp = pd.DataFrame([j, 0]).T.rename(columns={0: var}).rename(columns={0: var, 1: 'Frequency'})
+                        tester = pd.concat([tester, temp])
+                tester = tester.sort_values(var)
+                tester
+                date = np.repeat(i, len(tester))
+                tester['date'] = date
+                tester = tester.reset_index(drop=True)
+                finalframe = pd.concat([finalframe, tester])
+                value = []
+                for i in list(set(finalframe[var])):
+                    value.append(max(finalframe[finalframe[var] == i]['Frequency']))
+            fig = px.bar(finalframe, y=var, x='Frequency', animation_frame='date', orientation='h',
+                         range_x=[0, max(value)]).update_yaxes(categoryorder='total ascending')
+    else:
+        if monthly == True and yearly == True:
+            return "Choose one of the following: daily graph, monthly graph, yearly graph"
+        elif yearly == True:
+            data = data.sort_values('year')
+            finalframe = pd.DataFrame()
+            for i in sorted(set(data['year'])):
+                tester = pd.DataFrame(data[data['year'] <= i][var].value_counts()).reset_index().rename(
+                    columns={'index': var, var: 'Frequency'})
+                for j in set(data[var]):
+                    if j not in set(tester[var]):
+                        temp = pd.DataFrame([j, 0]).T.rename(columns={0: var}).rename(columns={0: var, 1: 'Frequency'})
+                        tester = pd.concat([tester, temp])
+                tester = tester.sort_values(var)
+                tester
+                date = np.repeat(i, len(tester))
+                tester['date'] = date
+                tester = tester.reset_index(drop=True)
+                finalframe = pd.concat([finalframe, tester])
+                value = []
+                for i in list(set(finalframe[var])):
+                    value.append(max(finalframe[finalframe[var] == i]['Frequency']))
+            fig = px.bar(finalframe, y=var, x='Frequency', animation_frame='date', orientation='h',
+                         range_x=[0, max(value)]).update_yaxes(categoryorder='total ascending')
+        elif monthly == True:
+            data = data.sort_values('month')
+            finalframe = pd.DataFrame()
+            for i in sorted(set(data['month'])):
+                tester = pd.DataFrame(data[data['month'] <= i][var].value_counts()).reset_index().rename(
+                    columns={'index': var, var: 'Frequency'})
+                for j in set(data[var]):
+                    if j not in set(tester[var]):
+                        temp = pd.DataFrame([j, 0]).T.rename(columns={0: var}).rename(columns={0: var, 1: 'Frequency'})
+                        tester = pd.concat([tester, temp])
+                tester = tester.sort_values(var)
+                tester
+                date = np.repeat(i, len(tester))
+                tester['date'] = date
+                tester = tester.reset_index(drop=True)
+                finalframe = pd.concat([finalframe, tester])
+                value = []
+                for i in list(set(finalframe[var])):
+                    value.append(max(finalframe[finalframe[var] == i]['Frequency']))
+            fig = px.bar(finalframe, y=var, x='Frequency', animation_frame='date', orientation='h',
+                         range_x=[0, max(value)]).update_yaxes(categoryorder='total ascending')
+        else:
+            data = data.sort_values('day')
+            finalframe = pd.DataFrame()
+            for i in sorted(set(data['day'])):
+                tester = pd.DataFrame(data[data['day'] <= i][var].value_counts()).reset_index().rename(
+                    columns={'index': var, var: 'Frequency'})
+                for j in set(data[var]):
+                    if j not in set(tester[var]):
+                        temp = pd.DataFrame([j, 0]).T.rename(columns={0: var}).rename(columns={0: var, 1: 'Frequency'})
+                        tester = pd.concat([tester, temp])
+                tester = tester.sort_values(var)
+                tester
+                date = np.repeat(i, len(tester))
+                tester['date'] = date
+                tester = tester.reset_index(drop=True)
+                finalframe = pd.concat([finalframe, tester])
+                value = []
+                for i in list(set(finalframe[var])):
+                    value.append(max(finalframe[finalframe[var] == i]['Frequency']))
+            fig = px.bar(finalframe, y=var, x='Frequency', animation_frame='date', orientation='h',
+                         range_x=[0, max(value)]).update_yaxes(categoryorder='total ascending')
+    fig = fig.update_geos(projection_type="equirectangular", visible=True, resolution=110)
+    fig.write_html(outputFilename)
+
+    return outputFilename
+
