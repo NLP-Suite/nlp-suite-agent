@@ -18,6 +18,7 @@ import charts_Plotly_util
 import IO_csv_util
 import IO_user_interface_util
 import statistics_csv_util
+import io
 
 # Prepare the data (data_to_be_plotted) to be used in charts_Excel_util.create_excel_chart with the format:
 #   one series: [[['Name1','Frequency'], ['A', 7]]]
@@ -27,37 +28,42 @@ import statistics_csv_util
 # inputFilename has the full path
 # columns_to_be_plotted is a double list [[0, 1], [0, 2], [0, 3]]
 
-
 def prepare_data_to_be_plotted_inExcel(
     inputFilename,
     columns_to_be_plotted,
     chart_type_list,
     count_var=0,
     column_yAxis_field_list=[],
+    inputFileData=""  # Optional parameter with default value
 ):
-    # TODO change to pandas half of this function relies on csv half on pandas, reading in data twice!
-    # TODO temporary to measure process time
-    # startTime=IO_ser_interface_util.timed_alert(2000,'Analysis start', 'Started running Excel prepare_data_to_be_plotted_inExcel at',
-    #                                              True, '', True, '', True)
-    withHeader_var = IO_csv_util.csvFile_has_header(
-        inputFilename
-    )  # check if the file has header
-    data, headers = IO_csv_util.get_csv_data(
-        inputFilename, withHeader_var
-    )  # get the data and header
-    if len(data) == 0:
-        return None
-    headers = list(headers)
+    # Check if inputFileData is provided; if so, use it instead of inputFilename
+    if inputFileData:
+        try:
+            # Convert inputFileData to a DataFrame
+            data = pd.read_csv(io.StringIO(inputFileData), encoding="utf-8", on_bad_lines="skip")
+        except ValueError as err:
+            print("Input data read error", str(err))
+            return None
+        headers = list(data.columns)
+        withHeader_var = True  
+    else:
+        withHeader_var = IO_csv_util.csvFile_has_header(
+            inputFilename, inputFileData=inputFileData
+        )  # check if the file has header
+        data, headers = IO_csv_util.get_csv_data(
+            inputFilename, withHeader_var,  inputFileData=inputFileData
+        )  # get the data and header
+        if len(data) == 0:
+            return None
+        headers = list(headers)
+
     count_msg, withHeader_msg = build_timed_alert_message(
         chart_type_list[0], withHeader_var, count_var
     )
     if count_var == 1:
         dataRange = get_dataRange(columns_to_be_plotted, data)
-        # TODO hover_over_values not being passed, neither are any potential aggregate columns
-        #   get_data_to_be_plotted_with_counts is less general than
+        # Get data with counts
         data_to_be_plotted = get_data_to_be_plotted_with_counts(
-            inputFilename,
-            withHeader_var,
             headers,
             columns_to_be_plotted,
             column_yAxis_field_list,
@@ -65,22 +71,24 @@ def prepare_data_to_be_plotted_inExcel(
         )
     else:
         try:
-            data = pd.read_csv(inputFilename, encoding="utf-8", on_bad_lines="skip")
+            if not inputFileData:  
+                data = pd.read_csv(inputFilename, encoding="utf-8", on_bad_lines="skip")
         except:
             try:
-                data = pd.read_csv(
-                    inputFilename, encoding="ISO-8859-1", on_bad_lines="skip"
-                )
-                IO_user_interface_util.timed_alert(
-                    2000,
-                    "Warning",
-                    "Excel-util encountered errors with utf-8 encoding and switched to ISO-8859-1 in reading into pandas the csv file "
-                    + inputFilename,
-                )
-                print(
-                    "Excel-util encountered errors with utf-8 encoding and switched to ISO-8859-1 encoding in reading into pandas the csv file "
-                    + inputFilename
-                )
+                if not inputFileData:  # Handle encoding fallback only for inputFilename
+                    data = pd.read_csv(
+                        inputFilename, encoding="ISO-8859-1", on_bad_lines="skip"
+                    )
+                    IO_user_interface_util.timed_alert(
+                        2000,
+                        "Warning",
+                        "Excel-util encountered errors with utf-8 encoding and switched to ISO-8859-1 in reading into pandas the csv file "
+                        + inputFilename,
+                    )
+                    print(
+                        "Excel-util encountered errors with utf-8 encoding and switched to ISO-8859-1 encoding in reading into pandas the csv file "
+                        + inputFilename
+                    )
             except ValueError as err:
                 if "codec" in str(err):
                     err = (
@@ -90,10 +98,15 @@ def prepare_data_to_be_plotted_inExcel(
                         + "\n\nPlease, check carefully the data in the csv file; it may contain filenames with non-utf-8/ISO-8859-1 characters; less likely, the data in the txt files that generated the csv file may also contain non-compliant characters. Run the utf-8 compliance algorithm and, perhaps, run the cleaning algorithm that converts apostrophes.\n\nNO EXCEL CHART PRODUCED."
                     )
                 print("Input file read error", str(err))
-                return
+                return None
         data_to_be_plotted = get_data_to_be_plotted_NO_counts(
-            inputFilename, withHeader_var, headers, columns_to_be_plotted, data
+            inputFilename if not inputFileData else None,
+            withHeader_var,
+            headers,
+            columns_to_be_plotted,
+            data,
         )
+
     return data_to_be_plotted
 
 
@@ -809,9 +822,11 @@ def run_all(
     remove_hyperlinks=False,
     csv_field_Y_axis_list=[],
     X_axis_var=[],
+    inputFileData = ""
 ):
+    from io import StringIO
     # get the chart type from the GUI user selection
-    chart_type_list = ["bar"]
+    # TODO: 
 
     use_Plotly = "plotly" in chartPackage.lower()
     # added by Tony, May 2022 for complete sentence index
@@ -819,7 +834,7 @@ def run_all(
     # the extra parameter "complete_sid" is set to True by default to avoid extra code mortification elsewhere
     if complete_sid:
         # TODO Samir
-        inputFilename = add_missing_IDs(inputFilename, inputFilename)
+        inputFilename = add_missing_IDs(pd.read_csv(StringIO(inputFileData)), inputFilename)
         # complete_sentence_index(inputFilename)
     if use_Plotly:
         if "static" in chartPackage.lower():
@@ -842,6 +857,7 @@ def run_all(
             static_flag=static_flag,
             csv_field_Y_axis_list=csv_field_Y_axis_list,
             X_axis_var=X_axis_var,
+            inputFileData=inputFileData
         )
         print("Visualized using plotly")
         return Plotly_outputFilename
@@ -851,6 +867,7 @@ def run_all(
         chart_type_list,
         count_var,
         column_yAxis_field_list,
+        inputFileData=inputFileData
     )
 
     def list_of_lists_to_csv(data, csv_file_path):
@@ -889,10 +906,10 @@ def run_all(
     else:
         # the lines below handle specifically the "Form-Lemma" annotator because "form-lemma" is not processed in statistics_csv_util.py
         withHeader_var = IO_csv_util.csvFile_has_header(
-            inputFilename
+            inputFilename, inputFileData=inputFileData
         )  # check if the file has header
         data, headers = IO_csv_util.get_csv_data(
-            inputFilename, withHeader_var
+            inputFilename, withHeader_var, inputFileData=inputFileData
         )  # get the data and header
 
         def double_level_grouping_and_frequency(data, plot_cols, group_cols):
@@ -959,6 +976,7 @@ def run_all(
             series_label_list,
             second_y_var,
             second_yAxis_label,
+            inputFileData=inputFileData
         )
 
     return outputFiles
@@ -1028,8 +1046,6 @@ def get_dataRange(columns_to_be_plotted, data):
 
 
 def get_data_to_be_plotted_with_counts(
-    inputFilename,
-    withHeader_var,
     headers,
     columns_to_be_plotted,
     specific_column_value_list,
@@ -1271,6 +1287,7 @@ def add_missing_IDs(input, outputFilename):
         True,
     )
     if isinstance(input, pd.DataFrame):
+        print("YES")
         df = input
     else:
         df = pd.read_csv(input, encoding="utf-8", on_bad_lines="skip")
@@ -1519,54 +1536,45 @@ def complete_sentence_index(file_path):
 # var is variable of choice
 # ntopchoices is the n max values
 def multiple_barchart(datalist, outputFilename, var, ntopchoices):
-    if pd.__version__[0] == "2":
-        print(
-            "Warning",
-            "The multiple_barchart algorithm is incompatible with a version of pandas higher than 2.0\n\nIn command line, please, pip unistall pandas and pip install pandas==1.5.2 (or even pip install pandas==1.4.4).\n\nMake sure you are in the right NLP environment by typing conda activate NLP",
-        )
-        return
+    # Read each file in datalist into a pandas DataFrame
+    tempdatalist = [
+        pd.read_csv(i, encoding="utf-8", on_bad_lines="skip") for i in datalist
+    ]
+    
+    # Process each DataFrame to count the top 'ntopchoices' values of the column 'var'
+    newDatalist = [
+        df[var]
+        .value_counts()
+        .reset_index()
+        .rename(columns={"index": var, var: "Frequency"})
+        .head(ntopchoices)
+        for df in tempdatalist
+    ]
 
-    tempdatalist = []
-    for i in datalist:
-        tempdatalist.append(pd.read_csv(i, encoding="utf-8", on_bad_lines="skip"))
-    newDatalist = []
-    for i in tempdatalist:
-        newDatalist.append(
-            pd.DataFrame(i[var].value_counts())
-            .reset_index()
-            .rename(columns={"index": var, var: "Frequency"})
-            .head(ntopchoices)
+    # Create a subplot layout
+    fig = make_subplots(
+        rows=2,
+        cols=(len(datalist) // 2) + (len(datalist) % 2),
+        subplot_titles=[f"Algorithm {i + 1}" for i in range(len(datalist))]
+    )
+
+    # Add the bar charts for the first row
+    for i in range(len(newDatalist)):
+        row = 1 if i < (len(datalist) + 1) // 2 else 2
+        col = i % ((len(datalist) + 1) // 2) + 1
+        fig.add_trace(
+            go.Bar(
+                x=newDatalist[i][var],
+                y=newDatalist[i]["Frequency"],
+                name=f"Algorithm {i + 1}",
+            ),
+            row=row,
+            col=col,
         )
-    fig = make_subplots(rows=2, cols=int(len(datalist) / 2) + len(datalist) % 2)
-    cols = 1
-    for i in range(0, len(newDatalist)):
-        if i < int(len(datalist) / 2) + len(datalist) % 2:
-            fig.add_trace(
-                go.Bar(
-                    x=newDatalist[i][var],
-                    y=newDatalist[i]["Frequency"],
-                    name="Algorithm " + str(i + 1),
-                ),
-                row=1,
-                col=cols,
-            )
-            cols = cols + 1
-    cols = 1
-    for i in range(0, len(newDatalist)):
-        if i >= int(len(datalist) / 2) + len(datalist) % 2:
-            fig.add_trace(
-                go.Bar(
-                    x=newDatalist[i][var],
-                    y=newDatalist[i]["Frequency"],
-                    name="Algorithm " + str(i + 1),
-                ),
-                row=2,
-                col=cols,
-            )
-            cols = cols + 1
+
+    # Save the plot to an HTML file
     fig.write_html(outputFilename)
     return outputFilename
-
 
 # written by Samir Kaddoura, March 2023
 
@@ -1576,7 +1584,7 @@ def multiple_barchart(datalist, outputFilename, var, ntopchoices):
 # points is the choice to represent all points of data, the outliers, or none of them, it should be given through a dropdown menu
 # color is another choice of categorical variable to split the data along
 def boxplot(
-    data, outputFilename, var, points, bycategory=None, category=None, color=None
+    data, outputFilename, var, points, bycategory=None, category=None, color=None, inputFileData=""
 ):
     if points == "All points":
         points = "all"
@@ -1587,8 +1595,10 @@ def boxplot(
     if color == "":
         color = None
 
-    if type(data) == str:
-        data = pd.read_csv(data, encoding="utf-8", on_bad_lines="skip")
+    if inputFileData:
+        data =  pd.read_csv(io.StringIO(inputFileData), encoding='utf-8', on_bad_lines='skip')
+    elif type(data) == str:
+        data = pd.read_csv(inputFileData, encoding='utf-8', on_bad_lines='skip')
 
     if not "int" in str(type(data[var][0])) and not "float" in str(type(data[var][0])):
         print(
@@ -1977,345 +1987,6 @@ def Treemap(
 # import numpy as np
 # import Plotly.express as px
 
-
-def timechart(
-    data, outputFilename, var, date_format_var, cumulative, monthly=None, yearly=None
-):
-    # convert csv to pandas
-    headers = IO_csv_util.get_csvfile_headers(data)
-    if "Date" in headers:
-        date_field = "Date"
-    elif "Document" in headers:
-        date_field = "Document"
-    else:
-        print(
-            "Warning",
-            "The time mapper algorithm requires a csv input file with either a Date or a Document field in the headers.\n\nPlease, select the expected csv file and try again.",
-        )
-        return
-    if type(data) == str:
-        data = pd.read_csv(data, encoding="utf-8", on_bad_lines="skip")
-    date = []
-    year = []
-    month = []
-    day = []
-
-    if date_format_var == "yyyy":  # creates year variable based on yyyy format
-        for i in range(0, len(data["Document"])):
-            year.append(re.search("\d{4}", data[date_field][i])[0])
-            data["year"] = year
-    elif (
-        date_format_var == "mm-yyyy"
-    ):  # creates year and month variable in yyyy-mm format
-        for i in range(0, len(data["Document"])):
-            date.append(re.search("\d.*\d", data[date_field][i])[0])
-        for i in range(0, len(data["Document"])):
-            year.append(re.search("\d{4}", date[i])[0])
-        for i in range(0, len(data["Document"])):
-            month.append(year[i] + "-" + date[i][0:2])
-        data["year"] = year
-        data["month"] = month
-    elif (
-        date_format_var == "yyyy-mm"
-    ):  # creates year and month variable in yyyy-mm format
-        for i in range(0, len(data[date_field])):
-            date.append(re.search("\d.*\d", data[date_field][i])[0])
-        for i in range(0, len(data[date_field])):
-            year.append(re.search("\d{4}", date[i])[0])
-        for i in range(0, len(data[date_field])):
-            month.append(year[i] + "-" + date[i][-2:])
-        data["year"] = year
-        data["month"] = month
-    elif (
-        date_format_var == "dd-mm-yyyy"
-    ):  # creates year,month and day variable in yyyy-mm-dd format
-        for i in range(0, len(data[date_field])):
-            date.append(re.search("\d.*\d", data[date_field][i])[0])
-        for i in range(0, len(data[date_field])):
-            year.append(re.search("\d{4}", date[i])[0])
-        for i in range(0, en(data[date_field])):
-            month.append(year[i] + "-" + date[i][3:5])
-        for i in range(0, len(data[date_field])):
-            day.append(month[i] + "-" + date[i][0:2])
-        data["day"] = day
-        data["year"] = year
-        data["month"] = month
-    elif (
-        date_format_var == "mm-dd-yyyy"
-    ):  # creates year,month and day variable in yyyy-mm-dd format
-        for i in range(0, len(data[date_field])):
-            try:
-                date.append(re.search("\d.*\d", data[date_field][i])[0])
-            except:
-                continue
-        for i in range(0, len(data[date_field])):
-            try:
-                year.append(re.search("\d{4}", date[i])[0])
-            except:
-                continue
-        for i in range(0, len(data[date_field])):
-            try:
-                month.append(year[i] + "-" + date[i][0:2])
-            except:
-                continue
-        for i in range(0, len(data[date_field])):
-            try:
-                day.append(month[i] + "-" + date[i][3:5])
-            except:
-                continue
-        data["year"] = year
-        data["month"] = month
-        data["day"] = day
-    elif (
-        date_format_var == "yyyy-mm-dd"
-    ):  # creates year,month and day variable in yyyy-mm-dd format
-        for i in range(0, len(data[date_field])):
-            date.append(re.search("\d.*\d", data[date_field][i])[0])
-        for i in range(0, len(data[date_field])):
-            year.append(re.search("\d{4}", date[i])[0])
-        for i in range(0, len(data[date_field])):
-            month.append(year[i] + "-" + date[i][5:7])
-        data["year"] = year
-        data["month"] = month
-        data["day"] = date
-    elif (
-        date_format_var == "yyyy-dd-mm"
-    ):  # creates year,month and day variable in yyyy-mm-dd format
-        for i in range(0, len(data[date_field])):
-            date.append(re.search("\d.*\d", data[date_field][i])[0])
-        for i in range(0, len(data[date_field])):
-            year.append(re.search("\d{4}", date[i])[0])
-        for i in range(0, len(data[date_field])):
-            month.append(year[i] + "-" + date[i][-2:])
-        for i in range(0, len(data[date_field])):
-            day.append(month[i] + "-" + date[i][5:7])
-        data["year"] = year
-        data["month"] = month
-        data["day"] = day
-
-    # Plot corresponding graph depending on the options
-    if cumulative == False:
-        if monthly == True and yearly == True:
-            return (
-                "Choose one of the following: daily graph, monthly graph, yearly graph"
-            )
-        elif monthly == True:
-            data = data.sort_values("month")
-            finalframe = pd.DataFrame()
-            for i in sorted(set(data["month"])):
-                tester = (
-                    pd.DataFrame(data[data["month"] == i][var].value_counts())
-                    .reset_index()
-                    .rename(columns={"index": var, var: "Frequency"})
-                )
-                for j in set(data[var]):
-                    if j not in set(tester[var]):
-                        temp = (
-                            pd.DataFrame([j, 0])
-                            .T.rename(columns={0: var})
-                            .rename(columns={0: var, 1: "Frequency"})
-                        )
-                        tester = pd.concat([tester, temp])
-                tester = tester.sort_values(var)
-                tester
-                date = np.repeat(i, len(tester))
-                tester["date"] = date
-                tester = tester.reset_index(drop=True)
-                finalframe = pd.concat([finalframe, tester])
-                value = []
-                for i in list(set(finalframe[var])):
-                    value.append(max(finalframe[finalframe[var] == i]["Frequency"]))
-            fig = px.bar(
-                finalframe,
-                y=var,
-                x="Frequency",
-                animation_frame="date",
-                orientation="h",
-                range_x=[0, max(value)],
-            ).update_yaxes(categoryorder="total ascending")
-        elif yearly == True:
-            data = data.sort_values("year")
-            finalframe = pd.DataFrame()
-            for i in sorted(set(data["year"])):
-                tester = (
-                    pd.DataFrame(data[data["year"] == i][var].value_counts())
-                    .reset_index()
-                    .rename(columns={"index": var, var: "Frequency"})
-                )
-                for j in set(data[var]):
-                    if j not in set(tester[var]):
-                        temp = (
-                            pd.DataFrame([j, 0])
-                            .T.rename(columns={0: var})
-                            .rename(columns={0: var, 1: "Frequency"})
-                        )
-                        tester = pd.concat([tester, temp])
-                tester = tester.sort_values(var)
-                tester
-                date = np.repeat(i, len(tester))
-                tester["date"] = date
-                tester = tester.reset_index(drop=True)
-                finalframe = pd.concat([finalframe, tester])
-                value = []
-                for i in list(set(finalframe[var])):
-                    value.append(max(finalframe[finalframe[var] == i]["Frequency"]))
-            fig = px.bar(
-                finalframe,
-                y=var,
-                x="Frequency",
-                animation_frame="date",
-                orientation="h",
-                range_x=[0, max(value)],
-            ).update_yaxes(categoryorder="total ascending")
-        else:
-            data = data.sort_values("day")
-            finalframe = pd.DataFrame()
-            for i in sorted(set(data["day"])):
-                tester = (
-                    pd.DataFrame(data[data["day"] == i][var].value_counts())
-                    .reset_index()
-                    .rename(columns={"index": var, var: "Frequency"})
-                )
-                for j in set(data[var]):
-                    if j not in set(tester[var]):
-                        temp = (
-                            pd.DataFrame([j, 0])
-                            .T.rename(columns={0: var})
-                            .rename(columns={0: var, 1: "Frequency"})
-                        )
-                        tester = pd.concat([tester, temp])
-                tester = tester.sort_values(var)
-                tester
-                date = np.repeat(i, len(tester))
-                tester["date"] = date
-                tester = tester.reset_index(drop=True)
-                finalframe = pd.concat([finalframe, tester])
-                value = []
-                for i in list(set(finalframe[var])):
-                    value.append(max(finalframe[finalframe[var] == i]["Frequency"]))
-            fig = px.bar(
-                finalframe,
-                y=var,
-                x="Frequency",
-                animation_frame="date",
-                orientation="h",
-                range_x=[0, max(value)],
-            ).update_yaxes(categoryorder="total ascending")
-    else:
-        if monthly == True and yearly == True:
-            return (
-                "Choose one of the following: daily graph, monthly graph, yearly graph"
-            )
-        elif yearly == True:
-            data = data.sort_values("year")
-            finalframe = pd.DataFrame()
-            for i in sorted(set(data["year"])):
-                tester = (
-                    pd.DataFrame(data[data["year"] <= i][var].value_counts())
-                    .reset_index()
-                    .rename(columns={"index": var, var: "Frequency"})
-                )
-                for j in set(data[var]):
-                    if j not in set(tester[var]):
-                        temp = (
-                            pd.DataFrame([j, 0])
-                            .T.rename(columns={0: var})
-                            .rename(columns={0: var, 1: "Frequency"})
-                        )
-                        tester = pd.concat([tester, temp])
-                tester = tester.sort_values(var)
-                tester
-                date = np.repeat(i, len(tester))
-                tester["date"] = date
-                tester = tester.reset_index(drop=True)
-                finalframe = pd.concat([finalframe, tester])
-                value = []
-                for i in list(set(finalframe[var])):
-                    value.append(max(finalframe[finalframe[var] == i]["Frequency"]))
-            fig = px.bar(
-                finalframe,
-                y=var,
-                x="Frequency",
-                animation_frame="date",
-                orientation="h",
-                range_x=[0, max(value)],
-            ).update_yaxes(categoryorder="total ascending")
-        elif monthly == True:
-            data = data.sort_values("month")
-            finalframe = pd.DataFrame()
-            for i in sorted(set(data["month"])):
-                tester = (
-                    pd.DataFrame(data[data["month"] <= i][var].value_counts())
-                    .reset_index()
-                    .rename(columns={"index": var, var: "Frequency"})
-                )
-                for j in set(data[var]):
-                    if j not in set(tester[var]):
-                        temp = (
-                            pd.DataFrame([j, 0])
-                            .T.rename(columns={0: var})
-                            .rename(columns={0: var, 1: "Frequency"})
-                        )
-                        tester = pd.concat([tester, temp])
-                tester = tester.sort_values(var)
-                tester
-                date = np.repeat(i, len(tester))
-                tester["date"] = date
-                tester = tester.reset_index(drop=True)
-                finalframe = pd.concat([finalframe, tester])
-                value = []
-                for i in list(set(finalframe[var])):
-                    value.append(max(finalframe[finalframe[var] == i]["Frequency"]))
-            fig = px.bar(
-                finalframe,
-                y=var,
-                x="Frequency",
-                animation_frame="date",
-                orientation="h",
-                range_x=[0, max(value)],
-            ).update_yaxes(categoryorder="total ascending")
-        else:
-            data = data.sort_values("day")
-            finalframe = pd.DataFrame()
-            for i in sorted(set(data["day"])):
-                tester = (
-                    pd.DataFrame(data[data["day"] <= i][var].value_counts())
-                    .reset_index()
-                    .rename(columns={"index": var, var: "Frequency"})
-                )
-                for j in set(data[var]):
-                    if j not in set(tester[var]):
-                        temp = (
-                            pd.DataFrame([j, 0])
-                            .T.rename(columns={0: var})
-                            .rename(columns={0: var, 1: "Frequency"})
-                        )
-                        tester = pd.concat([tester, temp])
-                tester = tester.sort_values(var)
-                tester
-                date = np.repeat(i, len(tester))
-                tester["date"] = date
-                tester = tester.reset_index(drop=True)
-                finalframe = pd.concat([finalframe, tester])
-                value = []
-                for i in list(set(finalframe[var])):
-                    value.append(max(finalframe[finalframe[var] == i]["Frequency"]))
-            fig = px.bar(
-                finalframe,
-                y=var,
-                x="Frequency",
-                animation_frame="date",
-                orientation="h",
-                range_x=[0, max(value)],
-            ).update_yaxes(categoryorder="total ascending")
-    fig = fig.update_geos(
-        projection_type="equirectangular", visible=True, resolution=110
-    )
-    fig.write_html(outputFilename)
-
-    return outputFilename
-
-
 # written by Simon Bian
 # September 2023
 
@@ -2591,8 +2262,11 @@ def cmaps(start_color, end_color):
         return "YlOrBr"
 
 
-def main_colormap(inputFilename, outputDir, csv_file_categorical_field_list, params):
-    dataFrame = read_filename_color(inputFilename)
+def main_colormap(inputFilename, outputDir, csv_file_categorical_field_list, params, inputFileData=""):
+    if inputFileData:
+        dataFrame = pd.read_csv(io.StringIO(inputFileData))
+    else:
+        dataFrame = read_filename_color(inputFilename)
     WHERE, GROUPBY, SELECT = sql_commands(csv_file_categorical_field_list, dataFrame)
     step1 = process_and_aggregate_data(
         dataFrame, where_column=WHERE, groupby_column=GROUPBY, select_column=SELECT
@@ -2679,8 +2353,9 @@ def rate_prop(df, rt, base):
 
 
 # THIS IS AN ABBREVIATED VERSION FOR The sunburst / treemap
+
 def Sunburst_Treemap(
-    inputFilename,
+    inputFileName, # Change inputFileName to use string contents of csv 
     outputFilename,
     outputDir,
     csv_file_categorical_field_list,
@@ -2689,10 +2364,15 @@ def Sunburst_Treemap(
     rate_param_var,
     base_param_var,
     filter_options_var,
+    file_data = ""
 ):
+    import io
     print(fixed_param_var, rate_param_var, base_param_var, filter_options_var)
     # print("======")
-    data = pd.read_csv(inputFilename)
+    if file_data != "":
+        data = pd.read_csv(io.StringIO(file_data))
+    else:
+        data = pd.read_csv(inputFileName)
     WHERE, GROUPBY = special_sql_commands(csv_file_categorical_field_list, data)
     data = where_data(data, where_column=WHERE)
     select_and_count = [GROUPBY]
@@ -2701,6 +2381,7 @@ def Sunburst_Treemap(
     df_grouped = df.groupby(select_and_count).size().reset_index(name="counts")
 
     df_grouped.to_csv(outputDir + os.sep + "Output_Csv_intermediate.csv", index=False)
+    print(df_grouped)
     # df_grouped.head(5)
     if filter_options_var == "Fixed parameter":
         df_grouped = fixed_transform(df_grouped, int(fixed_param_var))
@@ -2717,3 +2398,335 @@ def Sunburst_Treemap(
         fig = px.treemap(df_grouped, path=select_and_count, values="counts")
     fig.write_html(outputFilename)
     return outputFilename
+
+
+def visualize_colormap_data(data, top_n=60, figsize=(15, 10), y_label='Lemma', x_label='Document', normalize='log',
+                   color='YlOrBr', outputname='output_figure'):
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    numeric_data = data.select_dtypes(include=[np.number])
+    sorted_columns = numeric_data.columns.sort_values()
+    sorted_pivot_data = numeric_data[sorted_columns][::-1]
+    sorted_rows = numeric_data.sum(axis=1).sort_values(ascending=False).index
+    sorted_pivot_data = sorted_pivot_data.loc[sorted_rows]
+    transposed_data = sorted_pivot_data.head(top_n)
+    # print("doing calculations...complete!")
+    plt.figure(figsize=figsize)
+    try:
+        sns.heatmap(transposed_data, annot=False, fmt='.2f', cmap=color, cbar_kws={'label': normalize})
+    except:
+        print("There appears to be ann error with cmap; we revert to default ")
+        sns.heatmap(transposed_data, annot=False, fmt='.2f', cmap='YlOrBr', cbar_kws={'label': normalize})
+    ax = plt.gca()
+    ax.set_yticks(np.arange(len(transposed_data.index)))
+    ax.set_yticklabels(transposed_data.index)
+    ax.set_xticks(np.arange(len(transposed_data.columns)))
+    ax.set_xticklabels(transposed_data.columns, rotation=90)
+    ax.set_ylabel(y_label)
+    x_label = x_label.replace('Real_','')
+    ax.set_xlabel(x_label)
+    ax.set_title('Colormap/heatmap of ' + y_label + ' Frequency by ' + x_label + ' Values (' + normalize + ' Scale)')
+    plt.savefig(outputname + '.png')
+    print(f"Data visualization saved as {outputname}.png.")
+    # plt.show() // we don't need to show it because we have that other option
+
+def colormap(inputFilename, outputDir, csv_file_categorical_field_list, params, inputFileData=""):
+    filesToOpen = []
+    if inputFileData:
+        dataFrame = pd.read_csv(io.StringIO(inputFileData))
+    else:
+        dataFrame = read_filename_color(inputFilename)
+
+    WHERE, GROUPBY, SELECT = sql_commands(csv_file_categorical_field_list, dataFrame)
+    # step1 is a dataframe
+    step1 = process_and_aggregate_data(dataFrame, where_column=WHERE, groupby_column=GROUPBY, select_column=SELECT)
+    if step1.empty:
+        print(title='No search values found',
+                       message='No combination of csv file fields and search values were found in your input file.\n\n' + str(csv_file_categorical_field_list) + '\n\nPlease, make sure to check whether\n   1. you have not entered the same field twice;\n   2. you are using a case sensitive search option.\n\nPlease, click on the Reset button and start again.')
+        return
+    colormap_dataframe_csv_filename =outputDir + os.sep + "colormap_dataframe.csv"
+    filesToOpen.append(colormap_dataframe_csv_filename)
+    # add headers to dataframe
+    if GROUPBY == 'Document':
+        if len(WHERE)==0:
+            for i in range(len(list(step1.columns.values))):
+                header = list(step1.columns.values)[i]
+                head, tail = os.path.split(header)
+                step1 = step1.rename(columns={header: 'Frequency in: ' + tail})
+    step1.to_csv(colormap_dataframe_csv_filename, index=True)
+
+    # val = 1 #get_transformation_choice(), but we will connect it....
+    step2 = transform_data(step1)  # There needs to be a GUI to allow transformation, but...
+    # We proceed with default instead perhaps...
+    if GROUPBY == 'Document':
+        # if len(WHERE)==0:
+            # when a specific document part (e.g., Book1 for Harry Potter) is not entered by the user
+            #   the document will contain the entire path along with an hypewrlink and this may be very cumbersome to display in the X axis
+            #   must remove hyperlink and display document tail only
+            # print('Must REMOVE hyperlink and display document tail only, not path')
+            # for i in range(len(list(step2.columns.values))):
+            #     header=list(step2.columns.values)[i]
+            #     head, tail = os.path.split(header)
+            #     step2 = step2.rename(columns = {header:tail})
+        renamedf(step2)  # We rename to file relative location, not absolute location
+    try:
+        cmap = cmaps(eval(params[1]), eval(params[2]))
+    except:
+        cmap = cmaps((135, 207, 236), (0, 0, 255))
+    import IO_files_util
+    outputFilename = IO_files_util.generate_output_file_name(inputFilename, '', outputDir,
+                                                             '.colormetric')
+
+    visualize_colormap_data(step2, top_n=params[0], y_label = SELECT, x_label = GROUPBY,
+                   normalize=params[-1], color=cmap, outputname=outputFilename)  # There is no GUI yet...
+    filesToOpen.append(outputFilename)
+    return filesToOpen
+
+def timechart(data, outputFilename, var, date_format_var, cumulative, monthly=None, yearly=None, inputFileData=""):
+    if inputFileData:
+        try:
+            data = pd.read_csv(io.StringIO(inputFileData), encoding='utf-8', on_bad_lines='skip')
+            headers = IO_csv_util.get_csvfile_headers(data, inputFileData=inputFileData)
+        except Exception as e:
+            print(f"Error processing inputFileData: {e}")
+            return
+    elif isinstance(data, str):
+        try:
+            headers = IO_csv_util.get_csvfile_headers(data)
+            data = pd.read_csv(data, encoding='utf-8', on_bad_lines='skip')
+        except Exception as e:
+            print(f"Error loading file {data}: {e}")
+            return
+    if 'Date' in headers:
+        date_field = 'Date'
+    elif 'Document' in headers:
+        date_field = 'Document'
+    else:
+        print("Warning. The time mapper algorithm requires a csv input file with either a 'Date' or 'Document' field in the headers.\n\nPlease, select the expected csv file and try again.")
+        return
+    date = []
+    year = []
+    month = []
+    day = []
+
+    if date_format_var == 'yyyy':  # creates year variable based on yyyy format
+        for i in range(0, len(data['Document'])):
+            year.append(re.search('\d{4}', data[date_field][i])[0])
+            data['year'] = year
+    elif date_format_var == 'mm-yyyy':  # creates year and month variable in yyyy-mm format
+        for i in range(0, len(data['Document'])):
+            date.append(re.search('\d.*\d', data[date_field][i])[0])
+        for i in range(0, len(data['Document'])):
+            year.append(re.search('\d{4}', date[i])[0])
+        for i in range(0, len(data['Document'])):
+            month.append(year[i] + '-' + date[i][0:2])
+        data['year'] = year
+        data['month'] = month
+    elif date_format_var == 'yyyy-mm':  # creates year and month variable in yyyy-mm format
+        for i in range(0, len(data[date_field])):
+            date.append(re.search('\d.*\d', data[date_field][i])[0])
+        for i in range(0, len(data[date_field])):
+            year.append(re.search('\d{4}', date[i])[0])
+        for i in range(0, len(data[date_field])):
+            month.append(year[i] + '-' + date[i][-2:])
+        data['year'] = year
+        data['month'] = month
+    elif date_format_var == 'dd-mm-yyyy':  # creates year,month and day variable in yyyy-mm-dd format
+        for i in range(0, len(data[date_field])):
+            date.append(re.search('\d.*\d', data[date_field][i])[0])
+        for i in range(0, len(data[date_field])):
+            year.append(re.search('\d{4}', date[i])[0])
+        for i in range(0, en(data[date_field])):
+            month.append(year[i] + '-' + date[i][3:5])
+        for i in range(0, len(data[date_field])):
+            day.append(month[i] + '-' + date[i][0:2])
+        data['day'] = day
+        data['year'] = year
+        data['month'] = month
+    elif date_format_var == 'mm-dd-yyyy':  # creates year,month and day variable in yyyy-mm-dd format
+        for i in range(0, len(data[date_field])):
+            try:
+                date.append(re.search('\d.*\d', data[date_field][i])[0])
+            except:
+                continue
+        for i in range(0, len(data[date_field])):
+            try:
+                year.append(re.search('\d{4}', date[i])[0])
+            except:
+                continue
+        for i in range(0, len(data[date_field])):
+            try:
+                month.append(year[i] + '-' + date[i][0:2])
+            except:
+                continue
+        for i in range(0, len(data[date_field])):
+            try:
+                day.append(month[i] + '-' + date[i][3:5])
+            except:
+                continue
+        data['year'] = year
+        data['month'] = month
+        data['day'] = day
+    elif date_format_var == 'yyyy-mm-dd':  # creates year,month and day variable in yyyy-mm-dd format
+        for i in range(0, len(data[date_field])):
+            date.append(re.search('\d.*\d', data[date_field][i])[0])
+        for i in range(0, len(data[date_field])):
+            year.append(re.search('\d{4}', date[i])[0])
+        for i in range(0, len(data[date_field])):
+            month.append(year[i] + '-' + date[i][5:7])
+        data['year'] = year
+        data['month'] = month
+        data['day'] = date
+    elif date_format_var == 'yyyy-dd-mm':  # creates year,month and day variable in yyyy-mm-dd format
+        for i in range(0, len(data[date_field])):
+            date.append(re.search('\d.*\d', data[date_field][i])[0])
+        for i in range(0, len(data[date_field])):
+            year.append(re.search('\d{4}', date[i])[0])
+        for i in range(0, len(data[date_field])):
+            month.append(year[i] + '-' + date[i][-2:])
+        for i in range(0, len(data[date_field])):
+            day.append(month[i] + '-' + date[i][5:7])
+        data['year'] = year
+        data['month'] = month
+        data['day'] = day
+
+    # Plot corresponding graph depending on the options
+    if cumulative == False:
+        if monthly == True and yearly == True:
+            return "Choose one of the following: daily graph, monthly graph, yearly graph"
+        elif monthly == True:
+            data = data.sort_values('month')
+            finalframe = pd.DataFrame()
+            for i in sorted(set(data['month'])):
+                tester = pd.DataFrame(data[data['month'] == i][var].value_counts()).reset_index().rename(
+                    columns={'index': var, var: 'Frequency'})
+                for j in set(data[var]):
+                    if j not in set(tester[var]):
+                        temp = pd.DataFrame([j, 0]).T.rename(columns={0: var}).rename(columns={0: var, 1: 'Frequency'})
+                        tester = pd.concat([tester, temp])
+                tester = tester.sort_values(var)
+                tester
+                date = np.repeat(i, len(tester))
+                tester['date'] = date
+                tester = tester.reset_index(drop=True)
+                finalframe = pd.concat([finalframe, tester])
+                value = []
+                for i in list(set(finalframe[var])):
+                    value.append(max(finalframe[finalframe[var] == i]['Frequency']))
+            fig = px.bar(finalframe, y=var, x='Frequency', animation_frame='date', orientation='h',
+                         range_x=[0, max(value)]).update_yaxes(categoryorder='total ascending')
+        elif yearly == True:
+            data = data.sort_values('year')
+            finalframe = pd.DataFrame()
+            for i in sorted(set(data['year'])):
+                tester = pd.DataFrame(data[data['year'] == i][var].value_counts()).reset_index().rename(
+                    columns={'index': var, var: 'Frequency'})
+                for j in set(data[var]):
+                    if j not in set(tester[var]):
+                        temp = pd.DataFrame([j, 0]).T.rename(columns={0: var}).rename(columns={0: var, 1: 'Frequency'})
+                        tester = pd.concat([tester, temp])
+                tester = tester.sort_values(var)
+                tester
+                date = np.repeat(i, len(tester))
+                tester['date'] = date
+                tester = tester.reset_index(drop=True)
+                finalframe = pd.concat([finalframe, tester])
+                value = []
+                for i in list(set(finalframe[var])):
+                    value.append(max(finalframe[finalframe[var] == i]['Frequency']))
+            fig = px.bar(finalframe, y=var, x='Frequency', animation_frame='date', orientation='h',
+                         range_x=[0, max(value)]).update_yaxes(categoryorder='total ascending')
+        else:
+            data = data.sort_values('day')
+            finalframe = pd.DataFrame()
+            for i in sorted(set(data['day'])):
+                tester = pd.DataFrame(data[data['day'] == i][var].value_counts()).reset_index().rename(
+                    columns={'index': var, var: 'Frequency'})
+                for j in set(data[var]):
+                    if j not in set(tester[var]):
+                        temp = pd.DataFrame([j, 0]).T.rename(columns={0: var}).rename(columns={0: var, 1: 'Frequency'})
+                        tester = pd.concat([tester, temp])
+                tester = tester.sort_values(var)
+                tester
+                date = np.repeat(i, len(tester))
+                tester['date'] = date
+                tester = tester.reset_index(drop=True)
+                finalframe = pd.concat([finalframe, tester])
+                value = []
+                for i in list(set(finalframe[var])):
+                    value.append(max(finalframe[finalframe[var] == i]['Frequency']))
+            fig = px.bar(finalframe, y=var, x='Frequency', animation_frame='date', orientation='h',
+                         range_x=[0, max(value)]).update_yaxes(categoryorder='total ascending')
+    else:
+        if monthly == True and yearly == True:
+            return "Choose one of the following: daily graph, monthly graph, yearly graph"
+        elif yearly == True:
+            data = data.sort_values('year')
+            finalframe = pd.DataFrame()
+            for i in sorted(set(data['year'])):
+                tester = pd.DataFrame(data[data['year'] <= i][var].value_counts()).reset_index().rename(
+                    columns={'index': var, var: 'Frequency'})
+                for j in set(data[var]):
+                    if j not in set(tester[var]):
+                        temp = pd.DataFrame([j, 0]).T.rename(columns={0: var}).rename(columns={0: var, 1: 'Frequency'})
+                        tester = pd.concat([tester, temp])
+                tester = tester.sort_values(var)
+                tester
+                date = np.repeat(i, len(tester))
+                tester['date'] = date
+                tester = tester.reset_index(drop=True)
+                finalframe = pd.concat([finalframe, tester])
+                value = []
+                for i in list(set(finalframe[var])):
+                    value.append(max(finalframe[finalframe[var] == i]['Frequency']))
+            fig = px.bar(finalframe, y=var, x='Frequency', animation_frame='date', orientation='h',
+                         range_x=[0, max(value)]).update_yaxes(categoryorder='total ascending')
+        elif monthly == True:
+            data = data.sort_values('month')
+            finalframe = pd.DataFrame()
+            for i in sorted(set(data['month'])):
+                tester = pd.DataFrame(data[data['month'] <= i][var].value_counts()).reset_index().rename(
+                    columns={'index': var, var: 'Frequency'})
+                for j in set(data[var]):
+                    if j not in set(tester[var]):
+                        temp = pd.DataFrame([j, 0]).T.rename(columns={0: var}).rename(columns={0: var, 1: 'Frequency'})
+                        tester = pd.concat([tester, temp])
+                tester = tester.sort_values(var)
+                tester
+                date = np.repeat(i, len(tester))
+                tester['date'] = date
+                tester = tester.reset_index(drop=True)
+                finalframe = pd.concat([finalframe, tester])
+                value = []
+                for i in list(set(finalframe[var])):
+                    value.append(max(finalframe[finalframe[var] == i]['Frequency']))
+            fig = px.bar(finalframe, y=var, x='Frequency', animation_frame='date', orientation='h',
+                         range_x=[0, max(value)]).update_yaxes(categoryorder='total ascending')
+        else:
+            data = data.sort_values('day')
+            finalframe = pd.DataFrame()
+            for i in sorted(set(data['day'])):
+                tester = pd.DataFrame(data[data['day'] <= i][var].value_counts()).reset_index().rename(
+                    columns={'index': var, var: 'Frequency'})
+                for j in set(data[var]):
+                    if j not in set(tester[var]):
+                        temp = pd.DataFrame([j, 0]).T.rename(columns={0: var}).rename(columns={0: var, 1: 'Frequency'})
+                        tester = pd.concat([tester, temp])
+                tester = tester.sort_values(var)
+                tester
+                date = np.repeat(i, len(tester))
+                tester['date'] = date
+                tester = tester.reset_index(drop=True)
+                finalframe = pd.concat([finalframe, tester])
+                value = []
+                for i in list(set(finalframe[var])):
+                    value.append(max(finalframe[finalframe[var] == i]['Frequency']))
+            fig = px.bar(finalframe, y=var, x='Frequency', animation_frame='date', orientation='h',
+                         range_x=[0, max(value)]).update_yaxes(categoryorder='total ascending')
+    fig = fig.update_geos(projection_type="equirectangular", visible=True, resolution=110)
+    fig.write_html(outputFilename)
+
+    return outputFilename
+

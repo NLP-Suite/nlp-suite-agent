@@ -9,6 +9,7 @@ import plotly.graph_objs as go
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import math
+import io
 
 import IO_csv_util
 
@@ -33,17 +34,35 @@ def create_Plotly_chart(inputFilename,outputDir,chart_title,chart_type_list,cols
                         column_yAxis_label='',
                         remove_hyperlinks=True,
                         static_flag=False,
-                        csv_field_Y_axis_list = [], X_axis_var = []):
+                        csv_field_Y_axis_list = [], X_axis_var = [], 
+                        inputFileData = ""):
     # if we need to remove the hyperlinks, we need to make a temporary data for plotting
-    if remove_hyperlinks:
-        remove_hyperlinks,inputFilename = IO_csv_util.remove_hyperlinks(inputFilename)
-    try:
-        data = pd.read_csv(inputFilename, encoding='utf-8', on_bad_lines='skip')
-    except pd.errors.ParserError:
-        data = pd.read_csv(inputFilename, encoding='utf-8', on_bad_lines='skip', sep='delimiter')
-    except:
-        print("Error: failed to read the csv file : "+inputFilename)
-        return
+    if inputFileData:
+        try:
+            # Convert inputFileData to a DataFrame
+            data = pd.read_csv(io.StringIO(inputFileData), encoding='utf-8', on_bad_lines='skip')
+            inputFilename = None  # No need to refer to a file when using inputFileData
+        except pd.errors.ParserError:
+            print("Error: failed to parse the provided inputFileData.")
+            return
+        except Exception as e:
+            print(f"Error: {e}")
+            return
+    else:
+        # Process inputFilename as usual
+        if remove_hyperlinks:
+            remove_hyperlinks, inputFilename = IO_csv_util.remove_hyperlinks(inputFilename)
+        try:
+            data = pd.read_csv(inputFilename, encoding='utf-8', on_bad_lines='skip')
+        except pd.errors.ParserError:
+            try:
+                data = pd.read_csv(inputFilename, encoding='utf-8', on_bad_lines='skip', sep='delimiter')
+            except:
+                print("Error: failed to read the csv file: " + inputFilename)
+                return
+        except Exception as e:
+            print(f"Error: {e}")
+            return
     # print on X-axis the filename w/o path
     # head, tail = os.path.split(inputFilename)
     # inputFilenameSV=inputFilename
@@ -449,3 +468,184 @@ def plot_graph_bubble_chart(fileName, xAxis, yAxis, category):
                         "yanchor": "top"}]
     )
     return fig
+
+
+
+def bubble_chart(inputFilename, outputFilename, x, y, color, show_labels=True, inputFileData=""):
+    import mpld3
+    from mpld3 import plugins
+    import numpy as np
+    from collections import Counter
+    import random
+    
+
+    print(f"\nCHART PARAMETERS: {x} (X-axis) vs. {y} (Y-axis)")
+    if inputFileData:
+        df = pd.read_csv(io.StringIO(inputFileData))
+    else:
+        df = pd.read_csv(inputFilename)
+
+    df = df[(df[x] != 'None') & (df[y] != 'None')]
+
+    df[x] = df[x].astype(str)
+    df[y] = df[y].astype(str)
+
+    xy_pairs = list(zip(df[x], df[y]))
+    pair_counts = Counter(xy_pairs)
+
+    unique_pairs = list(pair_counts.keys())
+    frequencies = list(pair_counts.values())
+
+    n_bubbles = len(frequencies)
+    max_size = 5000 / np.sqrt(n_bubbles)
+    min_size = max_size / 10
+
+    sizes = np.array(frequencies)
+    sizes = (sizes - sizes.min()) / (sizes.max() - sizes.min()) * 50 * (max_size - min_size) + min_size
+
+    unique_x = sorted(set(df[x]))
+    unique_y = sorted(set(df[y]))
+    x_pos = [unique_x.index(pair[0]) for pair in unique_pairs]
+    y_pos = [unique_y.index(pair[1]) for pair in unique_pairs]
+
+    labels = [f"{pair[0]}, {pair[1]}\nFreq: {freq}" for pair, freq in zip(unique_pairs, frequencies)]
+
+    unique_frequencies = sorted(set(frequencies))
+    frequency_colors = {freq: f'#{random.randint(0, 0xFFFFFF):06x}' for freq in unique_frequencies}
+    colors = [frequency_colors[freq] for freq in frequencies]
+
+    class BubbleChart:
+        def __init__(self, area, x_pos, y_pos, colors):
+            bubble_spacing = 0.1
+            area = np.asarray(area)
+            r = np.sqrt(area / np.pi)
+
+            self.bubble_spacing = bubble_spacing
+            self.bubbles = np.ones((len(area), 4))
+            self.bubbles[:, 2] = r
+            self.bubbles[:, 3] = area
+            self.maxstep = 2 * self.bubbles[:, 2].max() + self.bubble_spacing
+            self.step_dist = self.maxstep / 2
+            self.colors = colors
+
+            length = np.ceil(np.sqrt(len(self.bubbles)))
+            grid = np.arange(length) * self.maxstep
+            gx, gy = np.meshgrid(grid, grid)
+            self.bubbles[:, 0] = gx.flatten()[:len(self.bubbles)]
+            self.bubbles[:, 1] = gy.flatten()[:len(self.bubbles)]
+
+            self.com = self.center_of_mass()
+
+        def center_of_mass(self):
+            return np.average(
+                self.bubbles[:, :2], axis=0, weights=self.bubbles[:, 3]
+            )
+
+        def center_distance(self, bubble, bubbles):
+            return np.hypot(bubble[0] - bubbles[:, 0],
+                            bubble[1] - bubbles[:, 1])
+
+        def outline_distance(self, bubble, bubbles):
+            center_distance = self.center_distance(bubble, bubbles)
+            return center_distance - bubble[2] - \
+                bubbles[:, 2] - self.bubble_spacing
+
+        def check_collisions(self, bubble, bubbles):
+            distance = self.outline_distance(bubble, bubbles)
+            return len(distance[distance < 0])
+
+        def collides_with(self, bubble, bubbles):
+            distance = self.outline_distance(bubble, bubbles)
+            return np.argmin(distance, keepdims=True)
+
+        def collapse(self, n_iterations=50):
+            """
+            Move bubbles to the center of mass.
+
+            Parameters
+            ----------
+            n_iterations : int, default: 50
+                Number of moves to perform.
+            """
+            for _i in range(n_iterations):
+                moves = 0
+                for i in range(len(self.bubbles)):
+                    rest_bub = np.delete(self.bubbles, i, 0)
+
+                    dir_vec = self.com - self.bubbles[i, :2]
+                    dir_vec = dir_vec / np.sqrt(dir_vec.dot(dir_vec))
+                    new_point = self.bubbles[i, :2] + dir_vec * self.step_dist
+                    new_bubble = np.append(new_point, self.bubbles[i, 2:4])
+
+                    if not self.check_collisions(new_bubble, rest_bub):
+                        self.bubbles[i, :] = new_bubble
+                        self.com = self.center_of_mass()
+                        moves += 1
+                    else:
+                        for colliding in self.collides_with(new_bubble, rest_bub):
+                            dir_vec = rest_bub[colliding, :2] - self.bubbles[i, :2]
+                            dir_vec = dir_vec / np.sqrt(dir_vec.dot(dir_vec))
+                            orth = np.array([dir_vec[1], -dir_vec[0]])
+                            new_point1 = (self.bubbles[i, :2] + orth * self.step_dist)
+                            new_point2 = (self.bubbles[i, :2] - orth * self.step_dist)
+                            dist1 = self.center_distance(self.com, np.array([new_point1]))
+                            dist2 = self.center_distance(self.com, np.array([new_point2]))
+                            new_point = new_point1 if dist1 < dist2 else new_point2
+                            new_bubble = np.append(new_point, self.bubbles[i, 2:4])
+                            if not self.check_collisions(new_bubble, rest_bub):
+                                self.bubbles[i, :] = new_bubble
+                                self.com = self.center_of_mass()
+
+                if moves / len(self.bubbles) < 0.1:
+                    self.step_dist = self.step_dist / 2
+
+        def plot(self, ax, labels):
+            """
+            Draw the bubble plot with specified colors and scale text to bubble size.
+
+            Parameters
+            ----------
+            ax : matplotlib.axes.Axes
+            labels : list
+                Labels of the bubbles.
+            """
+            self.circles = []
+            self.texts = []
+            for i in range(len(self.bubbles)):
+                circ = plt.Circle(
+                    self.bubbles[i, :2], self.bubbles[i, 2], color=self.colors[i])
+                self.circles.append(circ)
+                ax.add_patch(circ)
+
+                bubble_size = self.bubbles[i, 2] * 2
+                text_size = bubble_size / 10
+
+                if show_labels:
+                    text = ax.text(*self.bubbles[i, :2], labels[i],
+                            horizontalalignment='center', verticalalignment='center',
+                            fontsize=text_size, color='black')
+                    self.texts.append(text)
+
+    bubble_chart = BubbleChart(area=sizes, x_pos=x_pos, y_pos=y_pos, colors=colors)
+    bubble_chart.collapse()
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    bubble_chart.plot(ax, labels)
+    ax.axis("off")
+    ax.relim()
+    ax.autoscale_view()
+    ax.set_title('Bubble Chart for ' + x + " (X-axis) and " + y + " (Y-axis)")
+
+    scatter = ax.scatter([bubble[0] for bubble in bubble_chart.bubbles],
+                         [bubble[1] for bubble in bubble_chart.bubbles],
+                         s=[bubble[3] for bubble in bubble_chart.bubbles],
+                         color=bubble_chart.colors, alpha=0)
+
+    tooltip = plugins.PointLabelTooltip(scatter, labels=labels)
+    plugins.connect(fig, tooltip)
+
+    plt.tight_layout(pad=0.1, w_pad=0.1, h_pad=0.1)
+    plt.subplots_adjust(left=0.02, right=0.98, top=0.95, bottom=0.05)
+
+    mpld3.save_html(fig, outputFilename + ".html")
+    return outputFilename + ".html"
