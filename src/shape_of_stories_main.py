@@ -280,7 +280,7 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
     # hierarchical clustering
     if hierarchical_clustering:
         # create HC subdir
-        outputHCDir = IO_files_util.make_output_subdirectory('', '', outputDir, label='HC_cluster',
+        outputHCDir = IO_files_util.make_output_subdirectory('', inputDir, outputDir, label='HC_cluster',
                                                               silent=True)
         if outputHCDir == '':
             return
@@ -300,7 +300,7 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
     # svd
     if SVD:
         # create SVD subdir
-        outputSVDDir = IO_files_util.make_output_subdirectory('', '', outputDir, label='SVD_cluster',
+        outputSVDDir = IO_files_util.make_output_subdirectory('', inputDir, outputDir, label='SVD_cluster',
                                                               silent=True)
         if outputSVDDir == '':
             return
@@ -327,7 +327,7 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
     # NMF
     if NMF:
         # create NMF subdir
-        outputNMFDir = IO_files_util.make_output_subdirectory('', '', outputDir, label='NMF_cluster',
+        outputNMFDir = IO_files_util.make_output_subdirectory('', inputDir, outputDir, label='NMF_cluster',
                                                               silent=True)
         if outputNMFDir == '':
             return
@@ -346,14 +346,14 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
 
     # best topic estimate
     if best_topic_estimation:
-        startTime1=IO_user_interface_util.timed_alert(2000,'Analysis start',
-                                           'Started running estimate_best_k at', True,'You can follow the progress bar in command line.')
+        # startTime1=IO_user_interface_util.timed_alert(2000,'Analysis start',
+        #                                    'Started running estimate_best_k at', True,'You can follow the progress bar in command line.')
         filesToOpen = cl.estimate_best_k(sentiment_vectors, outputDir, filesToOpen)
-        IO_user_interface_util.timed_alert(2000,'Analysis end',
-                            'Finished running estimate_best_k at', True, '', True, startTime1)
+        # IO_user_interface_util.timed_alert(2000,'Analysis end',
+        #                     'Finished running estimate_best_k at', True, '', True, startTime1)
 
-    IO_user_interface_util.timed_alert(2000,'Analysis end',
-                        'Finished running Shape of Stories at', True, '', True, startTime1)
+    # IO_user_interface_util.timed_alert(2000,'Analysis end',
+    #                     'Finished running Shape of Stories at', True, '', True, startTime1)
 
     if openOutputFiles == True:
         IO_files_util.OpenOutputFiles(openOutputFiles, filesToOpen, outputDir, scriptName)

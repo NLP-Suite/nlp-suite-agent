@@ -12,6 +12,7 @@ from parsers_annotators import run_parsers_annotators
 from sentiment_analysis import run_sentiment_analysis
 from topic_modeling import run_topic_modeling
 from word2vec import run_word2vec
+from shape_of_stories_main import run as run_shape_of_stories
 app = FastAPI()
 origins = [
     "*",
@@ -296,6 +297,47 @@ def style_analysis(
                 gender_guesser_var = gender_guesser,
                 min_rating = min_rating,
                 max_rating_sd = max_rating_sd
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+
+@app.post("/shape_of_stories")
+def shape_of_stories(
+    inputDirectory: Annotated[str, Form()],
+    outputDirectory: Annotated[str, Form()],
+    chartPackage: Annotated[str, Form()],
+    transformation: Annotated[str, Form()],
+    sentimentAnalysis: Annotated[bool, Form()]=False,
+    sentimentAnalysisMethod: Annotated[str, Form()]='',
+    corpus_analysis: Annotated[bool, Form()]=False,
+    hierarchical_clustering: Annotated[bool, Form()]=False,
+    SVD: Annotated[bool, Form()]=False,
+    NMF: Annotated[bool, Form()]=False,
+    best_topic_estimation: Annotated[bool, Form()]=False,
+    memory_var = Annotated[int, Form()]
+    ):
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_shape_of_stories(
+                inputFilename='',
+                openOutputFiles = False,
+                inputDir=inputDirectory,
+                outputDir=outputDirectory,
+                chartPackage=chartPackage, 
+                dataTransformation=transformation,
+                sentimentAnalysis= sentimentAnalysis,
+                sentimentAnalysisMethod = sentimentAnalysisMethod,
+                corpus_analysis = corpus_analysis,
+                hierarchical_clustering = hierarchical_clustering,
+                SVD = SVD,
+                NMF = NMF,
+                best_topic_estimation= best_topic_estimation,
+                memory_var=memory_var
             ),
         )
     )

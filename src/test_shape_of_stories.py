@@ -4,13 +4,13 @@ def main():
     # inputFilename = '/Users/is2ac/nlp-suite/input/example.txt'
     inputFilename = ''
     # inputDir = '/Users/is2ac/nlp-suite/input'
-    inputDir = '/Users/is2ac/Documents/QTM_190/English'
+    inputDir = '/Users/is2ac/nlp-suite/input'
     outputDir= '/Users/is2ac/nlp-suite/output'
     openOutputFiles = False
     chartPackage = "Excel"
     dataTransformation = ''
     sentimentAnalysis=True
-    sentimentAnalysisMethod="Stanford CoreNLP"
+    sentimentAnalysisMethod="BERT (English model)"
     memory_var=6
     corpus_analysis=False
     hierarchical_clustering=True
