@@ -13,6 +13,8 @@ from sentiment_analysis import run_sentiment_analysis
 from topic_modeling import run_topic_modeling
 from word2vec import run_word2vec
 from sunburst_charts import run_sun_burst
+from colormap_chart import run_colormap
+
 #from style_analysis import run_style_analysis
 
 app = FastAPI()
@@ -333,6 +335,38 @@ def sunburst_charts(
                 selected_pairs_data = selected_pairs_data,
                 piechart_var = piechart_var,
                 treemap_var = treemap_var 
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+
+@app.post("/colormap_chart")
+def colormap_chart(
+    colormap_file_input: Annotated[str, Form()],
+    outputDirectory: Annotated[str, Form()],
+    max_number_of_rows: Annotated[int, Form()],
+    less_freq_color_picker: Annotated[str, Form()],
+    csv_file_categorical_field_list_front: Annotated[str, Form()] = '[]', 
+    more_freq_color_picker: Annotated[str, Form()] = False,
+    normalize: Annotated[str, Form()] = False,
+    file_data: Annotated[str, Form()] = "",
+
+):
+    # inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_colormap(
+                inputFilename=colormap_file_input,
+                outputDir=outputDirectory,
+                csv_file_categorical_field_list=csv_file_categorical_field_list_front, 
+                max_rows_var= max_number_of_rows,
+                color_1_style_var=less_freq_color_picker,
+                color_2_style_var=more_freq_color_picker,
+                normalize_var=normalize,
+                inputFileData=file_data,
             ),
         )
     )

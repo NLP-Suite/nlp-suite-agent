@@ -1,7 +1,8 @@
 
 import charts_util
+import json
 
-def run(inputFilename, outputDir,
+def run_colormap(inputFilename, outputDir,
         csv_file_categorical_field_list,
         max_rows_var,
         color_1_style_var,
@@ -12,7 +13,8 @@ def run(inputFilename, outputDir,
         filesToOpen = []
         all_fields = []
         intermediate_fields = []
-
+        csv_file_categorical_field_list = json.loads(csv_file_categorical_field_list)
+        print(csv_file_categorical_field_list)
         for i in range(len(csv_file_categorical_field_list)):
             if i >0 and i < len(csv_file_categorical_field_list)-1:
                 intermediate_fields.append(csv_file_categorical_field_list[i][0].split('|')[0])
@@ -37,6 +39,7 @@ def run(inputFilename, outputDir,
                 filesToOpen.append(outputFiles)
             else:
                 filesToOpen.extend(outputFiles)
+    
         return outputFiles
 
 
@@ -53,13 +56,16 @@ def main():
     7,Lady,Female,Yes,Black,Single breed,11,22,Small
     8,Leo,Male,Yes,Reddish,Single breed,15,14,Small"""
 
-    outputDir = "C:/Users/sherry/OneDrive/Desktop/QTM446W/Ouput"
+    outputDir = "/Users/aidenamaya/nlp-suite/output"
     inputFilename = "sample.csv"
-                                        #GROUPBY,     WHERE,         SELECT               
-    csv_file_categorical_field_list = [['Gender|'], ['Fixed|Yes'], ['Weight|']]
-                                    # GROUPBY format: [field|Val1, Val2...], Vals optional
-                                    # WHERE format: [field|Val1, Val2...], Vals not optional
-                                    # SELECT format: [field|]
+    
+    #                                     #GROUPBY,     WHERE,         SELECT               
+    # csv_file_categorical_field_list = [['Gender|'], ['Fixed|Yes'], ['Weight|']]
+    #                                 # GROUPBY format: [field|Val1, Val2...], Vals optional
+    #                                 # WHERE format: [field|Val1, Val2...], Vals not optional
+    #                                 # SELECT format: [field|]
+                                    
+    csv_file_categorical_field_list = '[["Age|"],["Weight|"]]'
     max_rows_var = 5
     color_1_style_var = "135,207,236"  
     color_2_style_var = "0,0,255"      
@@ -67,7 +73,7 @@ def main():
 
     # Run the colormap visualization
     try:
-        output_files = run(
+        output_files = run_colormap(
             inputFilename,
             outputDir,
             csv_file_categorical_field_list,
@@ -80,5 +86,7 @@ def main():
         print("Output files generated:", output_files)
     except Exception as e:
         print("An error occurred during testing:", e)
+        
+        
 if __name__ == '__main__':
     main()
