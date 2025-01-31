@@ -20,6 +20,7 @@ import IO_user_interface_util
 import statistics_csv_util
 import io
 
+
 # Prepare the data (data_to_be_plotted) to be used in charts_Excel_util.create_excel_chart with the format:
 #   one series: [[['Name1','Frequency'], ['A', 7]]]
 #   two series: [[['Name1','Frequency'], ['A', 7]], [['Name2','Frequency'], ['B', 4]]]
@@ -1640,7 +1641,6 @@ def boxplot(
 # All these recommendations are for performance
 # three_way_Sankey is a boolean variable that dictates whether the returned Sankey is 2way or 3way. True for 3 variables, false for 2 variables
 def Sankey(
-    data,
     outputFilename,
     var1,
     lengthvar1,
@@ -1649,15 +1649,38 @@ def Sankey(
     three_way_Sankey,
     var3=None,
     lengthvar3=None,
-):
-    if isinstance(data, str):
-        try:
-            data = pd.read_csv(data, encoding="utf-8", on_bad_lines="skip")
-        except pd.errors.EmptyDataError:
-            print(
-                "Warning: The input file is empty.\nNo Sankey flowchart can be produced.\nPlease, check your input file and try again."
-            )
+    data = "",
+):  
+    import json
+
+    from io import StringIO
+    
+
+    try:
+        # Parse JSON if data is a string
+        if isinstance(data, str):
+            data = json.loads(data)
+
+        # Ensure data is now a list of dictionaries (JSON format)
+        if isinstance(data, list) and all(isinstance(row, dict) for row in data):
+            data = pd.DataFrame(data)  # Convert JSON to DataFrame
+        else:
+            print("Error: Data is not in the expected JSON format.")
             return
+
+        print("Below is the printed DataFrame:")
+        print(data)
+
+    except json.JSONDecodeError:
+        print("Error: Invalid JSON string.")
+        return
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return
+    
+    print("This is the df" + data)
+    print(data[var1].dtype)
+    print(data[var2].dtype)
 
     # Ensure that required fields are categorical
     if not pd.api.types.is_string_dtype(data[var1]) or not pd.api.types.is_string_dtype(data[var2]):
@@ -2443,8 +2466,8 @@ def colormap(inputFilename, outputDir, csv_file_categorical_field_list, params, 
     # step1 is a dataframe
     step1 = process_and_aggregate_data(dataFrame, where_column=WHERE, groupby_column=GROUPBY, select_column=SELECT)
     if step1.empty:
-        print(title='No search values found',
-                       message='No combination of csv file fields and search values were found in your input file.\n\n' + str(csv_file_categorical_field_list) + '\n\nPlease, make sure to check whether\n   1. you have not entered the same field twice;\n   2. you are using a case sensitive search option.\n\nPlease, click on the Reset button and start again.')
+        print('No search values found' +
+              'No combination of csv file fields and search values were found in your input file.\n\n' + str(csv_file_categorical_field_list) + '\n\nPlease, make sure to check whether\n   1. you have not entered the same field twice;\n   2. you are using a case sensitive search option.\n\nPlease, click on the Reset button and start again.')
         return
     colormap_dataframe_csv_filename =outputDir + os.sep + "colormap_dataframe.csv"
     filesToOpen.append(colormap_dataframe_csv_filename)

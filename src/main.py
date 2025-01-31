@@ -14,6 +14,7 @@ from topic_modeling import run_topic_modeling
 from word2vec import run_word2vec
 from sunburst_charts import run_sun_burst
 from colormap_chart import run_colormap
+from sankey_flowchart import run_sankey
 
 #from style_analysis import run_style_analysis
 
@@ -367,6 +368,37 @@ def colormap_chart(
                 color_2_style_var=more_freq_color_picker,
                 normalize_var=normalize,
                 inputFileData=file_data,
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+
+
+@app.post("/sankey_flowchart")
+def sankey_flowchart(
+        inputDirectory: Annotated[str, Form()],
+        outputDirectory: Annotated[str, Form()],
+        variable_1_max: Annotated[int, Form()], 
+        variable_2_max: Annotated[int, Form()], 
+        variable_3_max: Annotated[int, Form()], 
+        file_data: Annotated[str, Form()] = "",
+        selected_pairs_data: Annotated[str, Form()] = "[]",
+):
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_sankey(
+                data = file_data,
+                inputDir = inputDirectory,
+                outputDir = outputDirectory,
+                csv_file_relational_field_list = selected_pairs_data,
+                Sankey_limit1_var = variable_1_max,
+                Sankey_limit2_var = variable_2_max,
+                Sankey_limit3_var = variable_3_max,
             ),
         )
     )

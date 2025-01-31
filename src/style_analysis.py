@@ -271,9 +271,9 @@ def run_style_analysis(inputFilename, inputDir, outputDir, chartPackage,dataTran
 
 
 def main():
-    inputFilename = "Conrad_Lord Jim_01.txt"
-    inputDir = "C:/Users/sherry/OneDrive/Desktop/QTM446W/Input"
-    outputDir = "C:/Users/sherry/OneDrive/Desktop/QTM446W/Output"
+    inputFilename = "The Three Little Pigs.txt"
+    inputDir = "/Users/aidenamaya/nlp-suite/input"
+    outputDir = "/Users/aidenamaya/nlp-suite/output"
     chartPackage = "matplotlib"  
     dataTransformation = "log" 
     extra_GUIs_var = False

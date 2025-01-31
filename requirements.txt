@@ -97,4 +97,10 @@ watchfiles==0.21.0
 weasel==0.3.4
 websockets==12.0
 wordcloud==1.9.3
-zipp==3.18.1
+zipp==3.18.1 #before style_analysis
+# autocorrect==2.6.1
+# spellchecker==0.4.0
+# spacy_langdetect==0.1.2
+# langid==1.1.6
+# pyspellchecker==0.8.2
+# fuzzywuzzy==0.18.0
