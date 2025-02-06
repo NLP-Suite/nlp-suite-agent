@@ -8,7 +8,7 @@ import IO_csv_util
 import CoNLL_util
     
     
-def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
+def run_conll(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
         searchedCoNLLField, searchField_kw, postag, deprel, co_postag, co_deprel, Begin_K_sent_var, End_K_sent_var):
     
     logging.basicConfig(level=logging.INFO)

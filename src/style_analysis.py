@@ -21,7 +21,7 @@ def run_style_analysis(inputFilename, inputDir, outputDir, chartPackage,dataTran
     max_rating_sd):   
 
     
-    openOutputFiles = False
+    openOutputFiles = True
     config_filename = "NLP_default_IO_config.csv"
 
     filesToOpen = []  # Store all files that are to be opened once finished
@@ -271,16 +271,16 @@ def run_style_analysis(inputFilename, inputDir, outputDir, chartPackage,dataTran
 
 
 def main():
-    inputFilename = "The Three Little Pigs.txt"
+    inputFilename = ""
     inputDir = "/Users/aidenamaya/nlp-suite/input"
     outputDir = "/Users/aidenamaya/nlp-suite/output"
-    chartPackage = "matplotlib"  
-    dataTransformation = "log" 
+    chartPackage = "Excel"  
+    dataTransformation = "No transformation" 
     extra_GUIs_var = False
     complexity_readability_analysis_var = True
     complexity_readability_analysis_menu_var = "text-readability"
-    vocabulary_analysis_var = True
-    vocabulary_analysis_menu_var = "unigrams"
+    vocabulary_analysis_var = False 
+    vocabulary_analysis_menu_var = "*"
     gender_guesser_var = False  
     min_rating = 3
     max_rating_sd = 1

@@ -1655,30 +1655,17 @@ def Sankey(
 
     from io import StringIO
     
+    print(type(data))
 
     try:
-        # Parse JSON if data is a string
         if isinstance(data, str):
-            data = json.loads(data)
-
-        # Ensure data is now a list of dictionaries (JSON format)
-        if isinstance(data, list) and all(isinstance(row, dict) for row in data):
-            data = pd.DataFrame(data)  # Convert JSON to DataFrame
-        else:
-            print("Error: Data is not in the expected JSON format.")
-            return
-
-        print("Below is the printed DataFrame:")
-        print(data)
-
-    except json.JSONDecodeError:
-        print("Error: Invalid JSON string.")
-        return
+            data = pd.read_csv(StringIO(data))
+            
+            
     except Exception as e:
         print(f"An error occurred: {e}")
         return
-    
-    print("This is the df" + data)
+
     print(data[var1].dtype)
     print(data[var2].dtype)
 

@@ -4,12 +4,21 @@
 import IO_files_util
 import charts_util 
 import json
+import pandas as pd 
+import io 
 
 def run_sankey(data, inputDir, outputDir,
         csv_file_relational_field_list, # = "a, b, c"
         Sankey_limit1_var, Sankey_limit2_var, Sankey_limit3_var,
         ):
-
+        
+        print("This is the datra: " + data)
+        data = json.loads(data)
+        
+        
+        data = pd.DataFrame(data) 
+        # @@@ nan values will break the code
+        data = data.fillna("Blank/missing value")
         
         # csv_file_relational_field_list = json.loads(csv_file_relational_field_list)
         output_label = 'Sankey'
@@ -36,6 +45,7 @@ def run_sankey(data, inputDir, outputDir,
             three_way_Sankey = False
             var3=None
             Sankey_limit3_var=None
+            
         outputFiles = charts_util.Sankey(outputFilename,
                                     csv_file_relational_field_list[0], Sankey_limit1_var, csv_file_relational_field_list[1],
                                             Sankey_limit2_var, three_way_Sankey, var3, Sankey_limit3_var, data=data)
@@ -51,7 +61,7 @@ def run_sankey(data, inputDir, outputDir,
 
 
 def main(): 
-    inputFilename ='''Obs,Name,Gender,Fixed,Color,Heritage,Age,Weight,Size
+    data ='''Obs,Name,Gender,Fixed,Color,Heritage,Age,Weight,Size
         1,Max,Male,Yes,Dark brown,"Designer/deliberate mix (e.g., labradoodles)",7,70,Large
         2,Isla,Female,Yes,Black,Single breed,8,13,Small
         3,Tyson,Male,No,Black,Mixed breed/unknown,0.33,24,Large
@@ -60,7 +70,14 @@ def main():
         6,Lola,Female,Yes,Black,Mixed breed/unknown,14,85,Large
         7,Lady,Female,Yes,Black,Single breed,11,22,Small
         8,Leo,Male,Yes,Reddish,Single breed,15,14,Small''' #csv file 
-        
+
+    rows = [row.split(",") for row in data.split("\n")]
+    headers = rows[0]
+    data_list = [dict(zip(headers, row)) for row in rows[1:]]
+
+    data = json.dumps(data_list)
+
+    
     inputDir = "/Users/aidenamaya/nlp-suite/input"
     outputDir = "/Users/aidenamaya/nlp-suite/output"
     csv_file_relational_field_list = "Name, Color"
@@ -68,7 +85,7 @@ def main():
     Sankey_limit2_var = 15
     Sankey_limit3_var = 20
 
-    run_sankey(data= inputFilename, 
+    run_sankey(data= data, 
                inputDir = inputDir, 
                outputDir = outputDir,
                csv_file_relational_field_list = csv_file_relational_field_list, 

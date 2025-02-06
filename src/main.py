@@ -15,8 +15,10 @@ from word2vec import run_word2vec
 from sunburst_charts import run_sun_burst
 from colormap_chart import run_colormap
 from sankey_flowchart import run_sankey
+from CoNLL_table_analyzer_main import run_conll
 
-#from style_analysis import run_style_analysis
+# from style_analysis import run_style_analysis
+from SVO import run_svo
 
 app = FastAPI()
 origins = [
@@ -265,6 +267,52 @@ def word2vec(
     thread.start()
     return PlainTextResponse("", status_code=200)
 
+@app.post("/CoNLL_table_analyzer_main")
+def conll_table_analyzer(
+    inputFilename: Annotated[str, Form()], 
+    inputDirectory: Annotated[str, Form()],
+    outputDirectory: Annotated[str, Form()], 
+    chart_packages: Annotated[str, Form()],
+    transformation: Annotated[str, Form()], 
+    conll_search_field: Annotated[str, Form()], 
+    search_kw: Annotated[str, Form()], 
+    postag: Annotated[str, Form()], 
+    deprel: Annotated[str, Form()], 
+    postag_b: Annotated[str, Form()], 
+    deprel_b: Annotated[str, Form()],
+    Begin_K_sent_var: Annotated[bool, Form()] = False,
+    End_K_sent_var: Annotated[bool, Form()] = False,
+    openOutputFiles: Annotated[bool, Form()] = False,
+
+):
+    inputFilename = ""
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_conll(
+                inputFilename=inputFilename,
+                inputDir=inputDirectory,
+                outputDir=outputDirectory,
+                openOutputFiles=openOutputFiles, 
+                chartPackage=chart_packages, 
+                dataTransformation=transformation,
+                searchedCoNLLField=conll_search_field,
+                searchField_kw=search_kw,
+                postag=postag,
+                deprel=deprel,
+                co_postag=postag_b,
+                co_deprel=deprel_b,
+                Begin_K_sent_var=Begin_K_sent_var,
+                End_K_sent_var=End_K_sent_var,
+
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+
 
 # @app.post("/style_analysis")
 # def style_analysis(
@@ -404,6 +452,65 @@ def sankey_flowchart(
     )
     thread.start()
     return PlainTextResponse("", status_code=200)
+
+
+
+@app.post("/SVO")
+def SVO(
+    inputDirectory: Annotated[str, Form()],
+    outputDirectory: Annotated[str, Form()],
+    transformation: Annotated[str, Form()],
+    coreferenceResolution: Annotated[bool, Form()] = False,
+    manualCoreference: Annotated[bool, Form()] = False,
+    package: Annotated[str, Form()] = 'Excel',
+    lemmatize_subjects: Annotated[bool, Form()] = False,
+    filter_subjects: Annotated[bool, Form()] = False,
+    lemmatize_verbs: Annotated[bool, Form()] =  False,
+    filter_verbs: Annotated[bool, Form()] = False,
+    lemmatize_objects: Annotated[bool, Form()] = False,
+    filter_objects: Annotated[bool, Form()] = False,
+    so_gender: Annotated[bool, Form()] = False,
+    so_quote: Annotated[bool, Form()] = False,
+):
+    inputFilename = ""
+    chartPackage = 'Excel'
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_svo(
+                inputFilename = inputFilename,
+                inputDir = inputDirectory, 
+                outputDir = outputDirectory, 
+                openOutputFiles = False, 
+                chartPackage = chartPackage, 
+                dataTransformation = transformation,
+                coref_var = coreferenceResolution,
+                manual_coref_var = manualCoreference,
+                normalized_NER_date_extractor_var = False,
+                package_var = package,
+                gender_var = so_gender,
+                quote_var = so_quote,
+                subjects_dict_path_var = False,
+                verbs_dict_path_var = False,
+                objects_dict_path_var = False,
+                filter_subjects = filter_subjects,
+                filter_verbs = filter_verbs,
+                filter_objects = filter_objects,
+                lemmatize_subjects = lemmatize_subjects,
+                lemmatize_verbs = lemmatize_verbs,
+                lemmatize_objects = lemmatize_objects,
+                gephi_var = False,
+                wordcloud_var = False,
+                google_earth_var = False
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+
+
 
 if __name__ == "__main__":
     uvicorn.run(app, port=3000, host="0.0.0.0")
