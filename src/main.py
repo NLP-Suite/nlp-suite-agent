@@ -16,6 +16,7 @@ from sunburst_charts import run_sun_burst
 from colormap_chart import run_colormap
 from sankey_flowchart import run_sankey
 from CoNLL_table_analyzer_main import run_conll
+from wordcloud_visual import run_wordcloud
 
 # from style_analysis import run_style_analysis
 from SVO import run_svo
@@ -510,7 +511,61 @@ def SVO(
     thread.start()
     return PlainTextResponse("", status_code=200)
 
-
+@app.post("/wordclouds")
+def wordcloud(
+    inputDirectory: Annotated[str, Form()],
+    outputDirectory: Annotated[str, Form()],
+    wordcloudservice: Annotated[str, Form()],
+    font_name: Annotated[str, Form()], 
+    maxNumberOfWords: Annotated[int, Form()],
+    horizontal: Annotated[bool, Form()] = False,
+    stopwords: Annotated[bool, Form()] = False,
+    lemmas: Annotated[bool, Form()] = False,
+    punctuation: Annotated[bool, Form()] =  False,
+    lowercase_checkbox: Annotated[bool, Form()] = False,
+    collocation: Annotated[bool, Form()] = False,
+    differentColorsByPOS: Annotated[bool, Form()] = False,
+    prepareImage: Annotated[bool, Form()] = False,
+    imageContour: Annotated[bool, Form()] = False,
+    useColorsForCsvColumns: Annotated[bool, Form()] = False,
+    csvField: Annotated[bool, Form()] = False,
+    intermediateWordcloudFiles: Annotated[bool, Form()] = False,
+):
+    inputFilename = ""
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    selectedImage = ""
+    openOuputfiles = False
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_wordcloud(
+                inputFilename,
+                inputDir = inputDirectory, 
+                outputDir = outputDirectory, 
+                visualization_tools = wordcloudservice, 
+                prefer_horizontal = horizontal, 
+                font = font_name,
+                max_words = maxNumberOfWords, 
+                lemmatize = lemmas, 
+                exclude_stopwords = stopwords,
+                exclude_punctuation = punctuation, 
+                lowercase = lowercase_checkbox, 
+                collocation = collocation, 
+                differentPOS_differentColor = differentColorsByPOS,
+                prepare_image_var =prepareImage,
+                selectedImage = selectedImage, 
+                use_contour_only = imageContour,
+                differentColumns_differentColors = useColorsForCsvColumns, 
+                csvField_color_list = csvField, 
+                openOutputFiles = openOuputfiles , 
+                doNotCreateIntermediateFiles = intermediateWordcloudFiles
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+    
 
 if __name__ == "__main__":
     uvicorn.run(app, port=3000, host="0.0.0.0")

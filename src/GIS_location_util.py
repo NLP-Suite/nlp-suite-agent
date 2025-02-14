@@ -1,11 +1,6 @@
 import sys
-import GUI_util
 import IO_libraries_util
 
-if IO_libraries_util.install_all_Python_packages(GUI_util.window,"GIS_location_util",['re','tkinter','csv','pandas'])==False:
-	sys.exit(0)
-
-import tkinter.messagebox as mb
 import re
 import pandas as pd
 import os
@@ -56,7 +51,7 @@ def extract_index(inputFilename, InputCodedCsvFile, encodingValue, location_var_
 
 #the CoNLL table includes the filename; the position in the table varies with old and new CoNLL
 # returns filename, location, sentence, date (if present)
-def extract_NER_locations(window,conllFile,encodingValue,datePresent):
+def extract_NER_locations(conllFile,encodingValue,datePresent):
 	global multi_word_location_prefix
 	filenamePositionInCoNLLTable=12
 	# startTime=IO_user_interface_util.timed_alert(window, 2000, 'NER locations extraction', "Started extracting NER locations from CoNLL table at",
@@ -139,7 +134,7 @@ def extract_NER_locations(window,conllFile,encodingValue,datePresent):
 			if row[10]!=documentID:
 				documentID=row[11]
 	if len(locList)==0:
-		mb.showwarning(title='NER locations', message="There are no NER tags for 'LOCATION','STATE_OR_PROVINCE','CITY','COUNTRY' in your CoNLL file\n\n" + conllFile + "\n\nThere is no geocoding to be done.")
+		print("NER locations, there are no NER tags for 'LOCATION','STATE_OR_PROVINCE','CITY','COUNTRY' in your CoNLL file\n\n" + conllFile + "\n\nThere is no geocoding to be done.")
 	# else:
 	# 	IO_user_interface_util.timed_alert(window, 2000, 'NER locations extraction', "Finished extracting NER locations from CoNLL table at", True, '', True, startTime, True)
 	# returns filename, location, sentence, date (if present)
@@ -163,7 +158,7 @@ def save_location(datePresent, currLocation, sentence, document, row):
 
 # called from GIS_Google_util
 #locationColumnNumber where locations are stored in the csv file; any changes to the columns will result in error
-def extract_csvFile_locations(window,inputFilename,withHeader,locationColumnNumber,encodingValue, datePresent, dateColumnNumber):
+def extract_csvFile_locations(inputFilename,withHeader,locationColumnNumber,encodingValue, datePresent, dateColumnNumber):
 	global multi_word_location_prefix
 	# startTime=IO_user_interface_util.timed_alert(window, 2000, 'csv file locations extraction', "Started extracting locations from csv file at",
 	# 											 True,'', True, '', True)
@@ -175,7 +170,7 @@ def extract_csvFile_locations(window,inputFilename,withHeader,locationColumnNumb
 		count_row = dt.shape[0]  # gives number of row count
 		#count_col = dt.shape[1]  # gives number of col count
 	except:
-		mb.showerror(title='Input file error', message="There was an error in the function 'Extract csv locations' reading the input csv file\n" + str(inputFilename) + "\nMost likely, the error is due to an encoding error. Your current encoding value is '" + encodingValue + "'.\n\nSelect a different encoding value and try again.")
+		print("Input file error, There was an error in the function 'Extract csv locations' reading the input csv file\n" + str(inputFilename) + "\nMost likely, the error is due to an encoding error. Your current encoding value is '" + encodingValue + "'.\n\nSelect a different encoding value and try again.")
 		return
 	if withHeader==True:
 
@@ -241,7 +236,7 @@ def extract_csvFile_locations(window,inputFilename,withHeader,locationColumnNumb
 				# 			locList.append([row[locationColumnNumber], [index], [0]])
 
 	if len(locList)==0:
-		mb.showwarning(title='Locations', message="There are no locations in your input file\n\n" + inputFilename + "\n\nThere is no geocoding to be done.\n\nNo maps can be done.")
+		print("Locations,There are no locations in your input file\n\n" + inputFilename + "\n\nThere is no geocoding to be done.\n\nNo maps can be done. ")
 		return
 	# IO_user_interface_util.timed_alert(window, 2000, 'csv file locations extraction', "Finished extracting locations from csv file at", True, '', True, startTime, True)
 	# return sorted(locList)

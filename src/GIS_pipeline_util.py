@@ -5,8 +5,6 @@
 
 import os
 import pandas as pd
-import tkinter.messagebox as mb
-import tkinter as tk
 import csv
 
 import IO_files_util
@@ -20,7 +18,6 @@ import GIS_geocode_util
 import GIS_Google_Maps_util
 import IO_libraries_util
 import config_util
-import TIPS_util
 import constants_util
 import charts_util
 
@@ -28,7 +25,7 @@ import charts_util
 import IO_user_interface_util
 
 # Google_config: 'Google-geocode-API_config.csv' or 'Google-Maps-API_config.csv'
-def getGoogleAPIkey(window,Google_config, display_key=False):
+def getGoogleAPIkey(Google_config, display_key=False):
     configFilePath = os.path.join(GUI_IO_util.configPath, Google_config)
     configAPIKey = []
     if os.path.isfile(configFilePath):
@@ -48,9 +45,9 @@ def getGoogleAPIkey(window,Google_config, display_key=False):
             if 'Maps' in Google_config:
                 message = message + '\n\nWithout a Google Maps API key you can only map locations in Google Earth Pro.'
             message = message + '\n\nPlease, read the TIPS file TIPS_NLP_GIS_Google API Key.pdf on how to obtain free Google API keys.\n\nWould you like to open the TIPS file now?'
-            answer = tk.messagebox.askyesno("Warning",message)
+            answer = print("Warning " + message)
             if answer:
-                TIPS_util.open_TIPS('TIPS_NLP_GIS_Google API Key.pdf')
+                print('Search and open: TIPS_NLP_GIS_Google API Key.pdf')
         if 'Maps' in Google_config:
             config_type='Maps'
         else:
@@ -66,7 +63,7 @@ def getGoogleAPIkey(window,Google_config, display_key=False):
         key, string_out = GUI_IO_util.enter_value_widget(message, 'Enter', 1, key, 'API key', key)
         # save the API key
         if key!='':
-            config_util.Google_API_Config_Save(window,Google_config, key)
+            config_util.Google_API_Config_Save(Google_config, key)
     else:
         key = configAPIKey[0]
     return key
@@ -74,7 +71,7 @@ def getGoogleAPIkey(window,Google_config, display_key=False):
 
 # the list of arguments reflect the order of widgets in the Google_Earth_main GUI
 # processes one file at a time
-def GIS_pipeline(window, config_filename, inputFilename, inputDir, outputDir,
+def GIS_pipeline(config_filename, inputFilename, inputDir, outputDir,
                         geocoder, mapping_package, chartPackage, dataTransformation,
                         datePresent,
                         country_bias,
@@ -119,7 +116,7 @@ def GIS_pipeline(window, config_filename, inputFilename, inputDir, outputDir,
     if GoogleEarthProDir == None or GoogleEarthProDir == '':
         return
 
-    startTime = IO_user_interface_util.timed_alert(window, 2000, 'Analysis start', 'Started running GIS pipeline at',
+    startTime = IO_user_interface_util.timed_alert(2000, 'Analysis start', 'Started running GIS pipeline at',
                                                    True, '', True, '', False)
 
     head, scriptName = os.path.split(os.path.basename(__file__))
@@ -141,11 +138,11 @@ def GIS_pipeline(window, config_filename, inputFilename, inputDir, outputDir,
     if inputIsCoNLL == True:
         outputCsvLocationsOnly = IO_files_util.generate_output_file_name(inputFilename, '', outputDir, '.csv', 'GIS',
                                                                    'NER_locations', '', '', '', False, True)
-        locations = GIS_location_util.extract_NER_locations(window, inputFilename, encodingValue,
+        locations = GIS_location_util.extract_NER_locations(inputFilename, encodingValue,
                                                             datePresent)
     else:
         # locations is a double list of names of locations in the form [['United States','COUNTRY']]
-        locations = GIS_location_util.extract_csvFile_locations(window, inputFilename, withHeader, locationColumnNumber, encodingValue, datePresent, dateColumnNumber)
+        locations = GIS_location_util.extract_csvFile_locations(inputFilename, withHeader, locationColumnNumber, encodingValue, datePresent, dateColumnNumber)
         if locations == None or len(locations) == 0:
             return
         if not inputIsGeocoded and geocoder == 'Nominatim':
@@ -222,7 +219,7 @@ def GIS_pipeline(window, config_filename, inputFilename, inputDir, outputDir,
         locationsNotFoundoutputFilename, \
         locationsNotFoundNonDistinctoutputFilename, \
         kmloutputFilename = \
-            GIS_geocode_util.geocode(window, locations, inputFilename, outputDir,
+            GIS_geocode_util.geocode(locations, inputFilename, outputDir,
                 locationColumnName,geocoder,country_bias, area_var,restrict,
                 encodingValue)
 
@@ -232,7 +229,7 @@ def GIS_pipeline(window, config_filename, inputFilename, inputDir, outputDir,
             return
 
     else:
-        kmloutputFilename = GIS_geocode_util.process_geocoded_data_for_kml(window, locations, inputFilename, outputDir,
+        kmloutputFilename = GIS_geocode_util.process_geocoded_data_for_kml(locations, inputFilename, outputDir,
                                       locationColumnName, encodingValue, geocoder)
         if kmloutputFilename!='':
             filesToOpen.append(kmloutputFilename)
@@ -247,7 +244,7 @@ def GIS_pipeline(window, config_filename, inputFilename, inputDir, outputDir,
         else:
             # always use the location_var variable passed by algorithms to make sure locations are then matched
             locations.insert(0, ['Location', 'NER', 'Sentence ID', 'Sentence', 'Document ID', 'Document'])
-        IO_csv_util.list_to_csv(window, locations, outputCsvLocationsOnly)
+        IO_csv_util.list_to_csv(locations, outputCsvLocationsOnly)
 
     # the plot of locations frequencies is done in the CoreNLP_annotator_util
     # the plot of location NERs frequencies is done in the function CoreNLP_annotator_util
@@ -407,16 +404,15 @@ def GIS_pipeline(window, config_filename, inputFilename, inputDir, outputDir,
             for i in range(len(lat)):
                 coordList.append([lat[i], lon[i]])
         else:
-            mb.showwarning('Warning',
-                           'The input csv file\n\n' + geocodedLocationsOutputFilename + '\n\ndoes not contain geocoded data with Latitude or Longitude columns required for Google Maps to produce heat maps.\n\nPlease, select a geocoded csv file in input and try again.')
+            print("Warning, the input csv file\n\n' + geocodedLocationsOutputFilename + '\n\ndoes not contain geocoded data with Latitude or Longitude columns required for Google Maps to produce heat maps.\n\nPlease, select a geocoded csv file in input and try again.")
             return
 
-        Google_Maps_API = getGoogleAPIkey(window,'Google-Maps-API_config.csv')
+        Google_Maps_API = getGoogleAPIkey('Google-Maps-API_config.csv')
         if Google_Maps_API == '':
             return
 
-        GIS_Google_Maps_util.create_js(window, heatMapoutputFilename, coordList, geocoder, True)
+        GIS_Google_Maps_util.create_js(heatMapoutputFilename, coordList, geocoder, True)
         filesToOpen.append(heatMapoutputFilename)
 
-    IO_user_interface_util.timed_alert(window, 2000, 'Analysis end', 'Finished running GIS pipeline at', True, '', True, startTime)
+    IO_user_interface_util.timed_alert(2000, 'Analysis end', 'Finished running GIS pipeline at', True, '', True, startTime)
     return filesToOpen

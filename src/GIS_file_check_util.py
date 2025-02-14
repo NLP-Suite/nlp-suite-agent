@@ -1,4 +1,3 @@
-import tkinter.messagebox as mb
 import IO_csv_util
 import CoNLL_util
 import pandas as pd
@@ -16,7 +15,7 @@ def geocoded_checker(numColumns, minColumns, headers, locationColumnValue, input
     try:
         dt = pd.read_csv(inputFilename, encoding=encodingValue, on_bad_lines='skip')
     except IOError as e:
-        mb.showerror(title='Input file error', message="There was an error reading the input file\n" + str(
+        print("Input file error,There was an error reading the input file\n" + str(
             inputFilename) + "\nwith geocoded input.\n\n"+str(e))
         #  Most likely, the error is due to an encoding error. Your current encoding value is " + encodingValue + ".\n\nSelect a different encoding value and try again.
         return False
@@ -39,9 +38,8 @@ def geocoded_checker(numColumns, minColumns, headers, locationColumnValue, input
             break
 
     if check1 == False or check2 == False:
-        mb.showerror(title='Input file error',
-                     message="You have ticked the geocoded checkbox.\n\nBut the input file does not have two consecutive columns of float type data (in the forms of: columns of latitude in range [-90, 90] and longitude in range [-180, 180]) right after your selected location field, " + str(
-                         locationColumnValue) + ".\n\nPlease, check your input file and/or deselect the geocoded option and try again.")
+        print("Input file error, ou have ticked the geocoded checkbox.\n\nBut the input file does not have two consecutive columns of float type data (in the forms of: columns of latitude in range [-90, 90] and longitude in range [-180, 180]) right after your selected location field, " + str( locationColumnValue) +
+              ".\n\nPlease, check your input file and/or deselect the geocoded option and try again.")
         return False
     else:
         return True
@@ -52,8 +50,8 @@ def location_column_checker(inputFilename, locationColumnValue, encodingValue):
     try:
         dt = pd.read_csv(inputFilename, encoding=encodingValue, on_bad_lines='skip')
     except:
-        mb.showerror(title='Input file error', message="There was an error reading the input file\n" + str(
-            inputFilename) + "\nwith geocoded input. Most likely, the error is due to an encoding error. Your current encoding value is " + encodingValue + ".\n\nSelect a different encoding value and try again.")
+        print("Input file error, there was an error reading the input file\n " + str(inputFilename)  + "\nwith geocoded input. Most likely, the error is due to an encoding error. Your current encoding value is " + encodingValue + ".\n\nSelect a different encoding value and try again.")
+
         return False
     check1 = True
     # convert np.nan (in float form) to an empty string
@@ -63,8 +61,7 @@ def location_column_checker(inputFilename, locationColumnValue, encodingValue):
             check1 = False
             break
     if check1 == False:
-        mb.showerror(title='Input file error',
-                     message="The location column you selected, " + locationColumnValue + ", is not a column of strings, as expected for the column containing location names.\n\nPlease, reselect your location column and try again.")
+        print("Input file error The location column you selected, " + locationColumnValue + ", is not a column of strings, as expected for the column containing location names.\n\nPlease, reselect your location column and try again.")
         return False
     else:
         return True
@@ -96,7 +93,7 @@ def restrictions_checker(inputFilename, inputIsCoNLL, withHeader, headers,
     else:
         if len(locationColumnValue) == 0:
             if inputIsCoNLL == False:
-                mb.showerror(title='Option selection error', message=msgNolocationColumnValue)
+                print("option selection error, no location column value" )
                 return False
 
     # set default values --------------------------------------------------------------------------------------------------
@@ -108,10 +105,10 @@ def restrictions_checker(inputFilename, inputIsCoNLL, withHeader, headers,
                     location_num = i
                     break
                 if location_num + 2 >= numColumns:
-                    mb.showerror(title='Input file warning', message=msgFloat)
+                    print("input file warning, msg Float")
                     return False
         else:
-            mb.showerror(title='Input file warning', message=msgTooFewColumnsForGeocoded)
+            print("Input file warning, message = two few colms for geocoded.")
             return False
         # Check if the inputfile is REALLY geocoded or not for the two sets of locations
         if geocoded_checker(numColumns, minColumns, headers, locationColumnValue, inputFilename, encodingValue) == False:

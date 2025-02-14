@@ -18,8 +18,8 @@ import GIS_pipeline_util
 # inserts correct javascript containing all of the points to plot on heatmap_template
 # gmaps_list is a list of lat/long values to be written in the java script html output file
 # then saves a new file that contains the html/js to display the heatmap
-def create_google_heatmap(window, outputFilename, gmaps_list):
-    api_key = GIS_pipeline_util.getGoogleAPIkey(window, 'Google-Maps-API_config.csv')
+def create_google_heatmap(outputFilename, gmaps_list):
+    api_key = GIS_pipeline_util.getGoogleAPIkey('Google-Maps-API_config.csv')
     # 10 is a random number because the APY key is a long set of characters
     if len(api_key)< 5 or api_key == None :
         import tkinter.messagebox as mb
@@ -57,7 +57,7 @@ def create_google_heatmap(window, outputFilename, gmaps_list):
 # must provide geocoder if points are locations rather than lat longs
 # if lat longs are provided, it should be via a nested list, i.e. [[lat1, long1], [lat2, long2], ...]
 # otherwise it assumes the item provided is a list of locations (as strings)
-def create_js(window, outputFilename, locations, geocoder, latLongList):
+def create_js(outputFilename, locations, geocoder, latLongList):
     gmaps_list = []
     if not latLongList:
         latLongList = []
@@ -70,7 +70,7 @@ def create_js(window, outputFilename, locations, geocoder, latLongList):
         gmaps_str = ''.join(["new google.maps.LatLng(",str(item[0]),", ",str(item[1]),"),"])
         gmaps_list.append(gmaps_str)
         # gmaps_list geocoded values`
-    create_google_heatmap(window, outputFilename, gmaps_list)
+    create_google_heatmap(outputFilename, gmaps_list)
     head, scriptName = os.path.split(os.path.basename(__file__))
     reminders_util.checkReminder(scriptName,
                             reminders_util.title_options_Google_API,

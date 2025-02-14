@@ -2,16 +2,12 @@ import sys
 
 import pandas as pd
 
-import GUI_util
 import IO_libraries_util
 
-if IO_libraries_util.install_all_Python_packages(GUI_util.window,"GIS_geocode_util",['os','tkinter','csv','geopy'])==False:
-	sys.exit(0)
 
 import IO_files_util
 import IO_user_interface_util
 import csv
-import tkinter.messagebox as mb
 import os # TODO MINO GIS create kml record
 
 from geopy import Nominatim
@@ -167,10 +163,10 @@ def google_geocode(geolocator, loc, region=None, timeout=10):
 # return 2 filenames of csv files of geocoded and non-geocoded locations
 #	 filenames are '' if empty, perhaps for a permission error
 
-def process_geocoded_data_for_kml(window,locations, inputFilename, outputDir,
+def process_geocoded_data_for_kml(locations, inputFilename, outputDir,
 			locationColumnName, encodingValue, geocoder):
 	if 'Google' in geocoder:
-		Google_API = GIS_pipeline_util.getGoogleAPIkey(window, 'Google-geocode-API_config.csv')
+		Google_API = GIS_pipeline_util.getGoogleAPIkey('Google-geocode-API_config.csv', False)
 		# if Google_API == '':
 		# 	return Google_API
 	kml = simplekml.Kml()
@@ -264,7 +260,7 @@ def process_geocoded_data_for_kml(window,locations, inputFilename, outputDir,
 			kmlfile.truncate()
 	return kmloutputFilename
 
-def geocode(window,locations, inputFilename, outputDir,
+def geocode(locations, inputFilename, outputDir,
 			locationColumnName,
 			geocoder,country_bias,area,restrict,
 			encodingValue):
@@ -280,7 +276,7 @@ def geocode(window,locations, inputFilename, outputDir,
 	index=0
 
 	if "Google" in geocoder:
-		Google_API = GIS_pipeline_util.getGoogleAPIkey(window,'Google-geocode-API_config.csv')
+		Google_API = GIS_pipeline_util.getGoogleAPIkey('Google-geocode-API_config.csv')
 	else:
 		Google_API=''
 
@@ -292,7 +288,7 @@ def geocode(window,locations, inputFilename, outputDir,
 		headers, datePresent, filenamePositionInCoNLLTable = GIS_file_check_util.CoNLL_checker(inputFilename)
 	input_df = pd.read_csv(inputFilename, encoding=encodingValue, on_bad_lines='skip')
 
-	startTime=IO_user_interface_util.timed_alert(window, 2000, "GIS geocoder", "Started geocoding locations via the online service '" + geocoder + "' at",
+	startTime=IO_user_interface_util.timed_alert(2000, "GIS geocoder", "Started geocoding locations via the online service '" + geocoder + "' at",
 												 True, '', True,'',True)
 	# if geocoder=='Nominatim':
 	# 	config_filename='GIS-geocode_config.csv'
@@ -319,10 +315,10 @@ def geocode(window,locations, inputFilename, outputDir,
 		if inputIsCoNLL:
 			outputCsvLocationsOnly = IO_files_util.generate_output_file_name(inputFilename, '', outputDir, '.csv', 'GIS',
 																	   'NER_locations', '', '', '', False, True)
-			locations = GIS_location_util.extract_NER_locations(window, inputFilename, encodingValue, datePresent)
+			locations = GIS_location_util.extract_NER_locations(inputFilename, encodingValue, datePresent)
 		else:
 			# locations is a list of names of locations
-			locations = GIS_location_util.extract_csvFile_locations(window, inputFilename, withHeader, locationColumnName, encodingValue)
+			locations = GIS_location_util.extract_csvFile_locations(inputFilename, withHeader, locationColumnName, encodingValue)
 
 		if locations == None or len(locations) == 0:
 			return '', '', '', ''  # empty output files
@@ -584,7 +580,7 @@ def geocode(window,locations, inputFilename, outputDir,
 		if locationsNotFound==index_locations or locationsNotFound==len(distinctGeocodedList):
 			geocodedLocationsOutputFilename='' #used NOT to open the file since there are no records
 			# this warning is already given
-	IO_user_interface_util.timed_alert(window, 2000, "GIS geocoder", "Finished geocoding " + str(len(locations)) + " locations via the online service '" + geocoder + "' at", True, str(locationsNotFound) + " location(s) was/were NOT geocoded out of " + str(index_locations) + ". The list will be displayed as a csv file.\n\nPlease, check your locations and try again.\n\nA Google Earth Pro kml map file will now be produced for all successfully geocoded locations.", True, startTime, True)
+	IO_user_interface_util.timed_alert(2000, "GIS geocoder", "Finished geocoding " + str(len(locations)) + " locations via the online service '" + geocoder + "' at", True, str(locationsNotFound) + " location(s) was/were NOT geocoded out of " + str(index_locations) + ". The list will be displayed as a csv file.\n\nPlease, check your locations and try again.\n\nA Google Earth Pro kml map file will now be produced for all successfully geocoded locations.", True, startTime, True)
 	return geocodedLocationsOutputFilename, locationsNotFoundoutputFilename, locationsNotFoundNonDistinctoutputFilename, kmloutputFilename
 
 # TODO MINO GIS date option
