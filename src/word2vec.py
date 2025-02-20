@@ -21,8 +21,8 @@ def run_word2vec(inputFilename, inputDir, outputDir, chartPackage, dataTransform
 
     if not 'Do not' in vis_menu_var:
         result = print('Visualization via t-SNE: You have selected to run Word2Vec with the t-SNE visualization option ("Plot word vectors"). Depending upon the total number of words in your corpus, this option is computationally VERY demanding.')
-        if not result:
-            return
+        # if not result:
+        #     return
 
     label = ''
     if BERT_var:

@@ -210,6 +210,7 @@ def word2vec(
     inputDirectory: Annotated[str, Form()],
     outputDirectory: Annotated[str, Form()],
     transformation: Annotated[str, Form()],
+    ngrams: Annotated[str, Form()],
     chartPackage: Annotated[str, Form()] = 'Excel',
     removeStopwords: Annotated[bool, Form()] = False,
     lemmatize: Annotated[bool, Form()] = False,
@@ -229,7 +230,6 @@ def word2vec(
     kMeansMin: Annotated[int, Form()] = 4,
     kMeansMax: Annotated[int, Form()] = 6,
     range20: Annotated[int, Form()] = 10,
-    ngrams: Annotated[str, Form()] = "1-grams"
 ):
     inputFilename = ""
     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")

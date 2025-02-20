@@ -278,7 +278,7 @@ def main():
     dataTransformation = "No transformation" 
     extra_GUIs_var = False
     complexity_readability_analysis_var = True
-    complexity_readability_analysis_menu_var = "text-readability"
+    complexity_readability_analysis_menu_var = "*"
     vocabulary_analysis_var = False 
     vocabulary_analysis_menu_var = "*"
     gender_guesser_var = False  
