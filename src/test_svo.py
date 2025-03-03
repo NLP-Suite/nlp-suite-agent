@@ -1,7 +1,7 @@
 # test_topic_modeling.py
 import os
 from SVO import run_svo
-
+import GUI_IO_util
 # Replace with your input and output directories
 inputDir = '/Users/aidenamaya/nlp-suite/input'
 outputDir = '/Users/aidenamaya/nlp-suite/output'
@@ -21,22 +21,21 @@ normalized_NER_date_extractor_var = False
 package_var = 'Stanford CoreNLP'
 gender_var = False
 quote_var = False
-subjects_dict_path_var = False 
-verbs_dict_path_var = False
-objects_dict_path_var = False 
-filter_subjects = False
-filter_verbs = False
+subjects_dict_path_var =  GUI_IO_util.wordLists_libPath + os.sep + 'social-actor-list.csv'  
+verbs_dict_path_var =  GUI_IO_util.wordLists_libPath + os.sep + 'social-actor-list.csv'
+objects_dict_path_var =   GUI_IO_util.wordLists_libPath + os.sep + 'social-actor-list.csv'
+filter_subjects =  True
+filter_verbs = True
 filter_objects = False
-lemmatize_subjects = False
-lemmatize_verbs = False
+lemmatize_subjects = True
+lemmatize_verbs = True
 lemmatize_objects = False 
-gephi_var = False 
-wordcloud_var = False 
+gephi_var = True 
+wordcloud_var = True 
 google_earth_var = False
 
 
 
-# Run the topic modeling function
 run_svo(inputFilename = inputFilename, inputDir = inputDir, outputDir = outputDir, openOutputFiles = openOutputFiles, chartPackage = chartPackage, dataTransformation = dataTransformation,
         coref_var = coref_var,
         manual_coref_var = manual_coref_var,

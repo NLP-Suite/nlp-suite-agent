@@ -18,7 +18,7 @@ from sankey_flowchart import run_sankey
 from CoNLL_table_analyzer_main import run_conll
 from wordcloud_visual import run_wordcloud
 
-# from style_analysis import run_style_analysis
+from style_analysis import run_style_analysis
 from SVO import run_svo
 
 app = FastAPI()
@@ -145,7 +145,7 @@ def topic_modeling(
 
 @app.post("/parsers_annotators")
 def parsers_annotators(
-    inputDir: Annotated[str, Form()] = '',
+    inputDir: Annotated[str, Form()],
     dataTransformation: Annotated[str, Form()] = '',
     # extra_GUIs_var: Annotated[bool, Form()] = False,
     # extra_GUIs_menu_var: Annotated[str, Form()] = '',
@@ -159,36 +159,19 @@ def parsers_annotators(
     annotators_var: Annotated[bool, Form()] = False,
     annotators_menu_var: Annotated[str, Form()] = '',
 ):
-    # Define input and output directories
-    inputFilename = inputDir # TODO
+    inputFilename =  ''
     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
-
+    openOutputFiles = False
     # Start the processing in a separate thread
     thread = Thread(
-        # target=lambda: run_parsers_annotators(
-        #     inputFilename=inputFilename,
-        #     inputDir=inputDirectory,
-        #     outputDir=outputDirectory,
-        #     chartPackage="Excel",    # Default chart package
-        #     dataTransformation=transformation,
-        #     extra_GUIs_var=extra_GUIs_var,
-        #     extra_GUIs_menu_var=extra_GUIs_menu_var,
-        #     manual_Coref=manual_Coref,
-        #     open_GUI=open_GUI,
-        #     parser_var=parser_var,
-        #     parser_menu_var=parser_menu_var,
-        #     single_quote=single_quote,
-        #     CoNLL_table_analyzer_var=CoNLL_table_analyzer_var,
-        #     annotators_var=annotators_var,
-        #     annotators_menu_var=annotators_menu_var,
-        # )
         target=lambda: run(
             app,
             lambda: run_parsers_annotators(
                 inputFilename=inputFilename,
                 inputDir=inputDirectory,
                 outputDir=outputDirectory,
+                openOutputFiles=openOutputFiles,
                 chartPackage=chartPackage,
                 dataTransformation=dataTransformation,
                 manual_Coref=manual_Coref, 
@@ -315,47 +298,48 @@ def conll_table_analyzer(
     return PlainTextResponse("", status_code=200)
 
 
-# @app.post("/style_analysis")
-# def style_analysis(
-#         # inputFilename: Annotated[str, Form()],
-#         inputDirectory: Annotated[str, Form()],
-#         outputDirectory: Annotated[str, Form()],
-#         chartPackage: Annotated[str, Form()] = 'Excel',
-#         transformation: Annotated[str, Form()] = 'no_transformation',
-#         extra_GUIs_var: Annotated[bool, Form()] = False,
-#         complexity_analysis: Annotated[bool, Form()] = False,
-#         analysis_dropdown: Annotated[str, Form()] = '*',
-#         vocabulary_analysis: Annotated[bool, Form()] = False,
-#         voc_options: Annotated[str, Form()] = '*',
-#         gender_guesser: Annotated[bool, Form()] = False, 
-#         min_rating: Annotated[int, Form()] = 5,
-#         max_rating_sd: Annotated[int, Form()] = 2
-# ):
-#     inputFilename = ""
-#     inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
-#     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
-#     thread = Thread(
-#         target=lambda: run(
-#             app,
-#             lambda: run_style_analysis(
-#                 inputFilename = inputFilename,
-#                 inputDir = inputDirectory,
-#                 outputDir = outputDirectory,
-#                 chartPackage = chartPackage, 
-#                 dataTransformation = transformation,
-#                 extra_GUIs_var = extra_GUIs_var,
-#                 complexity_readability_analysis_var = complexity_analysis,
-#                 complexity_readability_analysis_menu_var = analysis_dropdown,
-#                 vocabulary_analysis_var = vocabulary_analysis,
-#                 vocabulary_analysis_menu_var = voc_options,
-#                 gender_guesser_var = gender_guesser,
-#                 min_rating = min_rating,
-#                 max_rating_sd = max_rating_sd
-#             ),
-#         )
-#     )
-#     thread.start()
-#     return PlainTextResponse("", status_code=200)
+@app.post("/style_analysis")
+def style_analysis(
+        inputDirectory: Annotated[str, Form()],
+        outputDirectory: Annotated[str, Form()],
+        analysis_dropdown: Annotated[str, Form()],
+        voc_options: Annotated[str, Form()],
+        min_rating: Annotated[int, Form()],
+        max_rating_sd: Annotated[int, Form()],
+        chartPackage: Annotated[str, Form()] = 'Excel',
+        transformation: Annotated[str, Form()] = 'no_transformation',
+        complexity_analysis: Annotated[bool, Form()] = False,
+        vocabulary_analysis: Annotated[bool, Form()] = False,
+        gender_guesser: Annotated[bool, Form()] = False, 
+):
+    inputFilename = ""
+    extra_GUIs_var = False
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    gender_guesser = False
+        
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_style_analysis(
+                inputFilename = inputFilename,
+                inputDir = inputDirectory,
+                outputDir = outputDirectory,
+                chartPackage = chartPackage, 
+                dataTransformation = transformation,
+                extra_GUIs_var = extra_GUIs_var,
+                complexity_readability_analysis_var = complexity_analysis,
+                complexity_readability_analysis_menu_var = analysis_dropdown,
+                vocabulary_analysis_var = vocabulary_analysis,
+                vocabulary_analysis_menu_var = voc_options,
+                gender_guesser_var = gender_guesser,
+                min_rating = min_rating,
+                max_rating_sd = max_rating_sd
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
 
 
 

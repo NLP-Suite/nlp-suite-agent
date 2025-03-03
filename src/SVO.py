@@ -402,9 +402,9 @@ def run_svo(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
 # -------------------------------------------------------------------------------------------------------------------------------------
 # Lemmatizing and Filtering SVO for all packages
 
-    subject_filePath = ""
-    verb_filePath = ""
-    object_filePath = ""
+    subject_filePath = GUI_IO_util.wordLists_libPath + os.sep + 'social-actor-list.csv'
+    verb_filePath = GUI_IO_util.wordLists_libPath + os.sep + 'social-action-list.csv'
+    object_filePath = GUI_IO_util.wordLists_libPath + os.sep + 'social-actor-list.csv'
     SVO_lemmatized_filename = ''
     SVO_filtered_filename = ''
     if len(svo_result_list)>0:

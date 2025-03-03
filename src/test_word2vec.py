@@ -16,8 +16,8 @@ chartPackage='Excel'
 dataTransformation=''
 remove_stopwords_var = True
 lemmatize_var = True
-WSI_var = False 
-BERT_var = True
+WSI_var = True
+BERT_var = False
 Gensim_var = False
 sg_menu_var = False
 vector_size_var = 100
@@ -28,11 +28,12 @@ dim_menu_var = "2D"
 compute_distances_var = True
 top_words_var = 200
 keywords_var = False
-keywordInput = ""
+keywordInput = "harry, magic"
 range4 = 4
 range6 = 6
 range20 = 10 
 ngramsDropDown = "3-grams (trigrams)"
+#Vairbalke names for training architecute for gensim: Skip-Gram , CBOW
 # Run the topic modeling function
 run_word2vec(inputFilename, inputDir, outputDir, chartPackage, dataTransformation,
                  remove_stopwords_var, lemmatize_var, WSI_var,

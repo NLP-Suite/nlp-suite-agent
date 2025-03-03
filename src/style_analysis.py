@@ -279,10 +279,10 @@ def main():
     extra_GUIs_var = False
     complexity_readability_analysis_var = True
     complexity_readability_analysis_menu_var = "*"
-    vocabulary_analysis_var = False 
+    vocabulary_analysis_var = True
     vocabulary_analysis_menu_var = "*"
-    gender_guesser_var = False  
-    min_rating = 3
+    gender_guesser_var = False
+    min_rating = 5
     max_rating_sd = 1
 
     run_style_analysis(

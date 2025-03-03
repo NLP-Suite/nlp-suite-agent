@@ -32,6 +32,7 @@ import IO_user_interface_util
 from IO_files_util import make_directory
 import reminders_util
 import constants_util
+import nltk
 
 def lemmatizing(word):#edited by Claude Hu 08/2020
     #https://stackoverflow.com/questions/15586721/wordnet-lemmatization-and-pos-tagging-in-python
@@ -56,7 +57,7 @@ def nltk_unusual_words(inputFilename,inputDir,outputDir, configFileName, chartPa
     nltk.download('words')
 
     from Stanza_functions_util import stanzaPipeLine, lemmatize_stanza_doc, lemmatize_stanza_word
-
+                                                        
     filesToOpen=[]
     unusual=[]
     container=[]
@@ -78,13 +79,13 @@ def nltk_unusual_words(inputFilename,inputDir,outputDir, configFileName, chartPa
     outputFilename_byDoc=IO_files_util.generate_output_file_name(inputFilename, inputDir, outputDir, '.csv', 'NLTK_unus_byDoc', '')
     filesToOpen.append(outputFilename_byDoc)
 
-    startTime=IO_user_interface_util.timed_alert(3000, 'NLTK unusual words-spelling checker start',
-                                       'Started running NLTK unusual words-spelling checker at',
-                                                 True, '', True, '', False)
+    # startTime=IO_user_interface_util.timed_alert(3000, 'NLTK unusual words-spelling checker start',
+    #                                    'Started running NLTK unusual words-spelling checker at',
+    #                                              True, '', True, '', False)
 
 
     # already shown in NLP.py
-    # IO_util.timed_alert(GUI_util.window,2000,'Analysis start','Started running NLTK unusual words at',True,'You can follow NLTK unusual words in command line.')
+    # IO_util.timed_alert(2000,'Analysis start','Started running NLTK unusual words at',True,'You can follow NLTK unusual words in command line.')
 
     # https://stackoverflow.com/questions/28339622/is-there-a-corpus-of-english-words-in-nltk
     import GUI_IO_util
@@ -170,9 +171,9 @@ def nltk_unusual_words(inputFilename,inputDir,outputDir, configFileName, chartPa
         if IO_csv_util.list_to_csv(ALL_files_unusual,outputFilename_list): return
         container.insert(0, ['Misspelled-unusual lemmatized word', 'Document ID', 'Document'])
         if IO_csv_util.list_to_csv(container,outputFilename_byDoc): return
-        IO_user_interface_util.timed_alert(3000, 'Spelling checker (via nltk)', str(len(text_vocab_lemmatized)) + ' distinct words in your corpus were compared to ' + str(len(NLTK_english_vocab_lemmatized)) + ' words available in the NLTK corpus.\n' + str(len(ALL_files_unusual)) + ' words were not found in the NLTK corpus and are classified as unusual.\n   1. The word may be a misspelling, but also a proper name (e.g., a person, location).\n   2. Stanza could have also lemmatized a word incorrectly (e.g., dared not lemmatized as dare but as dared).\n   3. Finally, words may be capitalized differently in the NLTK corpus and your input corpus.\n\nPlease, check the list of unusual words carefully.', True)
+        # IO_user_interface_util.timed_alert(3000, 'Spelling checker (via nltk)', str(len(text_vocab_lemmatized)) + ' distinct words in your corpus were compared to ' + str(len(NLTK_english_vocab_lemmatized)) + ' words available in the NLTK corpus.\n' + str(len(ALL_files_unusual)) + ' words were not found in the NLTK corpus and are classified as unusual.\n   1. The word may be a misspelling, but also a proper name (e.g., a person, location).\n   2. Stanza could have also lemmatized a word incorrectly (e.g., dared not lemmatized as dare but as dared).\n   3. Finally, words may be capitalized differently in the NLTK corpus and your input corpus.\n\nPlease, check the list of unusual words carefully.', True)
     else:
-        IO_user_interface_util.timed_alert(3000, 'Spelling checker (via nltk)', 'No misspelled-unusual words found in\n' + file, True)
+        # IO_user_interface_util.timed_alert(3000, 'Spelling checker (via nltk)', 'No misspelled-unusual words found in\n' + file, True)
         if nFile==1:
             return
 
@@ -237,8 +238,8 @@ def check_for_typo_sub_dir(inputDir, outputDir, inputCsvDictionaryFile, openOutp
         return
     subdir = [f.path for f in os.scandir(inputDir) if f.is_dir()]
     if subdir == []:
-        mb.showwarning(title='Check Subdir option',
-                       message='There are no sub directories under the selected input directory\n\n' + inputDir +'\n\nPlease, uncheck your subdir option if you want to process this directory and try again.')
+        print('Check Subdir option There are no sub directories under the selected input directory\n\n' + inputDir +'\n\nPlease, uncheck your subdir option if you want to process this directory and try again.')
+
     df_list = []
     for dir in subdir:
         dfs = check_for_typo(inputDir, outputDir, inputCsvDictionaryFile, openOutputFiles, chartPackage, dataTransformation, NERs, similarity_value, by_all_tokens_var)
@@ -254,7 +255,7 @@ def check_for_typo_sub_dir(inputDir, outputDir, inputCsvDictionaryFile, openOutp
         filesToOpen.append(outputFileName_simple)
         filesToOpen.append(outputFileName_complete)
 
-
+        inputFilename = '' #temporary fix
         outputFiles = charts_util.visualize_chart(chartPackage, dataTransformation, inputFilename, outputDir,
                                                            columns_to_be_plotted_xAxis=[], columns_to_be_plotted_yAxis=['Typo?'],
                                                            chart_title='Frequency of Potential Typos',
@@ -270,10 +271,6 @@ def check_for_typo_sub_dir(inputDir, outputDir, inputCsvDictionaryFile, openOutp
                 filesToOpen.append(outputFiles)
             else:
                 filesToOpen.extend(outputFiles)
-
-        if openOutputFiles == True:
-            IO_files_util.OpenOutputFiles(GUI_util.window, openOutputFiles, filesToOpen, outputDir)
-            filesToOpen=[] # empty the list to avoid opening files twice
 
     return filesToOpen
 
@@ -506,8 +503,8 @@ def check_for_typo(inputDir, outputDir, inputCsvDictionaryFile, openOutputFiles,
             print("All words in the dictionary file are distinct.")
 
         # print(true_spellings)
-    startTime=IO_user_interface_util.timed_alert(GUI_util.window, 3000, 'Word similarity start', 'Started running Word similarity at',
-                                                 True, '', True, '', True)
+    # startTime=IO_user_interface_util.timed_alert(3000, 'Word similarity start', 'Started running Word similarity at',
+    #                                              True, '', True, '', True)
 
     # TODO which annotators is it using? We do not need all annotators! Sentence splitter and tokenizer (and NER)
     p = subprocess.Popen(
@@ -536,7 +533,7 @@ def check_for_typo(inputDir, outputDir, inputCsvDictionaryFile, openOutputFiles,
             from Stanza_functions_util import stanzaPipeLine, sentence_split_stanza_text
             sentences = sentence_split_stanza_text(stanzaPipeLine(text))
             documents.append([sentences, filename, dir_path])
-    # IO_util.timed_alert(GUI_util.window, 5000, 'Word similarity', 'Finished preparing data...\n\nProcessed '+str(folderID)+' subfolders and '+str(fileID)+' files.\n\nNow running Stanford CoreNLP to get NER values on every file processed... PLEASE, be patient. This may take a while...')
+    # IO_util.timed_alert(5000, 'Word similarity', 'Finished preparing data...\n\nProcessed '+str(folderID)+' subfolders and '+str(fileID)+' files.\n\nNow running Stanford CoreNLP to get NER values on every file processed... PLEASE, be patient. This may take a while...')
     if by_all_tokens_var:
         # TODO header_rows ends up including filename as well; must only include the words in the documents
         # processed_word_list = []
@@ -628,7 +625,7 @@ def check_for_typo(inputDir, outputDir, inputCsvDictionaryFile, openOutputFiles,
 
     print('Finished running Stanford CoreNLP to prepare data for folder '+str(folderID)+' and '+str(fileID)+' files.')
     print('   Processed '+str(len(header_row_list_to_check))+' words and '+ str(len(distinct_word_list)) +' DISTINCT words. Now computing spelling and word differences for DISTINCT words...')
-    # IO_util.timed_alert(GUI_util.window, 5000, 'Word similarity', 'Finished running Stanford CoreNLP...\n\nProcessed '+str(len(list_to_check))+' words.\n\nNow computing word differences... PLEASE, be patient. This may take a while...')
+    # IO_util.timed_alert(5000, 'Word similarity', 'Finished running Stanford CoreNLP...\n\nProcessed '+str(len(list_to_check))+' words.\n\nNow computing word differences... PLEASE, be patient. This may take a while...')
     # These headers reflect the items returned from the processing above
     # THEIR ORDER CANNOT BE CHANGED, UNLESS ABOVE ORDER OF PROCESSING IS ALSO CHANGED
     # These headers are then used selectively for the output (see headers2)
@@ -774,8 +771,8 @@ def check_for_typo(inputDir, outputDir, inputCsvDictionaryFile, openOutputFiles,
             filesToOpen.append(outputFileName_simple)
             filesToOpen.append(outputFileName_complete)
 
-            IO_user_interface_util.timed_alert(GUI_util.window, 3000, 'Word similarity end',
-                                               'Finished running Word similarity at', True, '', True, startTime, True)
+            # IO_user_interface_util.timed_alert(3000, 'Word similarity end',
+            #                                    'Finished running Word similarity at', True, '', True, startTime, True)
 
             outputFiles = charts_util.visualize_chart(chartPackage, dataTransformation, outputFileName_simple, outputDir,
                                                                columns_to_be_plotted_xAxis=[], columns_to_be_plotted_yAxis=['Typo?'],
@@ -794,7 +791,7 @@ def check_for_typo(inputDir, outputDir, inputCsvDictionaryFile, openOutputFiles,
                     filesToOpen.extend(outputFiles)
 
     if openOutputFiles == True:
-        IO_files_util.OpenOutputFiles(GUI_util.window, openOutputFiles, filesToOpen, outputDir)
+        IO_files_util.OpenOutputFiles(openOutputFiles, filesToOpen, outputDir)
         filesToOpen=[] # empty the list to avoid opening files twice
 
     p.kill()
@@ -803,10 +800,11 @@ def check_for_typo(inputDir, outputDir, inputCsvDictionaryFile, openOutputFiles,
 
 
 def spelling_checker_cleaner(window,inputFilename, inputDir, outputDir, openOutputFiles,configFileName):
-    mb.showwarning(title='Find & Replace csv file (with \'Original\' and \'Corrected\' headers)',
-                   message='Please, select the csv file that contains the information about words that need correcting.\n\nMostly likely this file was created by the spell checker algorithms and edited by you keeping only correct entries.\n\nThe Find & Replace will expect 2 column headers \'Original\' and \'Corrected\'.\n\nPlease, make sure that your csv file has those characteristics.')
+    print('Find & Replace csv file (with \'Original\' and \'Corrected\' headers) Please, select the csv file that contains the information about words that need correcting.\n\nMostly likely this file was created by the spell checker algorithms and edited by you keeping only correct entries.\n\nThe Find & Replace will expect 2 column headers \'Original\' and \'Corrected\'.\n\nPlease, make sure that your csv file has those characteristics.')
+
     # initialdir=initialFolder,
-    csv_spelling_file = filedialog.askopenfilename(title='Select INPUT csv spelling file (with \'Original\' and \'Corrected\' headers)', filetypes=[("csv files", "*.csv")]) #https://docs.python.org/3/library/dialog.html
+    # csv_spelling_file = filedialog.askopenfilename(title='Select INPUT csv spelling file (with \'Original\' and \'Corrected\' headers)', filetypes=[("csv files", "*.csv")]) #https://docs.python.org/3/library/dialog.html
+    csv_spelling_file = ''
     if csv_spelling_file=='':
         return
     df = pd.read_csv(csv_spelling_file, encoding='utf-8', on_bad_lines='skip')
@@ -814,8 +812,8 @@ def spelling_checker_cleaner(window,inputFilename, inputDir, outputDir, openOutp
         original = df['Original']
         corrected = df['Corrected']
     except:
-        mb.showwarning(title='CSV file error',
-                       message='The selected csv file does not have the expected format. The Find & Replace expects 2 column headers \'Original\' and \'Corrected\'.\n\nPlease, make sure that your csv file has those characteristics and try again.')
+        print("CSV file error, The selected csv file does not have the expected format. The Find & Replace expects 2 column headers \'Original\' and \'Corrected\'.\n\nPlease, make sure that your csv file has those characteristics and try again. ")
+
         print(
             "The selected csv file does not have the expected format. The Find & Replace expects 2 column headers \'Original\' and \'Corrected\'.\n\nPlease, make sure that your csv file has those characteristics and try again.")
         return
@@ -834,7 +832,7 @@ def spelling_checker_cleaner(window,inputFilename, inputDir, outputDir, openOutp
     file_cleaner_util.find_replace_string(window,inputFilename, inputDir, outputDir, configFileName, openOutputFiles,input_original,input_corrected)
 
 def spellchecking_autocorrect(text: str, inputFilename) -> (str, DataFrame):
-    # startTime=IO_user_interface_util.timed_alert(GUI_util.window, 3000, 'Autocorrect spelling checker start',
+    # startTime=IO_user_interface_util.timed_alert(3000, 'Autocorrect spelling checker start',
     #                                    'Started running AUTOCORRECT spelling checker on ' + inputFilename + ' at ',
     #                                     True, '', True, '', True)
     original_str_list = []
@@ -894,9 +892,9 @@ def spellchecking_autocorrect(text: str, inputFilename) -> (str, DataFrame):
 #     return misspelled
 
 def spellchecking_pyspellchecker(text: str, inputFilename) -> (str, DataFrame):
-    startTime=IO_user_interface_util.timed_alert(GUI_util.window, 3000, 'Pyspellchecker spelling checker start',
-                                       'Started running PYSPELLCHECKER spelling checker on ' + inputFilename + ' at',
-                                                 True, '', True, '', True)
+    # startTime=IO_user_interface_util.timed_alert('Pyspellchecker spelling checker start',
+    #                                    'Started running PYSPELLCHECKER spelling checker on ' + inputFilename + ' at',
+    #                                              True, '', True, '', True)
 
     from Stanza_functions_util import stanzaPipeLine, tokenize_stanza_text
 
@@ -923,9 +921,9 @@ def spellchecking_pyspellchecker(text: str, inputFilename) -> (str, DataFrame):
 
 
 def spellchecking_text_blob(text: str, inputFilename) -> (str, DataFrame):
-    startTime=IO_user_interface_util.timed_alert(GUI_util.window, 3000, 'Textblob spelling checker start',
-                                       'Started running TEXTBLOB spelling checker on ' + inputFilename + ' at',
-                                                 True, '', True, '', True)
+    # startTime=IO_user_interface_util.timed_alert('Textblob spelling checker start',
+    #                                    'Started running TEXTBLOB spelling checker on ' + inputFilename + ' at',
+    #                                              True, '', True, '', True)
     new_str_list = []
     new_str_list_for_df = []
     original_str_list = []
@@ -1069,8 +1067,8 @@ def spellcheck(inputFilename,inputDir, checker_value_var, check_withinDir):
 
     IO_user_interface_util.subdirectory_file_output_save(inputDir, corrected_files_path, 'INPUT', 'spell checker')
 
-    mb.showwarning(title='Spell checking',
-                   message='Spell checker algorithms are not very accurate, perhaps pyspellchecker perfoming better than autocorrect and textblob performing the worse.\n\nThe spell checkers generate in output\n  1. corrected txt file(s) in a subdirectory \'spell_checked\' of the input file and/or input directory;\n  2. csv files (one for each of the 3 available algorithms if run together) with the headers \'Original\' and \'Corrected\' that list all the words that would have been edited for misspellings in the output files.\n\nPLEASE, CAREFULLY INSPECT THE OUTPUT CSV FILE(S), DELETE ANY WRONGLY CORRECTED WORDS FROM EACH CELL UNDER THE \'Corrected\' COLUMN, THEN, RUN THE \'Find & Replace string (Spelling checker cleaner)\' SCRIPT TO EDIT THE ORIGINAL INPUT FILE(S).')
+    print("Spell checking, Spell checker algorithms are not very accurate, perhaps pyspellchecker perfoming better than autocorrect and textblob performing the worse.\n\nThe spell checkers generate in output\n  1. corrected txt file(s) in a subdirectory \'spell_checked\' of the input file and/or input directory;\n  2. csv files (one for each of the 3 available algorithms if run together) with the headers \'Original\' and \'Corrected\' that list all the words that would have been edited for misspellings in the output files.\n\nPLEASE, CAREFULLY INSPECT THE OUTPUT CSV FILE(S), DELETE ANY WRONGLY CORRECTED WORDS FROM EACH CELL UNDER THE \'Corrected\' COLUMN, THEN, RUN THE \'Find & Replace string (Spelling checker cleaner)\' SCRIPT TO EDIT THE ORIGINAL INPUT FILE(S). ")
+
     return autocorrect_df, pyspellchecker_df, textblob_df
 
 
@@ -1106,9 +1104,9 @@ def language_detection(inputFilename, inputDir, outputDir, configFileName, openO
                                  reminders_util.message_language_detection,
                                  True)
 
-    startTime=IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis start',
-                                       'Started running language detection algorithms at',
-                                                 True, '', True, '', True)
+    # startTime=IO_user_interface_util.timed_alert('Analysis start',
+    #                                    'Started running language detection algorithms at',
+    #                                              True, '', True, '', True)
 
 # Stanza's multilingual pipeline needs to load only once, therefore called outside the for-loop
     from stanza.pipeline.multilingual import MultilingualPipeline
@@ -1245,11 +1243,12 @@ def language_detection(inputFilename, inputDir, outputDir, configFileName, openO
             else:
                 msg = str(fileID) + ' documents processed for language detection.\n  ' + \
                       str(docErrors_unknown) + ' document(s) read with unknown errors.'
-        mb.showwarning(title='File read errors',
-                message=msg+ '\n\nFaulty files are listed in command line/terminal. Please, search for \'File read error\' and inspect each file carefully.')
+        
+        print("File read errors," + "msg+ '\n\nFaulty files are listed in command line/terminal. Please, search for \'File read error\' and inspect each file carefully.")
+
     filesToOpen.append(outputFilenameCSV)
-    IO_user_interface_util.timed_alert(GUI_util.window, 1000, 'Analysis end',
-                                       'Finished running Language Detection at', True,'Languages detected are exported via the ISO 639 two-letter code. ISO 639 is a standardized nomenclature used to classify languages. Check the ISO list at https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.', True, startTime, True)
+    # IO_user_interface_util.timed_alert(1000, 'Analysis end',
+    #                                    'Finished running Language Detection at', True,'Languages detected are exported via the ISO 639 two-letter code. ISO 639 is a standardized nomenclature used to classify languages. Check the ISO list at https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.', True, startTime, True)
     print('Languages detected are exported via the ISO 639 two-letter code. ISO 639 is a standardized nomenclature used to classify languages. Check the ISO list at https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.')
     if chartPackage!='No charts':
         columns_to_be_plotted_yAxis=[[1, 1]]
