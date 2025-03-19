@@ -1640,101 +1640,104 @@ def boxplot(
 # var3 is the third categorical variable, lengthvar3 is the amount of var 3: should take values of 5,10, 20 or 30
 # All these recommendations are for performance
 # three_way_Sankey is a boolean variable that dictates whether the returned Sankey is 2way or 3way. True for 3 variables, false for 2 variables
-def Sankey(
-    outputFilename,
-    var1,
-    lengthvar1,
-    var2,
-    lengthvar2,
-    three_way_Sankey,
-    var3=None,
-    lengthvar3=None,
-    data = "",
-):  
-    import json
+def Sankey(data, outputFilename, var1, lengthvar1, var2, lengthvar2, three_way_Sankey, var3, lengthvar3):
+    # if pd.__version__[0] == '2':
+    #     mb.showwarning(title='Warning',
+    #                    message='The Sankey algorithm is incompatible with a version of pandas higher than 2.0\n\nIn command line, please, pip unistall pandas and pip install pandas==1.5.2.\n\nMake sure you are in the right NLP environment by typing conda activate NLP')
+    #     return
 
-    from io import StringIO
-    
-    print(type(data))
-
-    try:
-        if isinstance(data, str):
-            data = pd.read_csv(StringIO(data))
-            
-            
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return
-
-    print(data[var1].dtype)
-    print(data[var2].dtype)
-
-    # Ensure that required fields are categorical
-    if not pd.api.types.is_string_dtype(data[var1]) or not pd.api.types.is_string_dtype(data[var2]):
-        print(
-            "Warning: All csv file fields should be categorical for a Sankey flowchart.\nPlease, select categorical fields with string values and try again."
-        )
-        return
+    if type(data) == str:
+        try:
+            data = pd.read_csv(data, encoding='utf-8', on_bad_lines='skip')
+        except:
+            print("Warning, The input file ' + data + ' is empty.\n\nNo Sankey flowchart can be produced.\n\nPlease, check your input file and try again.")
+            return
+    if type(data[var1][0]) != str or type(data[var2][0]) != str:
+        print("Warning, All csv file fields should be CATEGORICAL for a Sankey flowchart.\n\nPlease, select categorical field(s) (i.e., fields with string values), rather than continuous numeric field(s), and try again.")
 
     if three_way_Sankey:
-        # 3-way Sankey
+        # 3 variables
         data[var1] = data[var1].str.lower()
-        tempframe = data[var1].value_counts().head(lengthvar1).reset_index()
-        tempframe.columns = [var1, "Frequency"]
-        finalframe = data[data[var1].isin(tempframe[var1])]
+        tempframe = pd.DataFrame(data[var1].value_counts().head(lengthvar1)).reset_index()
+        try:
+            finalframe = data[data[var1].isin(list(set(tempframe.iloc[:, 0])))]
+        except:
+            if len(finalframe) == 0:
+                print("Warning, The dataframe computed by the Sankey flowchart is empty.\n\nIt is likely that you are using a version of pandas > 1.5.2. If so, in command line please, pip unistall pandas and pip install pandas==1.5.2")
+                return
+            finalframe = data[data[var1].isin(list(set(tempframe.index)))]
+        tempframe2 = pd.DataFrame(finalframe[var2]).value_counts().head(lengthvar2).reset_index()
+        tempframe3 = pd.DataFrame(finalframe[var3]).value_counts().head(lengthvar3).reset_index()
+        finalframe = finalframe[finalframe[var2].isin(list(set(tempframe2[var2])))]
+        finalframe = finalframe[finalframe[var3].isin(list(set(tempframe3[var3])))]
+        finalframe = finalframe.reset_index(drop=True)
+        sourcelist = list(range(0, len(set(finalframe[var1])) + len(set(finalframe[var2]))))
+        source = [item for item in sourcelist for _ in range(len(set(finalframe[var2])) + len(set(finalframe[var3])))]
+        target1 = list(range(0, len(set(finalframe[var2])) + len(set(finalframe[var3]))))
+        target2 = [x + len(set(finalframe[var1])) for x in target1]
+        target = target2 * len(sourcelist)
 
-        tempframe2 = finalframe[var2].value_counts().head(lengthvar2).reset_index()
-        tempframe2.columns = [var2, "Frequency"]
-        finalframe = finalframe[finalframe[var2].isin(tempframe2[var2])]
-        finalframe.reset_index(drop=True, inplace=True)
-
-        sourcelist = list(range(len(finalframe[var1].unique())))
-        source = [s for s in sourcelist for _ in range(len(finalframe[var2].unique()))]
-
-        target1 = list(range(len(finalframe[var2].unique())))
-        target2 = [t + len(finalframe[var1].unique()) for t in target1]
-        target = target2 * len(finalframe[var1].unique())
-
+        labelvector = sorted(set(finalframe[var1])) + sorted(set(finalframe[var2])) + sorted(set(finalframe[var3]))
         valuevector = []
-        for i in finalframe[var1].unique():
-            tempdata = finalframe[finalframe[var1] == i][var2].value_counts()
-            for j in finalframe[var2].unique():
-                valuevector.append(tempdata.get(j, 0))
 
-        labelvector = list(finalframe[var1].unique()) + list(finalframe[var2].unique())
+        for i in sorted(list(set(finalframe[var1]))):
+            tempvec = []
+            tempframe = finalframe[finalframe[var1] == i]
+            wantedframe = pd.DataFrame(tempframe[var2].value_counts()).reset_index().rename(
+                columns={'index': var2, var2: 'Frequency'})
+            for j in sorted(list(set(finalframe[var2]))):
+                if j not in list(wantedframe[var2]):
+                    tempvec.append(0)
+                else:
+                    tempvec.append(list(wantedframe[wantedframe[var2] == j]['Frequency'])[0])
+            tempvec = tempvec + list(np.repeat(0, len(target2) - len(tempvec)))
+            valuevector = valuevector + tempvec
+        for i in sorted(list(set(finalframe[var2]))):
+            tempvec = []
+            tempframe = finalframe[finalframe[var2] == i]
+            wantedframe = pd.DataFrame(tempframe[var3].value_counts()).reset_index().rename(
+                columns={'index': var3, var3: 'Frequency'})
+            tempvec = list(np.repeat(0, len(set(finalframe[var2]))))
+            for j in sorted(list(set(finalframe[var3]))):
+                if j not in list(wantedframe[var3]):
+                    tempvec.append(0)
+                else:
+                    tempvec.append(list(wantedframe[wantedframe[var3] == j]['Frequency'])[0])
+            valuevector = valuevector + tempvec
 
     else:
-        # 2-way Sankey
+        # 2 variables
         data[var1] = data[var1].str.lower()
-        tempframe = data[var1].value_counts().head(lengthvar1).reset_index()
-        tempframe.columns = [var1, "Frequency"]
-        finalframe = data[data[var1].isin(tempframe[var1])]
+        tempframe = pd.DataFrame(data[var1].value_counts().head(lengthvar1)).reset_index()
+        try:
+            finalframe = data[data[var1].isin(list(set(tempframe['index'])))]
+        except:
+            print("Warning, The dataframe computed by the Sankey flowchart is empty.\n\nIt is likely that you are using a version of pandas > 1.5.2. If so, in command line please, pip unistall pandas and pip install pandas==1.5.2")
+            return
+            finalframe = tempframe  # data[data[var1].isin(list(set(tempframe['count'])))]
+        tempframe2 = pd.DataFrame(finalframe[var2]).value_counts().head(lengthvar2).reset_index()
+        finalframe = finalframe[finalframe[var2].isin(list(set(tempframe2[var2])))]
+        finalframe = finalframe.reset_index(drop=True)
+        sourcelist = list(range(0, len(set(finalframe[var1]))))
 
-        tempframe2 = finalframe[var2].value_counts().head(lengthvar2).reset_index()
-        tempframe2.columns = [var2, "Frequency"]
-        finalframe = finalframe[finalframe[var2].isin(tempframe2[var2])]
-        finalframe.reset_index(drop=True, inplace=True)
-
-        source = []
-        target = []
+        source = [item for item in sourcelist for _ in range(len(set(finalframe[var2])))]
+        target1 = list(range(0, len(set(finalframe[var2]))))
+        target2 = [x + len(set(finalframe[var1])) for x in target1]
+        target = target2 * len(set(finalframe[var1]))
+        labelvector = sorted(list(set(finalframe[var1]))) + sorted(list(set(finalframe[var2])))
         valuevector = []
 
-        for i, val1 in enumerate(finalframe[var1].unique()):
-            for j, val2 in enumerate(finalframe[var2].unique()):
-                source.append(i)
-                target.append(j + len(finalframe[var1].unique()))
-                valuevector.append(
-                    len(finalframe[(finalframe[var1] == val1) & (finalframe[var2] == val2)])
-                )
+        for i in sorted(list(set(finalframe[var1]))):
+            tempdata = pd.DataFrame(finalframe[finalframe[var1] == i][var2].value_counts()).reset_index().rename(
+                columns={'index': var2, var2: 'Frequency'})
+            for j in sorted(list(set(tempdata[var2]))):
+                if j not in list(tempdata[var2]):
+                    valuevector.append(0)
+                else:
+                    valuevector.append(list(tempdata[tempdata[var2] == j]['Frequency'])[0])
 
-        labelvector = list(finalframe[var1].unique()) + list(finalframe[var2].unique())
-
-    fig = go.Figure(
-        go.Sankey(
-            link=dict(source=source, target=target, value=valuevector),
-            node=dict(label=labelvector, pad=35, thickness=10),
-        )
-    )
+    fig = go.Figure(go.Sankey(link=dict(source=source, target=target, value=valuevector),
+                              node=dict(label=labelvector, pad=35, thickness=10)))
     fig.write_html(outputFilename)
 
     return outputFilename

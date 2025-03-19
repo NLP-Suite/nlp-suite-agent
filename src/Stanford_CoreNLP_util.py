@@ -520,9 +520,9 @@ def CoreNLP_annotate(
             "Verb (V)",
             "Object (O)",
             "Negation",
-            "Locations",
-            "Persons",
-            "Organizations",
+            "Location",
+            "Person",
+            "Organization",
             "Date expression",
             "Normalized date",
             "Date type",
@@ -536,9 +536,9 @@ def CoreNLP_annotate(
             "Verb (V)",
             "Object (O)",
             "Negation",
-            "Locations",
-            "Persons",
-            "Organizations",
+            "Location",
+            "Person",
+            "Organization",
             "Date expression",
             "Normalized date",
             "Sentence ID",
@@ -905,7 +905,7 @@ def CoreNLP_annotate(
     # DOES NOT WORK Increase and decrease the total amount of words within file and test the performance
     # DOES NOT WORK Test to see if file splitting process influences the performance
 
-    nlp = StanfordCoreNLP("http://localhost:9000/")
+    nlp = StanfordCoreNLP("http://172.16.0.12:9000")
     
     #nlp = StanfordCoreNLP("http://localhost:9000/") # for testing on local
 #     The corpus you have selected is too small for data reduction algorithms. These algorithms require a LARGE number of files.

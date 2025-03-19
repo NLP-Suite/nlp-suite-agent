@@ -448,19 +448,21 @@ def run_svo(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
                                                               ['Subject (S)', 'Object (O)'])
                 # the WordNet installation directory, WordNetDir,  is now checked in aggregate_GoingUP
                 WordNetDir=''
-                output = knowledge_graphs_WordNet_util.aggregate_GoingUP(WordNetDir, outputFilename, outputWNDir,
-                                                                         config_filename, 'NOUN',
-                                                                         openOutputFiles, 
-                                                                         chartPackage, dataTransformation, language_var)
+                # output = knowledge_graphs_WordNet_util.aggregate_GoingUP(WordNetDir, outputFilename, outputWNDir,
+                #                                                          config_filename, 'NOUN',
+                #                                                          openOutputFiles, 
+                #                                                          chartPackage, dataTransformation, language_var)
+                output = None
                 os.remove(outputFilename)
                 if output != None and output != '':
                     filesToOpen.extend(output)
                 if lemmatize_verbs:
                     outputFilename = IO_csv_util.extract_from_csv(SVO_lemmatized_filename, outputWNDir, '', ['Verb (V)'])
-                    output = knowledge_graphs_WordNet_util.aggregate_GoingUP(WordNetDir, outputFilename, outputWNDir,
-                                                                             config_filename, 'VERB',
-                                                                             openOutputFiles, 
-                                                                             chartPackage, dataTransformation, language_var)
+                    output = None
+                    # output = knowledge_graphs_WordNet_util.aggregate_GoingUP(WordNetDir, outputFilename, outputWNDir,
+                    #                                                          config_filename, 'VERB',
+                    #                                                          openOutputFiles, 
+                    #                                                          chartPackage, dataTransformation, language_var)
                     os.remove(outputFilename)
                     if output != None and output != '':
                         filesToOpen.extend(output)
@@ -512,10 +514,11 @@ def run_svo(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
                     output_label = 'sankey'
                     outputFilename_sankey = IO_files_util.generate_output_file_name(inputFilename, inputDir, tempOutputDir,
                                                                                     '.html', output_label)
-                    outputFiles = charts_util.Sankey(inputFilename, outputFilename_sankey,
-                                                     'Subject (S)', Sankey_limit1_var, 'Verb (V)', Sankey_limit2_var,
-                                                     three_way_Sankey, 'Object (O)', Sankey_limit3_var)
-
+                    
+                    # outputFiles = charts_util.Sankey(inputFilename, outputFilename_sankey,
+                    #                                  'Subject (S)', Sankey_limit1_var, 'Verb (V)', Sankey_limit2_var,
+                    #                                  three_way_Sankey, 'Object (O)', Sankey_limit3_var)
+    
                     if outputFiles != None:
                         if isinstance(outputFiles, str):
                             filesToOpen.append(outputFiles)
@@ -561,9 +564,12 @@ def run_svo(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
 
                             outputFilename_sankey = IO_files_util.generate_output_file_name(f, inputDir, tempOutputDir,
                                                                                             '.html', output_label)
-                            outputFiles = charts_util.Sankey(f, outputFilename_sankey,
-                                                             'Subject (S)', Sankey_limit1_var, 'Verb (V)', Sankey_limit2_var,
-                                                             three_way_Sankey, 'Object (O)', Sankey_limit3_var)
+                            # outputFiles = charts_util.Sankey(f, outputFilename_sankey,
+                            #                                  'Subject (S)', Sankey_limit1_var, 'Verb (V)', Sankey_limit2_var,
+                            #                                  three_way_Sankey, 'Object (O)', Sankey_limit3_var)
+                            
+                            outputFiles = None
+                            
 
                             if outputFiles != None:
                                 if isinstance(outputFiles, str):

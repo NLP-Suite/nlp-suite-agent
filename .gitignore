@@ -67,3 +67,8 @@ src/__pycache__
 bin
 pyvenv.cfg
 lib/python*
+
+#BERT stuff
+src/cache/
+src/cache/models--bert-base-uncased/
+src/cache/.locks/

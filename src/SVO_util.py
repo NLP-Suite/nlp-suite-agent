@@ -120,6 +120,9 @@ def count_frequency_two_svo(CoreNLP_csv, senna_csv, inputFilename, inputDir, out
     # S, V, O are in loc 0, 1, 2
 
     # Adding each row of SVO into the corresponding sets
+    
+        
+        
     for i in range(len(CoreNLP_df)):
         # if pd.notnull(CoreNLP_df.iloc[i, 4]):
         #     if not pd.isnull(CoreNLP_df.iloc[i, 5]) and not pd.isnull(CoreNLP_df.iloc[i, 3]):
@@ -137,7 +140,7 @@ def count_frequency_two_svo(CoreNLP_csv, senna_csv, inputFilename, inputDir, out
             #     open_ie_sv.add(generate_key(S='', V=CoreNLP_df.iloc[i, 4], O=CoreNLP_df.iloc[i, 5]))
             # else:
             #     open_ie_sv.add(generate_key(S='', V=CoreNLP_df.iloc[i, 4], O=''))
-
+    
     for i in range(len(senna_df)):
         # if pd.notnull(senna_df.iloc[i, 4]):
         #     if not pd.isnull(senna_df.iloc[i, 3]) and not pd.isnull(senna_df.iloc[i, 5]):  # Has S, V, O
@@ -361,6 +364,7 @@ def lemmatize_filter_svo(svo_file_name, filter_s, filter_v, filter_o, filter_s_f
     filtered_svo = df.copy()
 
     lemmatize_s_SV = lemmatize_s
+    print(df.columns)
     for idx, row in df.iterrows():
         print('Processing SVO record '+ str(idx) + '/' + str(len(df)))
         if lemmatize_s_SV == True:
@@ -568,7 +572,7 @@ def lemmatize_filter_svo(svo_file_name, filter_s, filter_v, filter_o, filter_s_f
 
             nRecords_filter, nColumns = IO_csv_util.GetNumberOf_Records_Columns_inCSVFile(svo_filter_file_name)
             filtered_records = num_rows - nRecords_filter
-            IO_user_interface_util.timed_alert(window,6000,'Filtered records', 'The filter algorithms have filtered out ' + str(filtered_records) + \
+            IO_user_interface_util.timed_alert(6000,'Filtered records', 'The filter algorithms have filtered out ' + str(filtered_records) + \
                 ' records.\n\nNumber of original SVO records: ' + str(num_rows) + '\nNumber of filtered SVO records: ' + str(nRecords_filter))
 
             # save filtered records info
@@ -583,7 +587,7 @@ def lemmatize_filter_svo(svo_file_name, filter_s, filter_v, filter_o, filter_s_f
     else:
         svo_lemma_file_name= ''
 
-    IO_user_interface_util.timed_alert(window, 2000, 'Analysis end', 'Finished running the lemma/filter algorithm for Subject-Verb-Object (SVO) at', True, '', True,
+    IO_user_interface_util.timed_alert(2000, 'Analysis end', 'Finished running the lemma/filter algorithm for Subject-Verb-Object (SVO) at', True, '', True,
                                        startTime, True)
 
     if nRecords_lemma > 1 or nRecords_filter >1:
@@ -599,191 +603,191 @@ def lemmatize_filter_svo(svo_file_name, filter_s, filter_v, filter_o, filter_s_f
     return filesToOpen
 
 
-def lemmatize_filter_svo_old(window,svo_file_name, filter_s, filter_v, filter_o, filter_s_fileName, filter_v_fileName, filter_o_fileName,
-               lemmatize_s, lemmatize_v, lemmatize_o, outputSVODir,  chartPackage='Excel', dataTransformation='No transformation'):
-    """
-    Filters a svo csv file based on the dictionaries given, and replaces the original output csv file
-    :param svo_file_name: the name of the svo csv file
-    :param filter_s_fileName: the subject dict file path
-    :param filter_v_fileName: the verb dict file path
-    :param filter_o_fileName: the object dict file path
-    """
+# def lemmatize_filter_svo_old(window,svo_file_name, filter_s, filter_v, filter_o, filter_s_fileName, filter_v_fileName, filter_o_fileName,
+#                lemmatize_s, lemmatize_v, lemmatize_o, outputSVODir,  chartPackage='Excel', dataTransformation='No transformation'):
+#     """
+#     Filters a svo csv file based on the dictionaries given, and replaces the original output csv file
+#     :param svo_file_name: the name of the svo csv file
+#     :param filter_s_fileName: the subject dict file path
+#     :param filter_v_fileName: the verb dict file path
+#     :param filter_o_fileName: the object dict file path
+#     """
 
-    filesToOpen = []
-    s_filtered_set = {}
-    v_filtered_set = {}
-    o_filtered_set = {}
+#     filesToOpen = []
+#     s_filtered_set = {}
+#     v_filtered_set = {}
+#     o_filtered_set = {}
 
-    from Stanza_functions_util import stanzaPipeLine, sentence_split_stanza_text, tokenize_stanza_text, lemmatize_stanza_word
+#     from Stanza_functions_util import stanzaPipeLine, sentence_split_stanza_text, tokenize_stanza_text, lemmatize_stanza_word
 
-    startTime = IO_user_interface_util.timed_alert(window, 2000, 'Analysis start',
-                                                   'Started running the lemma/filter algorithm for Subject-Verb-Object (SVO) at',
-                                                   True, '', True)
+#     startTime = IO_user_interface_util.timed_alert(window, 2000, 'Analysis start',
+#                                                    'Started running the lemma/filter algorithm for Subject-Verb-Object (SVO) at',
+#                                                    True, '', True)
 
-    df = pd.read_csv(svo_file_name, encoding='utf-8',on_bad_lines='skip')
-    num_rows = df.shape[0]
+#     df = pd.read_csv(svo_file_name, encoding='utf-8',on_bad_lines='skip')
+#     num_rows = df.shape[0]
 
-    unfiltered_svo = df.to_dict('index')
-    # values updated below when lemmatizing or filtering
-    lemmatized_svo = {}
-    filtered_svo = {}
-    # lemmatized_filtered_svo = {}
+#     unfiltered_svo = df.to_dict('index')
+#     # values updated below when lemmatizing or filtering
+#     lemmatized_svo = {}
+#     filtered_svo = {}
+#     # lemmatized_filtered_svo = {}
 
-    if lemmatize_s or lemmatize_v or lemmatize_o:
-        head, tail = os.path.split(outputSVODir)
-        # create an SVO-lemma subdirectory of the main output directory
-        outputSVOLemmaDir = IO_files_util.make_output_subdirectory('', '', head, label='SVO_lemma',
-                                                                    silent=True)
-        if outputSVOLemmaDir == '':
-            return
+#     if lemmatize_s or lemmatize_v or lemmatize_o:
+#         head, tail = os.path.split(outputSVODir)
+#         # create an SVO-lemma subdirectory of the main output directory
+#         outputSVOLemmaDir = IO_files_util.make_output_subdirectory('', '', head, label='SVO_lemma',
+#                                                                     silent=True)
+#         if outputSVOLemmaDir == '':
+#             return
 
-        # create the lemma dict
-        lemmatized_svo = dict(unfiltered_svo)
-        if filter_s or filter_v or filter_o:
-            # create the filtered dict
-            # lemmatized_filtered_svo = dict(unfiltered_svo)
-            filtered_svo = dict(unfiltered_svo)
-            # place the filtered SVO files in a subdir under the main output directory,
-            #   rather than inside the SVO subdir
-            head, tail = os.path.split(outputSVODir)
-            # create an SVO-filtered subdirectory of the main output directory
-            outputSVOFilterDir = IO_files_util.make_output_subdirectory('', '', head, label='SVO_filter',
-                                                                        silent=True)
-            if outputSVOFilterDir == '':
-                return
+#         # create the lemma dict
+#         lemmatized_svo = dict(unfiltered_svo)
+#         if filter_s or filter_v or filter_o:
+#             # create the filtered dict
+#             # lemmatized_filtered_svo = dict(unfiltered_svo)
+#             filtered_svo = dict(unfiltered_svo)
+#             # place the filtered SVO files in a subdir under the main output directory,
+#             #   rather than inside the SVO subdir
+#             head, tail = os.path.split(outputSVODir)
+#             # create an SVO-filtered subdirectory of the main output directory
+#             outputSVOFilterDir = IO_files_util.make_output_subdirectory('', '', head, label='SVO_filter',
+#                                                                         silent=True)
+#             if outputSVOFilterDir == '':
+#                 return
 
-            # Generating filter dicts from filter files
-            if filter_s:
-                s_filtered_set = open(filter_s_fileName, 'r', encoding='utf-8-sig', errors='ignore').read().split('\n')
-                s_filtered_set = set(s_filtered_set)
-            if filter_v:
-                v_filtered_set = open(filter_v_fileName, 'r', encoding='utf-8-sig', errors='ignore').read().split('\n')
-                v_filtered_set = set(v_filtered_set)
-            if filter_o:
-                o_filtered_set = open(filter_o_fileName, 'r', encoding='utf-8-sig', errors='ignore').read().split('\n')
-                o_filtered_set = set(o_filtered_set)
+#             # Generating filter dicts from filter files
+#             if filter_s:
+#                 s_filtered_set = open(filter_s_fileName, 'r', encoding='utf-8-sig', errors='ignore').read().split('\n')
+#                 s_filtered_set = set(s_filtered_set)
+#             if filter_v:
+#                 v_filtered_set = open(filter_v_fileName, 'r', encoding='utf-8-sig', errors='ignore').read().split('\n')
+#                 v_filtered_set = set(v_filtered_set)
+#             if filter_o:
+#                 o_filtered_set = open(filter_o_fileName, 'r', encoding='utf-8-sig', errors='ignore').read().split('\n')
+#                 o_filtered_set = set(o_filtered_set)
 
-# update LEMMATIZED dict and FILTERED dict
-    for i in range(num_rows): # num_rows in the unfiltered SVO
-        deleted = False
-        if not pd.isna(unfiltered_svo[i]['Subject (S)']):
-            if lemmatize_s:
-                lemmatized_svo[i]['Subject (S)'] = lemmatize_stanza_word(stanzaPipeLine(unfiltered_svo[i]['Subject (S)']))
-                # lemmatized_svo.add(i,lemmatize_stanza_word(stanzaPipeLine(unfiltered_svo[i]['Subject (S)'])))
-                if (filter_s and filter_s_fileName!='') and (not unfiltered_svo[i]['Subject (S)'] in s_filtered_set):
-                    del filtered_svo[i]
-                    # del lemmatized_filtered_svo[i]
-                    deleted = True
-                else:
-                    # if lemmatize_s and lemmatized_filtered_svo != {}:
-                    # if lemmatize_s and lemmatized_filtered_svo != {}:
-                    #     lemmatized_filtered_svo[i]['Subject (S)'] = lemmatize_stanza_word(
-                    #         stanzaPipeLine(filtered_svo[i]['Subject (S)']))
-                    if lemmatize_s and filtered_svo != {}:
-                        filtered_svo[i]['Subject (S)'] = lemmatize_stanza_word(
-                            stanzaPipeLine(filtered_svo[i]['Subject (S)']))
+# # update LEMMATIZED dict and FILTERED dict
+#     for i in range(num_rows): # num_rows in the unfiltered SVO
+#         deleted = False
+#         if not pd.isna(unfiltered_svo[i]['Subject (S)']):
+#             if lemmatize_s:
+#                 lemmatized_svo[i]['Subject (S)'] = lemmatize_stanza_word(stanzaPipeLine(unfiltered_svo[i]['Subject (S)']))
+#                 # lemmatized_svo.add(i,lemmatize_stanza_word(stanzaPipeLine(unfiltered_svo[i]['Subject (S)'])))
+#                 if (filter_s and filter_s_fileName!='') and (not unfiltered_svo[i]['Subject (S)'] in s_filtered_set):
+#                     del filtered_svo[i]
+#                     # del lemmatized_filtered_svo[i]
+#                     deleted = True
+#                 else:
+#                     # if lemmatize_s and lemmatized_filtered_svo != {}:
+#                     # if lemmatize_s and lemmatized_filtered_svo != {}:
+#                     #     lemmatized_filtered_svo[i]['Subject (S)'] = lemmatize_stanza_word(
+#                     #         stanzaPipeLine(filtered_svo[i]['Subject (S)']))
+#                     if lemmatize_s and filtered_svo != {}:
+#                         filtered_svo[i]['Subject (S)'] = lemmatize_stanza_word(
+#                             stanzaPipeLine(filtered_svo[i]['Subject (S)']))
 
-        if not pd.isna(unfiltered_svo[i]['Verb (V)']):
-            if lemmatize_v:
-                lemmatized_svo[i]['Verb (V)'] = lemmatize_stanza_word(stanzaPipeLine(unfiltered_svo[i]['Verb (V)']))
-                if (filter_v and filter_v_fileName!='') and (not unfiltered_svo[i]['Verb (V)'] in v_filtered_set):
-                    if not deleted:
-                        del filtered_svo[i]
-                        # del lemmatized_filtered_svo[i]
-                        deleted = True
-                else:
-                    # if not deleted and lemmatize_v and lemmatized_filtered_svo!={}:
-                    #     lemmatized_filtered_svo[i]['Verb (V)'] = lemmatize_stanza_word(stanzaPipeLine(filtered_svo[i]['Verb (V)']))
-                    if not deleted and lemmatize_v and filtered_svo!={}:
-                        filtered_svo[i]['Verb (V)'] = lemmatize_stanza_word(stanzaPipeLine(filtered_svo[i]['Verb (V)']))
+#         if not pd.isna(unfiltered_svo[i]['Verb (V)']):
+#             if lemmatize_v:
+#                 lemmatized_svo[i]['Verb (V)'] = lemmatize_stanza_word(stanzaPipeLine(unfiltered_svo[i]['Verb (V)']))
+#                 if (filter_v and filter_v_fileName!='') and (not unfiltered_svo[i]['Verb (V)'] in v_filtered_set):
+#                     if not deleted:
+#                         del filtered_svo[i]
+#                         # del lemmatized_filtered_svo[i]
+#                         deleted = True
+#                 else:
+#                     # if not deleted and lemmatize_v and lemmatized_filtered_svo!={}:
+#                     #     lemmatized_filtered_svo[i]['Verb (V)'] = lemmatize_stanza_word(stanzaPipeLine(filtered_svo[i]['Verb (V)']))
+#                     if not deleted and lemmatize_v and filtered_svo!={}:
+#                         filtered_svo[i]['Verb (V)'] = lemmatize_stanza_word(stanzaPipeLine(filtered_svo[i]['Verb (V)']))
 
-        if not pd.isna(unfiltered_svo[i]['Object (O)']):
-            if lemmatize_o:
-                lemmatized_svo[i]['Object (O)'] = lemmatize_stanza_word(stanzaPipeLine(unfiltered_svo[i]['Object (O)']))
-                if (filter_o and filter_o_fileName!='') and (not unfiltered_svo[i]['Object (O)'] in o_filtered_set):
-                    if not deleted:
-                        del filtered_svo[i]
-                        # del lemmatized_filtered_svo[i]
-                else:
-                    # if not deleted and lemmatize_o and lemmatized_filtered_svo!={}:
-                    #     lemmatized_filtered_svo[i]['Object (O)'] = lemmatize_stanza_word(stanzaPipeLine(filtered_svo[i]['Object (O)']))
-                    if not deleted and lemmatize_o and filtered_svo!={}:
-                        filtered_svo[i]['Object (O)'] = lemmatize_stanza_word(stanzaPipeLine(filtered_svo[i]['Object (O)']))
-    # print(filter_s,filter_v,filtered_svo)
+#         if not pd.isna(unfiltered_svo[i]['Object (O)']):
+#             if lemmatize_o:
+#                 lemmatized_svo[i]['Object (O)'] = lemmatize_stanza_word(stanzaPipeLine(unfiltered_svo[i]['Object (O)']))
+#                 if (filter_o and filter_o_fileName!='') and (not unfiltered_svo[i]['Object (O)'] in o_filtered_set):
+#                     if not deleted:
+#                         del filtered_svo[i]
+#                         # del lemmatized_filtered_svo[i]
+#                 else:
+#                     # if not deleted and lemmatize_o and lemmatized_filtered_svo!={}:
+#                     #     lemmatized_filtered_svo[i]['Object (O)'] = lemmatize_stanza_word(stanzaPipeLine(filtered_svo[i]['Object (O)']))
+#                     if not deleted and lemmatize_o and filtered_svo!={}:
+#                         filtered_svo[i]['Object (O)'] = lemmatize_stanza_word(stanzaPipeLine(filtered_svo[i]['Object (O)']))
+#     # print(filter_s,filter_v,filtered_svo)
 
-    # filtering for WordNet social actors/actions requires lemmatizing
-    nRecords_lemma = 0
-    nRecords_filter = 0
-    if lemmatize_s or lemmatize_v or lemmatize_o:
-        head, tail = os.path.split(svo_file_name)
-        tail = tail.replace('NLP_SVO_', 'NLP_SVO_lemma_')
-        svo_lemma_file_name = os.path.join(outputSVODir, tail)
-        filesToOpen.append(svo_lemma_file_name)
-        # save lemmatized file
-        pd.DataFrame.from_dict(lemmatized_svo, orient='index').to_csv(svo_lemma_file_name, encoding='utf-8', index=False)
-        nRecords_lemma, nColumns = IO_csv_util.GetNumberOf_Records_Columns_inCSVFile(svo_lemma_file_name)
+#     # filtering for WordNet social actors/actions requires lemmatizing
+#     nRecords_lemma = 0
+#     nRecords_filter = 0
+#     if lemmatize_s or lemmatize_v or lemmatize_o:
+#         head, tail = os.path.split(svo_file_name)
+#         tail = tail.replace('NLP_SVO_', 'NLP_SVO_lemma_')
+#         svo_lemma_file_name = os.path.join(outputSVODir, tail)
+#         filesToOpen.append(svo_lemma_file_name)
+#         # save lemmatized file
+#         pd.DataFrame.from_dict(lemmatized_svo, orient='index').to_csv(svo_lemma_file_name, encoding='utf-8', index=False)
+#         nRecords_lemma, nColumns = IO_csv_util.GetNumberOf_Records_Columns_inCSVFile(svo_lemma_file_name)
 
-        # filtering for WordNet social actors/actions requires lemmatizing
-        if filter_s or filter_v or filter_o:
-            if filter_s and filter_v and filter_o:
-                label='SVO_'
-            elif filter_s and filter_v:
-                label='SV_'
-            elif filter_s and filter_o:
-                label='SO_'
-            elif filter_s:
-                label = 'S_'
-            elif filter_v and filter_o:
-                label='VO_'
-            elif filter_v:
-                label='V_'
-            elif filter_o:
-                label='O_'
+#         # filtering for WordNet social actors/actions requires lemmatizing
+#         if filter_s or filter_v or filter_o:
+#             if filter_s and filter_v and filter_o:
+#                 label='SVO_'
+#             elif filter_s and filter_v:
+#                 label='SV_'
+#             elif filter_s and filter_o:
+#                 label='SO_'
+#             elif filter_s:
+#                 label = 'S_'
+#             elif filter_v and filter_o:
+#                 label='VO_'
+#             elif filter_v:
+#                 label='V_'
+#             elif filter_o:
+#                 label='O_'
 
-            # # create a subdirectory of the output SVO directory for filtered SVOs
-            # # filtered SVOs are stored in the WordNet directory
-            # outputWNDir = IO_files_util.make_output_subdirectory('', '', outputDir,
-            #                                                      label='WordNet',
-            #                                                      silent=True)
-            outputDir, tail = os.path.split(svo_lemma_file_name)
-            tail = tail.replace('NLP_SVO_lemma_', 'NLP_SVO_filter_'+ label)
-            # svo_filtered_file_name = os.path.join(outputWNDir, tail)
-            svo_filter_file_name = os.path.join(outputSVODir, tail)
-            # save filtered file
-            filesToOpen.append(svo_filter_file_name)
-            # pd.DataFrame.from_dict(lemmatized_filtered_svo, orient='index').to_csv(svo_filter_file_name, encoding='utf-8',
-            #                                                               index=False)
-            # save filtered file
-            pd.DataFrame.from_dict(filtered_svo, orient='index').to_csv(svo_filter_file_name, encoding='utf-8',
-                                                                          index=False)
+#             # # create a subdirectory of the output SVO directory for filtered SVOs
+#             # # filtered SVOs are stored in the WordNet directory
+#             # outputWNDir = IO_files_util.make_output_subdirectory('', '', outputDir,
+#             #                                                      label='WordNet',
+#             #                                                      silent=True)
+#             outputDir, tail = os.path.split(svo_lemma_file_name)
+#             tail = tail.replace('NLP_SVO_lemma_', 'NLP_SVO_filter_'+ label)
+#             # svo_filtered_file_name = os.path.join(outputWNDir, tail)
+#             svo_filter_file_name = os.path.join(outputSVODir, tail)
+#             # save filtered file
+#             filesToOpen.append(svo_filter_file_name)
+#             # pd.DataFrame.from_dict(lemmatized_filtered_svo, orient='index').to_csv(svo_filter_file_name, encoding='utf-8',
+#             #                                                               index=False)
+#             # save filtered file
+#             pd.DataFrame.from_dict(filtered_svo, orient='index').to_csv(svo_filter_file_name, encoding='utf-8',
+#                                                                           index=False)
 
-            # if filter_s or filter_v or filter_o:
-            # pd.DataFrame.from_dict(filtered_svo, orient='index').to_csv(svo_filter_file_name, encoding='utf-8', index=False)
+#             # if filter_s or filter_v or filter_o:
+#             # pd.DataFrame.from_dict(filtered_svo, orient='index').to_csv(svo_filter_file_name, encoding='utf-8', index=False)
 
-            nRecords_filter, nColumns = IO_csv_util.GetNumberOf_Records_Columns_inCSVFile(svo_filter_file_name)
-            filtered_records = num_rows - nRecords_filter
-            IO_user_interface_util.timed_alert(window,6000,'Filtered records', 'The filter algorithms have filtered out ' + str(filtered_records) + \
-                ' records.\n\nNumber of original SVO records: ' + str(num_rows) + '\nNumber of filtered SVO records: ' + str(nRecords_filter))
-        # else:
-        #     svo_filter_file_name=''
-        #     nRecords = 0
+#             nRecords_filter, nColumns = IO_csv_util.GetNumberOf_Records_Columns_inCSVFile(svo_filter_file_name)
+#             filtered_records = num_rows - nRecords_filter
+#             IO_user_interface_util.timed_alert(window,6000,'Filtered records', 'The filter algorithms have filtered out ' + str(filtered_records) + \
+#                 ' records.\n\nNumber of original SVO records: ' + str(num_rows) + '\nNumber of filtered SVO records: ' + str(nRecords_filter))
+#         # else:
+#         #     svo_filter_file_name=''
+#         #     nRecords = 0
 
-    else:
-        svo_lemma_file_name= ''
-        svo_filtered_file_name = ''
-        # nRecords = 0
+#     else:
+#         svo_lemma_file_name= ''
+#         svo_filtered_file_name = ''
+#         # nRecords = 0
 
-    IO_user_interface_util.timed_alert(window, 2000, 'Analysis end', 'Finished running the lemma/filter algorithm for Subject-Verb-Object (SVO) at', True, '', True,
-                                       startTime, True)
+#     IO_user_interface_util.timed_alert(window, 2000, 'Analysis end', 'Finished running the lemma/filter algorithm for Subject-Verb-Object (SVO) at', True, '', True,
+#                                        startTime, True)
 
-    if nRecords_lemma > 1 or nRecords_filter >1:
-        openFiles = False # way too many files to open; but this can be changed at any time
-        if lemmatize_s or lemmatize_v or lemmatize_o:
-            filesToOpen = visualize_SVOs(svo_lemma_file_name, outputSVOLemmaDir, chartPackage, dataTransformation, filesToOpen, openFiles)
-        if filter_s or filter_v or filter_o:
-            filesToOpen = visualize_SVOs(svo_filter_file_name, outputSVOFilterDir, chartPackage, dataTransformation, filesToOpen, openFiles)
+#     if nRecords_lemma > 1 or nRecords_filter >1:
+#         openFiles = False # way too many files to open; but this can be changed at any time
+#         if lemmatize_s or lemmatize_v or lemmatize_o:
+#             filesToOpen = visualize_SVOs(svo_lemma_file_name, outputSVOLemmaDir, chartPackage, dataTransformation, filesToOpen, openFiles)
+#         if filter_s or filter_v or filter_o:
+#             filesToOpen = visualize_SVOs(svo_filter_file_name, outputSVOFilterDir, chartPackage, dataTransformation, filesToOpen, openFiles)
 
-    return filesToOpen
+#     return filesToOpen
 
 def normalize_date_svo(inputFilename, outputDir,  chartPackage='Excel', dataTransformation='No transformation'):
     filesToOpen = []
