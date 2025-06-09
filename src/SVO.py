@@ -515,9 +515,9 @@ def run_svo(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
                     outputFilename_sankey = IO_files_util.generate_output_file_name(inputFilename, inputDir, tempOutputDir,
                                                                                     '.html', output_label)
                     
-                    # outputFiles = charts_util.Sankey(inputFilename, outputFilename_sankey,
-                    #                                  'Subject (S)', Sankey_limit1_var, 'Verb (V)', Sankey_limit2_var,
-                    #                                  three_way_Sankey, 'Object (O)', Sankey_limit3_var)
+                    outputFiles = charts_util.Sankey(inputFilename, outputFilename_sankey,
+                                                     'Subject (S)', Sankey_limit1_var, 'Verb (V)', Sankey_limit2_var,
+                                                     three_way_Sankey, 'Object (O)', Sankey_limit3_var)
     
                     if outputFiles != None:
                         if isinstance(outputFiles, str):
@@ -564,13 +564,10 @@ def run_svo(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
 
                             outputFilename_sankey = IO_files_util.generate_output_file_name(f, inputDir, tempOutputDir,
                                                                                             '.html', output_label)
-                            # outputFiles = charts_util.Sankey(f, outputFilename_sankey,
-                            #                                  'Subject (S)', Sankey_limit1_var, 'Verb (V)', Sankey_limit2_var,
-                            #                                  three_way_Sankey, 'Object (O)', Sankey_limit3_var)
-                            
-                            outputFiles = None
-                            
-
+                            outputFiles = charts_util.Sankey(f, outputFilename_sankey,
+                                                             'Subject (S)', Sankey_limit1_var, 'Verb (V)', Sankey_limit2_var,
+                                                             three_way_Sankey, 'Object (O)', Sankey_limit3_var)
+                                                        
                             if outputFiles != None:
                                 if isinstance(outputFiles, str):
                                     filesToOpen.append(outputFiles)

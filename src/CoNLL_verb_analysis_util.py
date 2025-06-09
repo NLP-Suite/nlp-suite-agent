@@ -583,9 +583,9 @@ def verb_tense_stats(inputFilename, outputDir, data, data_divided_sents, openOut
 def verb_stats(config_filename, inputFilename, outputDir, data, data_divided_sents, openOutputFiles, chartPackage, dataTransformation):
 	filesToOpen = []  # Store all files that are to be opened once finished
 
-	startTime = IO_user_interface_util.timed_alert(2000,'Analysis start',
-												   'Started running VERB ANALYSES at',
-												   True, '', True, '', True)
+	# startTime = IO_user_interface_util.timed_alert(2000,'Analysis start',
+	# 											   'Started running VERB ANALYSES at',
+	# 											   True, '', True, '', True)
 
 	outputFiles = verb_compute_frequencies(inputFilename, outputDir, data, data_divided_sents,
 								   openOutputFiles, chartPackage, dataTransformation)
@@ -610,8 +610,8 @@ def verb_stats(config_filename, inputFilename, outputDir, data, data_divided_sen
 	if outputFiles!=None:
 		filesToOpen.extend(outputFiles)
 
-	IO_user_interface_util.timed_alert('Analysis end', 'Finished running VERB ANALYSES at', True,
-									   '', True, startTime, True)
+	# IO_user_interface_util.timed_alert('Analysis end', 'Finished running VERB ANALYSES at', True,
+	# 								   '', True, startTime, True)
 
 	return filesToOpen
 

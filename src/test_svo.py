@@ -15,7 +15,7 @@ inputFilename  = ''
 openOutputFiles = False
 chartPackage = 'Excel'
 dataTransformation = 'No transformation'
-coref_var = False 
+coref_var = True 
 manual_coref_var = False 
 normalized_NER_date_extractor_var = False
 package_var = 'Stanford CoreNLP'
@@ -30,7 +30,7 @@ filter_objects = False
 lemmatize_subjects = True
 lemmatize_verbs = True
 lemmatize_objects = False 
-gephi_var = True 
+gephi_var = False 
 wordcloud_var = True 
 google_earth_var = False
 

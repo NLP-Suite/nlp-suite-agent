@@ -15,7 +15,7 @@ from word2vec import run_word2vec
 from sunburst_charts import run_sun_burst
 from colormap_chart import run_colormap
 from sankey_flowchart import run_sankey
-from CoNLL_table_analyzer_main import run_conll
+from CoNLL_main import run_conll
 from wordcloud_visual import run_wordcloud
 
 from style_analysis import run_style_analysis
@@ -267,6 +267,11 @@ def conll_table_analyzer(
     Begin_K_sent_var: Annotated[bool, Form()] = False,
     End_K_sent_var: Annotated[bool, Form()] = False,
     openOutputFiles: Annotated[bool, Form()] = False,
+    compute_sentence_table: Annotated[bool, Form()] = False,
+    search_token_word_checkbox: Annotated[bool, Form()] = False, 
+    repetition_finder: Annotated[bool, Form()] = False, 
+    clause_noun_verb_function: Annotated[bool, Form()] = False, 
+    clause_noun_verb_function_options: Annotated[str, Form()] = False 
 
 ):
     inputFilename = ""
@@ -290,7 +295,11 @@ def conll_table_analyzer(
                 co_deprel=deprel_b,
                 Begin_K_sent_var=Begin_K_sent_var,
                 End_K_sent_var=End_K_sent_var,
-
+                compute_sentence_var = compute_sentence_table,
+                search_token_var = search_token_word_checkbox,
+                k_sentences_var = repetition_finder,
+                all_analyses_vars = clause_noun_verb_function,
+                all_analyses = clause_noun_verb_function_options, 
             ),
         )
     )

@@ -18,6 +18,16 @@ import Stanford_CoreNLP_tags_util
 import CoNLL_k_sentences_util
 import reminders_util
 
+import logging
+import CoNLL_clause_analysis_util
+
+import CoNLL_noun_analysis_util
+import CoNLL_verb_analysis_util
+import CoNLL_function_words_analysis_util
+import CoNLL_table_search_util
+import IO_csv_util
+import CoNLL_util
+
 # from data_manager_main import extract_from_csv
 
 # more imports (e.g., import CoNLL_clause_analysis_util) are called below under separate if statements
@@ -25,8 +35,10 @@ import reminders_util
 # RUN section ______________________________________________________________________________________________________________________________________________________
 
 # the values of the GUI widgets MUST be entered in the command otherwise they will not be updated
-def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
-        searchedCoNLLField, searchField_kw, postag, deprel, co_postag, co_deprel, Begin_K_sent_var, End_K_sent_var):
+def run_conll(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
+        searchedCoNLLField, searchField_kw, postag, deprel, co_postag, co_deprel, Begin_K_sent_var, End_K_sent_var, compute_sentence_var,
+        search_token_var, k_sentences_var, all_analyses_var, all_analyses
+        ):
 
     #INPUTE FILENAME WILLBE INPUT DIR, CoNLL Table to be parsed as one in directory 
     inputFilename = inputDir
@@ -40,32 +52,78 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
     config_filename = "NLP_default_IO_config.csv"
     filesToOpen = []  # Store all files that are to be opened once finished
     outputFiles = []
+    WordNet_var = False
     
-    if extra_GUIs_var.get() == False and \
-        all_analyses_var.get() == False and\
-        search_token_var.get() == False and \
-        WordNet_var.get() == False and \
-        compute_sentence_var.get() == False and \
-        k_sentences_var.get() == False:
+    if  all_analyses_var == False and\
+        search_token_var == False and \
+        WordNet_var == False and \
+        compute_sentence_var == False and \
+        k_sentences_var == False:
             print("No option selected, No option has been selected.\n\nPlease, select an option by ticking a checkbox and try again.")
             return
 
-    # if extra_GUIs_var.get():
-    #     if 'Data manipulation' in extra_GUIs_menu_var.get():
+    # if extra_GUIs_var:
+    #     if 'Data manipulation' in extra_GUIs_menu_var:
     #         call("python data_manipulation_main.py", shell=True)
-    #     elif 'Style' in extra_GUIs_menu_var.get():
+    #     elif 'Style' in extra_GUIs_menu_var:
     #         call("python style_analysis_main.py", shell=True)
-    #     if 'Ngrams searches' in extra_GUIs_menu_var.get():
+    #     if 'Ngrams searches' in extra_GUIs_menu_var:
     #         call("python NGrams_CoOccurrences_main.py", shell=True)
-    #     if 'Word searches' in extra_GUIs_menu_var.get():
+    #     if 'Word searches' in extra_GUIs_menu_var:
     #         call("python file_search_byWord_main.py", shell=True)
-    #     if 'Wordnet' in extra_GUIs_menu_var.get():
+    #     if 'Wordnet' in extra_GUIs_menu_var:
     #         call("python knowledge_graphs_WordNet_main.py", shell=True)
+
+#CONLL_TABLE_ANALYZER_MAIN
+
+
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+
+    # Reading CoNLL file data
+    data, header = IO_csv_util.get_csv_data(inputFilename, True)
+    if len(data) == 0:
+        return
+    all_CoNLL_records = CoNLL_util.CoNLL_record_division(data)
+    if all_CoNLL_records is None or len(all_CoNLL_records) == 0:
+        return
+
+    if searchedCoNLLField == 'FORM':
+        logger.info("Running FORM-based search")
+    else:
+        logger.info("Running LEMMA-based search")
+
+    # Clause Analysis
+    if 'CoNLL' in inputFilename and not '_nn_' in inputFilename:
+        outputFiles = CoNLL_clause_analysis_util.clause_stats(inputFilename, '', outputDir, data, all_CoNLL_records, openOutputFiles, chartPackage, dataTransformation)
+        if outputFiles:
+            filesToOpen.extend(outputFiles)
+    
+    # Noun Analysis
+    outputFiles = CoNLL_noun_analysis_util.noun_stats(inputFilename, outputDir, data, all_CoNLL_records, openOutputFiles, chartPackage, dataTransformation)
+    if outputFiles:
+        filesToOpen.extend(outputFiles)
+
+    # Verb Analysis
+    outputFiles = CoNLL_verb_analysis_util.verb_stats(config_filename, inputFilename, outputDir, data, all_CoNLL_records, openOutputFiles, chartPackage, dataTransformation)
+    if outputFiles:
+        filesToOpen.extend(outputFiles)
+
+    # Function Words (Stop words) Analysis
+    outputFiles = CoNLL_function_words_analysis_util.function_words_stats(inputFilename, outputDir, data, all_CoNLL_records, openOutputFiles, chartPackage, dataTransformation)
+    if outputFiles:
+        filesToOpen.extend(outputFiles)
+
+    if searchField_kw and searchField_kw != 'e.g.: father':
+        logger.info("Running token search on: %s", searchField_kw)
+        temp_outputDir, outputFiles = CoNLL_table_search_util.search_CoNLL_table(inputFilename, outputDir, config_filename, chartPackage, dataTransformation, all_CoNLL_records, searchField_kw, searchedCoNLLField, postag, deprel, co_postag, co_deprel)
+        if outputFiles:
+            filesToOpen.extend(outputFiles)
 
 # Ngrams searches & VIEWER','Word searches
 
 
-    if search_token_var.get() and searchField_kw=='e.g.: father':
+    if search_token_var and searchField_kw=='e.g.: father':
         print("Search error, The 'Searched token' field must be different from 'e.g.: father'. Please, enter a CoNLL table token/word and try again.")
 
         return
@@ -83,7 +141,7 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
 
 # ANALYSES -----------------------------------------------------------------------------------
 
-    if all_analyses_var.get():
+    if all_analyses_var:
         # # create a subdirectory of the output directory; should create a subdir with increasing number to avoid writing ver
         # outputDir_temp = IO_files_util.make_output_subdirectory(inputFilename, '', outputDir, label='CoNLL_analyses',
         #                                                    silent=True)
@@ -92,16 +150,16 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
         #
         # outputDir=outputDir_temp
         #
-        if all_analyses.get() == '*':
+        if all_analyses == '*':
             label = "Clause, noun, verb, function words"
         else:
-            label = all_analyses.get()
-        startTime=IO_user_interface_util.timed_alert('Analysis start', 'Started running CoNLL table ' + label + ' analyses at',
-                                                     True, '', True, '', False)
+            label = all_analyses
+        # startTime=IO_user_interface_util.timed_alert('Analysis start', 'Started running CoNLL table ' + label + ' analyses at',
+        #                                              True, '', True, '', False)
 
         outputDirSV = outputDir
 
-        if all_analyses.get() == '*' or all_analyses.get() == 'Clause analysis':
+        if all_analyses == '*' or all_analyses == 'Clause analysis':
             # create a subdirectory of the output directory; should create a subdir with increasing number to avoid writing ver
             outputDir_temp = IO_files_util.make_output_subdirectory(inputFilename, '', outputDir,
                                                                     label='CoNLL_clause',
@@ -111,11 +169,10 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
             outputDir = outputDir_temp
 
             if 'CoNLL' in inputFilename and '_nn_' in inputFilename:
-                if all_analyses.get() == 'Clause analysis':
+                if all_analyses == 'Clause analysis':
                     print("Input file error, The CLAUSE analysis algorithm expects in input a CoNLL table generated by the Stanford CoreNLP PCFG parser, rather than the nn, neural network parser.\n\nOnly the PCFG parser exports clause tags.\n\nPlease check your input file and try again.")
 
             if 'CoNLL' in inputFilename and not '_nn_' in inputFilename:
-                import CoNLL_clause_analysis_util
                 outputFiles = CoNLL_clause_analysis_util.clause_stats(inputFilename, '', outputDir,
                                                                       data,
                                                                       all_CoNLL_records,
@@ -123,7 +180,7 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
                 if outputFiles!=None:
                     filesToOpen.extend(outputFiles)
 
-        if all_analyses.get() =='*' or all_analyses.get() =='Noun analysis':
+        if all_analyses =='*' or all_analyses =='Noun analysis':
             # create a subdirectory of the output directory; should create a subdir with increasing number to avoid writing ver
             outputDir_temp = IO_files_util.make_output_subdirectory(inputFilename, '', outputDirSV,
                                                                     label='CoNLL_noun',
@@ -131,14 +188,13 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
             if outputDir_temp == '':
                 return
             outputDir = outputDir_temp
-            import CoNLL_noun_analysis_util
             outputFiles = CoNLL_noun_analysis_util.noun_stats(inputFilename, outputDir, data, all_CoNLL_records,
                                                               openOutputFiles,
                                                               chartPackage,
                                                               dataTransformation)
             if outputFiles!=None:
                 filesToOpen.extend(outputFiles)
-        if all_analyses.get() =='*' or all_analyses.get() =='Verb analysis':
+        if all_analyses =='*' or all_analyses =='Verb analysis':
             # create a subdirectory of the output directory; should create a subdir with increasing number to avoid writing ver
             outputDir_temp = IO_files_util.make_output_subdirectory(inputFilename, '', outputDirSV,
                                                                     label='CoNLL_verb',
@@ -146,14 +202,13 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
             if outputDir_temp == '':
                 return
             outputDir = outputDir_temp
-            import CoNLL_verb_analysis_util
             outputFiles = CoNLL_verb_analysis_util.verb_stats(config_filename, inputFilename, outputDir, data, all_CoNLL_records,
                                                               openOutputFiles, chartPackage, dataTransformation)
 
             if outputFiles!=None:
                 filesToOpen.extend(outputFiles)
 
-        if all_analyses.get() =='*' or all_analyses.get() =='Function (junk/stop) words analysis':
+        if all_analyses =='*' or all_analyses =='Function (junk/stop) words analysis':
             # create a subdirectory of the output directory; should create a subdir with increasing number to avoid writing ver
             outputDir_temp = IO_files_util.make_output_subdirectory(inputFilename, '', outputDirSV,
                                                                     label='CoNLL_stop',
@@ -161,20 +216,19 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
             if outputDir_temp == '':
                 return
             outputDir = outputDir_temp
-            import CoNLL_function_words_analysis_util
             outputFiles = CoNLL_function_words_analysis_util.function_words_stats(inputFilename, outputDir, data,
                                                                                   all_CoNLL_records, openOutputFiles,
                                                                                   chartPackage, dataTransformation)
             if outputFiles!=None:
                 filesToOpen.extend(outputFiles)
 
-        IO_user_interface_util.timed_alert(2000,'Analysis end',
-                                           'Finished running CoNLL table ' + label + ' analyses at',
-                                           True, '', True, startTime, False)
+        # IO_user_interface_util.timed_alert(2000,'Analysis end',
+        #                                    'Finished running CoNLL table ' + label + ' analyses at',
+        #                                    True, '', True, startTime, False)
 
 # SEARCH -----------------------------------------------------------------------------------
 
-    if search_token_var.get() and searchField_kw != 'e.g.: father':
+    if search_token_var and searchField_kw != 'e.g.: father':
         # # create a subdirectory of the output directory
         # outputDir = IO_files_util.make_output_subdirectory(inputFilename, '', outputDir, label='CoNLL_search',
         #                                                    silent=True)
@@ -184,9 +238,9 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
             return
         
         if searchedCoNLLField.lower() not in ['lemma', 'form']:
-            searchedCoNLLField_var.set('FORM')
-        if postag_var.get() != '*':
-            postag = str(postag_var.get()).split(' - ')[0]
+            searchedCoNLLField = ('FORM')
+        if postag!= '*':
+            postag = postag.split(' - ')[0]
             postag = postag.strip()
         else:
             postag = '*'
@@ -223,8 +277,8 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
 
             return  # breaks loop
 
-        startTime=IO_user_interface_util.timed_alert(2000,'Analysis start', 'Started running CoNLL search at',
-                                                     True, '', True, '', True)
+        # startTime=IO_user_interface_util.timed_alert(2000,'Analysis start', 'Started running CoNLL search at',
+        #                                              True, '', True, '', True)
 
         withHeader = True
         data, header = IO_csv_util.get_csv_data(inputFilename, withHeader)
@@ -248,7 +302,7 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
 
 # WordNet ------------------------------------------------------------------------------
 
-    if WordNet_var.get():
+    if WordNet_var:
         # create a subdirectory of the output directory; should create a subdir with increasing number to avoid writing ver
         outputDir_SV = outputDir
         outputDir = IO_files_util.make_output_subdirectory(inputFilename, '', outputDir, label='CoNLL_WordNet',
@@ -294,24 +348,26 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
         outputDir=outputDir_SV
 
 # -----------------------------------------------------------------------------------------------------------------------------
-    if compute_sentence_var.get():
+    if compute_sentence_var:
         tempOutputFile = CoNLL_util.compute_sentence_table(inputFilename, outputDir)
         filesToOpen.append(tempOutputFile)
 
 # -----------------------------------------------------------------------------------------------------------------------------
-    if k_sentences_var.get():
+    if k_sentences_var:
         if Begin_K_sent_var==0 or End_K_sent_var==0:
             print("Warning, The Repetion finder algorithm needs beginning and end K sentences.\n\nPlease, enter valid K number(s) of sentences and try again.")
             return
-        startTime = IO_user_interface_util.timed_alert(2000, 'Analysis start',
-                                                       'Started running the CoNLL table K-sentences analyzer at',
-                                                       True, '', True, '', False)
+        # startTime = IO_user_interface_util.timed_alert(2000, 'Analysis start',
+        #                                                'Started running the CoNLL table K-sentences analyzer at',
+        #                                                True, '', True, '', False)
         temp_outputDir, outputFiles = CoNLL_k_sentences_util.k_sent(inputFilename, outputDir, chartPackage, dataTransformation, Begin_K_sent_var, End_K_sent_var)
         if outputFiles!=None:
             outputDir = temp_outputDir
             filesToOpen.extend(outputFiles)
-        IO_user_interface_util.timed_alert(2000,'Analysis end',
-                                           'Finished running the CoNLL table K-sentences analyzer at',
-                                           True, '', True, startTime, False)
-
+        # IO_user_interface_util.timed_alert(2000,'Analysis end',
+        #                                    'Finished running the CoNLL table K-sentences analyzer at',
+        #                                    True, '', True, startTime, False)
+        
+        
     return filesToOpen
+
