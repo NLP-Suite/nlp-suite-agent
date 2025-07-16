@@ -1,5 +1,4 @@
 import sys
-import GUI_util
 import IO_libraries_util
 
 
@@ -20,7 +19,7 @@ import NGrams_CoOccurrences_util
 
 # RUN section ______________________________________________________________________________________________________________________________________________________
 
-def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
+def run_ngrams(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
         ngrams_options_list,
         Ngrams_compute_var,
         ngrams_menu_var,
@@ -42,8 +41,9 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
         number_of_years,
         ):
 
-    config_filename = GUI_util.config_filename_selected_config.get()
+    config_filename = 'NLP_default_IO_config.csv'
 
+    extra_GUIs_var = False
     filesToOpen = []
 
     if csv_file_var!='':
@@ -83,7 +83,7 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
         config_filename, config_input_output_numeric_options)
     extract_date_from_text_var = 0
 
-    if extra_GUIs_var.get() == False and Ngrams_compute_var==False and Ngrams_search_var==False and ngrams_viewer_var==False and CoOcc_Viewer_var==False:
+    if extra_GUIs_var == False and Ngrams_compute_var==False and Ngrams_search_var==False and ngrams_viewer_var==False and CoOcc_Viewer_var==False:
         print('Warning, there are no options selected.\n\nPlease, select one of the available options and try again.')
         return
     if inputDir=='' and (ngrams_viewer_var==True or CoOcc_Viewer_var==True):
@@ -158,12 +158,12 @@ def run(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataT
                 hapax_words = True  # set it temporarily to True since we default to compute it every time
                 wordgram = ngrams_word_var # true r false depending upon whether n-grams are for word or character
                 bySentenceID = bySentenceIndex_word_var
-                outputFiles, outputDir = statistics_txt_util.compute_character_word_ngrams(GUI_util.window, inputFilename,
+                outputFiles, outputDir = statistics_txt_util.compute_character_word_ngrams(inputFilename,
                                                                                 inputDir, outputDir, config_filename,
                                                                                 ngrams_size, frequency, hapax_words,
                                                                                 normalize,
                                                                                 lemmatize,
-                                                                                case_sensitive,
+                                                                                # case_sensitive,
                                                                                 excludePunctuation,
                                                                                 excludeArticles,
                                                                                 excludeDeterminers,

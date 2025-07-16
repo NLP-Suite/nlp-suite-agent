@@ -1,12 +1,12 @@
 import os
 from threading import Thread
-from typing import Annotated
+from typing import Annotated, List
 from enum import Enum
 
 import uvicorn
 from fastapi import FastAPI, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, RedirectResponse
 
 from parsers_annotators import run_parsers_annotators
 from sentiment_analysis import run_sentiment_analysis
@@ -20,6 +20,7 @@ from wordcloud_visual import run_wordcloud
 
 from style_analysis import run_style_analysis
 from SVO import run_svo
+from NGrams_CoOccurrences import run_ngrams
 
 app = FastAPI()
 origins = [
@@ -80,25 +81,30 @@ def sentiment_analysis(
     calculateMedian: Annotated[bool, Form()] = False,
     
 ):
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
-    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
-    thread = Thread(
-        target=lambda: run(
-            app,
-            lambda: run_sentiment_analysis(
-                inputDirectory,
-                outputDirectory,
-                False,
-                "Excel",
-                transformation,
-                calculateMean,
-                calculateMedian,
-                algorithm,
-            ),
+    try:
+        inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+        outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+        thread = Thread(
+            target=lambda: run(
+                app,
+                lambda: run_sentiment_analysis(
+                    inputDirectory,
+                    outputDirectory,
+                    False,
+                    "Excel",
+                    transformation,
+                    calculateMean,
+                    calculateMedian,
+                    algorithm,
+                ),
+            )
         )
-    )
-    thread.start()
-    return PlainTextResponse("", status_code=200)
+        thread.start()
+        return PlainTextResponse("", status_code=200)
+    
+    except Exception as e:
+        print("Error: ", e)
+        return RedirectResponse("./error.html", status_code=302)
 
 @app.post("/topic_modeling")
 def topic_modeling(
@@ -117,31 +123,35 @@ def topic_modeling(
     nounsOnly_var: Annotated[bool, Form()] = False,
     Gensim_MALLET_var: Annotated[bool, Form()] = False,
 ):
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
-    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
-    thread = Thread(
-        target=lambda: run(
-            app,
-            lambda: run_topic_modeling(
-                inputDir=inputDirectory,
-                outputDir=outputDirectory,
-                chartPackage=chartPackage, 
-                dataTransformation=transformation,
-                num_topics=numberOfTopics,
-                BERT_var=topicModelingBERT,
-                split_docs_var=splitToSentence,
-                MALLET_var=topicModelingMALLET,
-                optimize_intervals_var=optimizeTopicIntervals,
-                Gensim_var=topicModelingGensim,
-                remove_stopwords_var=removeStopwords,
-                lemmatize_var=lemmatizeWords,
-                nounsOnly_var=nounsOnly_var,
-                Gensim_MALLET_var=Gensim_MALLET_var,
-            ),
+    try:
+        inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+        outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+        thread = Thread(
+            target=lambda: run(
+                app,
+                lambda: run_topic_modeling(
+                    inputDir=inputDirectory,
+                    outputDir=outputDirectory,
+                    chartPackage=chartPackage, 
+                    dataTransformation=transformation,
+                    num_topics=numberOfTopics,
+                    BERT_var=topicModelingBERT,
+                    split_docs_var=splitToSentence,
+                    MALLET_var=topicModelingMALLET,
+                    optimize_intervals_var=optimizeTopicIntervals,
+                    Gensim_var=topicModelingGensim,
+                    remove_stopwords_var=removeStopwords,
+                    lemmatize_var=lemmatizeWords,
+                    nounsOnly_var=nounsOnly_var,
+                    Gensim_MALLET_var=Gensim_MALLET_var,
+                ),
+            )
         )
-    )
-    thread.start()
-    return PlainTextResponse("", status_code=200)
+        thread.start()
+        return PlainTextResponse("", status_code=200)
+    except Exception as e:
+        print("Error: ", e)
+        return RedirectResponse("./error.html", status_code=302)
 
 @app.post("/parsers_annotators")
 def parsers_annotators(
@@ -558,7 +568,75 @@ def wordcloud(
     )
     thread.start()
     return PlainTextResponse("", status_code=200)
-    
+
+
+@app.post("/NGrams_CoOccurrences.html")
+def NGrams_CoOccurrences(
+        inputDirectory: Annotated[str, Form()],
+        outputDirectory: Annotated[str, Form()],
+        openOutputFiles: Annotated[bool, Form()], 
+        chartPackage: Annotated[str, Form()],
+        dataTransformation: Annotated[str, Form()],
+        ngrams_options_list: Annotated[str, Form()],
+        Ngrams_compute_var: Annotated[bool, Form()],
+        ngrams_menu_var: Annotated[str, Form()],
+        ngrams_options_menu_var: Annotated[str, Form()],
+        ngrams_size: Annotated[int, Form()],
+        search_words: Annotated[str, Form()], 
+        minus_K_words_var: Annotated[int, Form()],
+        plus_K_words_var: Annotated[int, Form()],
+        Ngrams_search_var: Annotated[bool, Form()],
+        csv_file_var: Annotated[str, Form()],
+        ngrams_viewer_var:  Annotated[bool, Form()],
+        CoOcc_Viewer_var: Annotated[str, Form()],
+        date_options: Annotated[bool, Form()],
+        temporal_aggregation_var: Annotated[bool, Form()],
+        viewer_options_list: Annotated[str, Form()],
+        language_list: Annotated[str, Form()],
+        config_input_output_numeric_options: Annotated[str, Form()],
+        number_of_years: Annotated[int, Form()],
+        
+):
+    inputFilename = ""
+    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+        
+    thread = Thread(
+        target=lambda: run_ngrams(
+            app,
+            lambda: run_ngrams(
+                    inputFilename=inputFilename,
+                    inputDir=inputDirectory,
+                    outputDir=outputDirectory,
+                    openOutputFiles=openOutputFiles,
+                    chartPackage=chartPackage,
+                    dataTransformation=dataTransformation,
+
+                    ngrams_options_list=ngrams_options_list,
+                    Ngrams_compute_var=Ngrams_compute_var,
+                    ngrams_menu_var=ngrams_menu_var,
+                    ngrams_options_menu_var=ngrams_options_menu_var,
+                    ngrams_size=ngrams_size,
+                    search_words=search_words,
+                    minus_K_words_var=minus_K_words_var,
+                    plus_K_words_var=plus_K_words_var,
+                    Ngrams_search_var=Ngrams_search_var,
+                    csv_file_var=csv_file_var,
+                    ngrams_viewer_var=ngrams_viewer_var,
+                    CoOcc_Viewer_var=CoOcc_Viewer_var,
+                    # within_sentence_co_occurrence_search_var=within_sentence_co_occurrence_search_var,
+                    date_options=date_options,
+                    temporal_aggregation_var=temporal_aggregation_var,
+                    viewer_options_list=viewer_options_list,
+                    language_list=language_list,
+                    config_input_output_numeric_options=config_input_output_numeric_options,
+                    number_of_years=number_of_years
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, port=3000, host="0.0.0.0")
