@@ -60,8 +60,7 @@ async def single_runner(request: Request, call_next):
 
     app.worker = True
     response = await call_next(request)
-    if response.status_code >= 400:
-        app.worker = False
+    app.worker = False
     return response
 
 
