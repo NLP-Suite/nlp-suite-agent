@@ -4,7 +4,7 @@ from typing import Annotated, List
 from enum import Enum
 
 import uvicorn
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, RedirectResponse
 
@@ -41,8 +41,14 @@ app.worker = False
 
 
 def run(app, method):
-    method()
-    app.worker = False
+    try: 
+        method()
+        
+    except Exception as e:
+        app.worker_exception = e
+        
+    finally:
+        app.worker = False
 
 
 @app.middleware("http")
@@ -61,14 +67,20 @@ async def single_runner(request: Request, call_next):
 
 @app.get("/status")
 def status():
-    thread = Thread(
-        target=lambda: run(
-            app,
-            lambda: None,
-        )
-    )
-    thread.start()
-    return PlainTextResponse("", status_code=200)
+    if hasattr(app, 'worker_exception') and app.worker_exception:
+        e = app.worker_exception
+        app.worker_exception = None
+        
+        raise HTTPException(status_code=500, detail=str(e))
+
+    # thread = Thread(
+    #     target=lambda: run(
+    #         app,
+    #         lambda: None,
+    #     )
+    # )
+    # thread.start()
+    # return PlainTextResponse("", status_code=200)
 
 
 @app.post("/sentiment_analysis")
@@ -82,7 +94,8 @@ def sentiment_analysis(
     
 ):
     try:
-        inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+        inputDirectory = os.path.expanduser(inputDirectory)
+
         outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
         thread = Thread(
             target=lambda: run(
@@ -124,7 +137,7 @@ def topic_modeling(
     Gensim_MALLET_var: Annotated[bool, Form()] = False,
 ):
     try:
-        inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+        inputDirectory = os.path.expanduser(inputDirectory)
         outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
         thread = Thread(
             target=lambda: run(
@@ -155,7 +168,7 @@ def topic_modeling(
 
 @app.post("/parsers_annotators")
 def parsers_annotators(
-    inputDir: Annotated[str, Form()],
+    inputDirectory: Annotated[str, Form()],
     dataTransformation: Annotated[str, Form()] = '',
     # extra_GUIs_var: Annotated[bool, Form()] = False,
     # extra_GUIs_menu_var: Annotated[str, Form()] = '',
@@ -170,7 +183,7 @@ def parsers_annotators(
     annotators_menu_var: Annotated[str, Form()] = '',
 ):
     inputFilename =  ''
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     openOutputFiles = False
     # Start the processing in a separate thread
@@ -225,7 +238,7 @@ def word2vec(
     range20: Annotated[int, Form()] = 10,
 ):
     inputFilename = ""
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     thread = Thread(
         target=lambda: run(
@@ -285,7 +298,7 @@ def conll_table_analyzer(
 
 ):
     inputFilename = ""
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     thread = Thread(
         target=lambda: run(
@@ -333,7 +346,7 @@ def style_analysis(
 ):
     inputFilename = ""
     extra_GUIs_var = False
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     gender_guesser = False
         
@@ -373,7 +386,7 @@ def sunburst_charts(
         piechart_var: Annotated[bool, Form()] = False, 
         treemap_var: Annotated[bool, Form()] = False,
 ):
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     
     thread = Thread(
@@ -406,7 +419,7 @@ def colormap_chart(
     file_data: Annotated[str, Form()] = "",
 
 ):
-    # inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    # inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     thread = Thread(
         target=lambda: run(
@@ -437,7 +450,7 @@ def sankey_flowchart(
         file_data: Annotated[str, Form()] = "",
         selected_pairs_data: Annotated[str, Form()] = "[]",
 ):
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     
     thread = Thread(
@@ -478,7 +491,7 @@ def SVO(
 ):
     inputFilename = ""
     chartPackage = 'Excel'
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     thread = Thread(
         target=lambda: run(
@@ -535,7 +548,7 @@ def wordcloud(
     intermediateWordcloudFiles: Annotated[bool, Form()] = False,
 ):
     inputFilename = ""
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     selectedImage = ""
     openOuputfiles = False
@@ -598,7 +611,7 @@ def NGrams_CoOccurrences(
         
 ):
     inputFilename = ""
-    inputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "input")
+    inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
         
     thread = Thread(

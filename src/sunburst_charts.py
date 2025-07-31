@@ -2,6 +2,7 @@ import IO_files_util
 import charts_util
 import os
 import json
+from get_first_csv import first_csv
 
 def run_sun_burst(inputFilename, inputDir, outputDir,
         file_data,
@@ -10,6 +11,8 @@ def run_sun_burst(inputFilename, inputDir, outputDir,
         piechart_var, 
         treemap_var 
         ):
+    
+        csv_path = first_csv(inputDir)
         try:
             saved_pairs = json.loads(selected_pairs_data)
         except json.JSONDecodeError:
@@ -41,7 +44,7 @@ def run_sun_burst(inputFilename, inputDir, outputDir,
             fixed_param_var=None
 
         # TODO: join with input file dir
-        inputFilePath = os.path.join(inputDir, inputFilename)
+        inputFilePath = csv_path
         if piechart_var:    
             piechart_outputFilename = IO_files_util.generate_output_file_name(inputFilename, inputDir, outputDir, '.html', "Sunburst")
             pie_output = charts_util.Sunburst_Treemap(inputFilePath, piechart_outputFilename, outputDir, csv_file_categorical_field_list, 1, fixed_param_var, rate_param_var, base_param_var, filter_options_var, file_data = file_data)
