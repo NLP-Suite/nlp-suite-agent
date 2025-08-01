@@ -8,176 +8,169 @@
 
 import sys
 
-import GUI_IO_util
 import IO_files_util
-import GUI_util
-import IO_libraries_util
-import IO_user_interface_util
 
-if IO_libraries_util.install_all_Python_packages(GUI_util.window,"file_converter_util",['os','__main__','tkinter','docx','pdfminer','striprtf','errno'])==False:
-    sys.exit(0)
+
 
 import os
 import io
 
 import csv
 import tkinter as tk
-import tkinter.messagebox as mb
+#import tkinter.messagebox as mb
 import errno
 # pip install pdfminer.six --user (since it may ask for permission) rather than pip install pdfminer
-from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-from pdfminer.pdfpage import PDFPage
-from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
-from pdfminer.layout import LAParams
-from docx import Document #pip install python-docx
+# from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+# from pdfminer.pdfpage import PDFPage
+# from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
+# from pdfminer.layout import LAParams
+# from docx import Document #pip install python-docx
 from os.path import splitext
 from striprtf.striprtf import rtf_to_text
 
 # https://pdfminersix.readthedocs.io/en/latest/
-# https://pypi.org/project/pdfminer/#description
-# https://towardsdatascience.com/pdf-preprocessing-with-python-19829752af9f
-# inputFilename contains full path
-def pdf_converter(window,inputFilename, inputDir, outputDir,config_filename,openOutputFiles,chartPackage, dataTransformation):
+# # https://pypi.org/project/pdfminer/#description
+# # https://towardsdatascience.com/pdf-preprocessing-with-python-19829752af9f
+# # inputFilename contains full path
+# def pdf_converter(window, inputFilename, inputDir, outputDir, config_filename, openOutputFiles, chartPackage, dataTransformation):
 
-    if len(inputDir)>0:
-        msgbox_subDir = tk.messagebox.askyesnocancel("Process sub-directories", "Do you want to process for files in subdirectories?")
-        if msgbox_subDir:
-            inputDocs = IO_files_util.getFileList_SubDir(inputFilename,inputDir,'.pdf')
-            # check the extension
-            inputDocs = [f for f in inputDocs if f[:2] != '~$' and f[-4:]=='.pdf']
-        else:
-            inputDocs = [os.path.join(inputDir,f) for f in os.listdir(inputDir) if f[:2]!='~$' and f[-4:]=='.pdf']
+#     if len(inputDir) > 0:
+#         # Removed GUI prompt, just process all subdirectories
+#         inputDocs = IO_files_util.getFileList_SubDir(inputFilename, inputDir, '.pdf')
+#         # filter files
+#         inputDocs = [f for f in inputDocs if f[:2] != '~$' and f[-4:] == '.pdf']
+#     elif len(inputFilename) > 0:
+#         if inputFilename[:2] != '~$' and inputFilename[-4:] == '.pdf':
+#             inputDocs = [inputFilename]
+#         else:
+#             print(f"INFO: The input file {inputFilename} is not of type pdf. Please select a pdf type file (or directory) for input and try again.")
+#             return
+#     else:
+#         print("INFO: No input filename or directory specified. Please select a pdf type file or directory for input and try again.")
+#         return
 
-    elif len(inputFilename)>0:
-        if inputFilename[:2] != '~$' and inputFilename[-4:]=='.pdf':
-            inputDocs=[inputFilename]
-        else:
-            tk.messagebox.showinfo("pdf converter","The input file " + inputFilename + " is not of type pdf.\n\nPlease, select a pdf type file (or directory) for input and try again.")
-            return
-    else:
-        tk.messagebox.showinfo("pdf converter","No input filename or directory specified.\n\nPlease, select a pdf type file or directory for input and try again.")
-        return
-    if len(inputDocs) == 0:
-        tk.messagebox.showinfo("Warning","There are no pdf files in the input directory.\n\nPlease, select a different directory (or pdf type file) for input and try again.")
-        return
+#     if len(inputDocs) == 0:
+#         print("WARNING: There are no pdf files in the input directory. Please select a different directory (or pdf type file) for input and try again.")
+#         return
 
-    mb.showwarning(title='Warning', message='The Python pdf to text converter used here (pdfminer) is UNLIKELY to covert successfully multiple-column, full-page newspaper articles, with multiple headings and pictures. pdfminer CAN convert multiple-column documents with a simpler layout (e.g., journal articles) and does very well with full-page books/documents.\n\nFor more information on what pdfminer can do, see https://pdfminer-docs.readthedocs.io/programming.html.\n\nPLEASE, MAKE SURE TO CHECK THE CONVERTED OUTPUT FILE. IF YOU PLAN TO PARSE THE TXT OUTPUT VIA STANFORD CORENLP, YOU SHOULD CONSIDER CLEANING YOUR OUTPUT FROM COPYRIGHT MATERIAL AND BIBLIOGRAPHICAL REFERENCES, SINCE SUCH TEXTUAL ELEMENTS DO NOT HAVE COMPLETE SENTENCES.')
+#     print("WARNING: The Python pdf to text converter used here (pdfminer) is UNLIKELY to convert successfully multiple-column, full-page newspaper articles, with multiple headings and pictures. pdfminer CAN convert multiple-column documents with a simpler layout (e.g., journal articles) and does very well with full-page books/documents.")
+#     print("PLEASE, MAKE SURE TO CHECK THE CONVERTED OUTPUT FILE. IF YOU PLAN TO PARSE THE TXT OUTPUT VIA STANFORD CORENLP, YOU SHOULD CONSIDER CLEANING YOUR OUTPUT FROM COPYRIGHT MATERIAL AND BIBLIOGRAPHICAL REFERENCES, SINCE SUCH TEXTUAL ELEMENTS DO NOT HAVE COMPLETE SENTENCES.")
 
-    numberOfDocs=len(inputDocs)
-    for docNum, doc in enumerate(inputDocs):
-        head, tail = os.path.split(doc)
-        print('Processing file ' + str(docNum+1) + "/" + str(numberOfDocs) + " " + tail)
-        with open(doc, 'rb') as fp:
-            rsrcmgr = PDFResourceManager()
-            retstr = io.StringIO()
-            codec = 'utf-8'
-            laparams = LAParams()
-            device = TextConverter(rsrcmgr, retstr, codec=codec, laparams=laparams)
-            # Create a PDF interpreter object.
-            interpreter = PDFPageInterpreter(rsrcmgr, device)
-            # Process each page contained in the document.
-            if inputDir=="":
-                inputDir=os.path.dirname(inputFilename)
-            common = os.path.commonprefix([doc, inputDir])
-            relativePath = os.path.relpath(doc, common)
-            outputFilename=os.path.join(outputDir, relativePath[:-4] + ".txt")
-            if not os.path.exists(os.path.dirname(outputFilename)):
-                try:
-                    os.makedirs(os.path.dirname(outputFilename))
-                except OSError as exc:
-                    if exc.errno != errno.EEXIST:
-                        raise
-            f = open(outputFilename, "w+", encoding="utf-8")
-            for page in PDFPage.get_pages(fp):
-                interpreter.process_page(page)
-                data = retstr.getvalue()
-            f.write(data)
+#     numberOfDocs = len(inputDocs)
+#     for docNum, doc in enumerate(inputDocs):
+#         head, tail = os.path.split(doc)
+#         print(f'Processing file {docNum+1}/{numberOfDocs} {tail}')
+#         with open(doc, 'rb') as fp:
+#             rsrcmgr = PDFResourceManager()
+#             retstr = io.StringIO()
+#             codec = 'utf-8'
+#             laparams = LAParams()
+#             device = TextConverter(rsrcmgr, retstr, codec=codec, laparams=laparams)
+#             interpreter = PDFPageInterpreter(rsrcmgr, device)
 
-            f.close()
-    IO_user_interface_util.timed_alert(window, 4000, 'Analysis end', 'Finished running pdf converter at', True, str(numberOfDocs) + ' files were successfully converted from pdf to txt format and saved in directory ' + os.path.dirname(outputFilename))
-    if openOutputFiles and len(inputFilename)>0:
-        IO_files_util.openFile(window, outputFilename)
+#             if inputDir == "":
+#                 inputDir = os.path.dirname(inputFilename)
 
-if __name__ == '__main__':
-    pdf_converter(sys.argv[1], sys.argv[2], sys.argv[3])
+#             common = os.path.commonprefix([doc, inputDir])
+#             relativePath = os.path.relpath(doc, common)
+#             outputFilename = os.path.join(outputDir, relativePath[:-4] + ".txt")
+
+#             if not os.path.exists(os.path.dirname(outputFilename)):
+#                 try:
+#                     os.makedirs(os.path.dirname(outputFilename))
+#                 except OSError as exc:
+#                     if exc.errno != errno.EEXIST:
+#                         raise
+
+#             f = open(outputFilename, "w+", encoding="utf-8")
+#             for page in PDFPage.get_pages(fp):
+#                 interpreter.process_page(page)
+#                 data = retstr.getvalue()
+#             f.write(data)
+#             f.close()
+
+#     print(f"Finished running pdf converter. {numberOfDocs} files were successfully converted from pdf to txt format and saved in directory {os.path.dirname(outputFilename)}")
+
+#     if openOutputFiles and len(inputFilename) > 0:
+#         IO_files_util.openFile(window, outputFilename)
+
+# if __name__ == '__main__':
+#     pdf_converter(sys.argv[1], sys.argv[2], sys.argv[3])
 
 
-# https://www.geeksforgeeks.org/python-working-with-docx-module/
-# docx files all have the full path embedded
-# Document Converter (docx ---> txt)'
-# ONLY WORKS WITH DOCX; THERE ARE NO LIBRARIES TO CONVERT DOC DOCUMENTS
+# # https://www.geeksforgeeks.org/python-working-with-docx-module/
+# # docx files all have the full path embedded
+# # Document Converter (docx ---> txt)'
+# # ONLY WORKS WITH DOCX; THERE ARE NO LIBRARIES TO CONVERT DOC DOCUMENTS
 
-def docx_converter(window,inputFilename,inputDir,outputDir,config_filename,openOutputFiles,chartPackage, dataTransformation):
+# def docx_converter(window,inputFilename,inputDir,outputDir,config_filename,openOutputFiles,chartPackage, dataTransformation):
 
-    startTime=IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis start', 'Started running docx to txt converter at',
-                                                 True, '', True, '', False)
+#     outputDirSV=outputDir
+#     textFilename=''
+#     # replaced GUI prompt with default False (no)
+#     msgbox_subDir = False
+#     if len(inputDir)>0:
+#         # Default no sub-directory processing (you can change to True if wanted)
+#         # msgbox_subDir = tk.messagebox.askyesnocancel("Process sub-directories", "Do you want to process files in subdirectories?")
+#         msgbox_subDir = False
+#     if msgbox_subDir:
+#         inputDocs = IO_files_util.getFileList_SubDir(inputFilename,inputDir,'.docx')
 
-    outputDirSV=outputDir
-    textFilename=''
-    msgbox_subDir=False
-    if len(inputDir)>0:
-        msgbox_subDir = tk.messagebox.askyesnocancel("Process sub-directories",
-                                                     "Do you want to process files in subdirectories?")
-    if msgbox_subDir:
-        inputDocs = IO_files_util.getFileList_SubDir(inputFilename,inputDir,'.docx')
+#         # inputDocs = [f for f in inputDocs if os.path.basename(f)[:2] != '~$' and (f[-5:] == '.docx' or f[-4:] == '.doc')]
+#     else:
+#         inputDocs = IO_files_util.getFileList(inputFilename, inputDir, fileType='.docx',
+#                                               silent=False,
+#                                               configFileName=config_filename)
+#     nDocs = len(inputDocs)
 
-        # inputDocs = [f for f in inputDocs if os.path.basename(f)[:2] != '~$' and (f[-5:] == '.docx' or f[-4:] == '.doc')]
-    else:
-        inputDocs = IO_files_util.getFileList(inputFilename, inputDir, fileType='.docx',
-                                              silent=False,
-                                              configFileName=config_filename)
-    nDocs = len(inputDocs)
+#     numberOfDocs=len(inputDocs)
 
-    numberOfDocs=len(inputDocs)
+#     outputDir = IO_files_util.make_output_subdirectory(inputFilename, inputDir, outputDirSV,
+#                                                        label='docx_2_txt',
+#                                                        silent=True)
 
-    outputDir = IO_files_util.make_output_subdirectory(inputFilename, inputDir, outputDirSV,
-                                                       label='docx_2_txt',
-                                                       silent=True)
+#     for docNum, doc in enumerate(inputDocs):
+#         head, tail = os.path.split(doc)
+#         if tail.startswith('~$'):
+#             numberOfDocs=numberOfDocs-1
+#             continue
+#         fileExtension=doc.split(".")[-1]
+#         #fileExtension = os.path.splitext(doc)[1]
+#         if fileExtension =="docx":
+#             print('Processing docx file ' + str(docNum + 1) + "/" + str(numberOfDocs) + " " + tail)
 
-    for docNum, doc in enumerate(inputDocs):
-        head, tail = os.path.split(doc)
-        if tail.startswith('~$'):
-            numberOfDocs=numberOfDocs-1
-            continue
-        fileExtension=doc.split(".")[-1]
-        #fileExtension = os.path.splitext(doc)[1]
-        if fileExtension =="docx":
-            print('Processing docx file ' + str(docNum + 1) + "/" + str(numberOfDocs) + " " + tail)
+#             document = Document(doc)
+#             textFilename = os.path.join(outputDir, tail[:-5] + ".txt")
+#             # TODO: if the subdirectory doesn't exist in output directory, create it
+#             if not os.path.exists(os.path.dirname(textFilename)):
+#                 try:
+#                     os.makedirs(os.path.dirname(textFilename))
+#                 except OSError as exc:
+#                     if exc.errno != errno.EEXIST:
+#                         raise
+#             with open(textFilename,"w", encoding="utf-8",errors='ignore') as textFile:
+#                 for para in document.paragraphs:
+#                     textFile.write(para.text+'\n') #line of texts
 
-            document = Document(doc)
-            textFilename = os.path.join(outputDir, tail[:-5] + ".txt")
-            # TODO: if the subdirectory doesn't exist in output directory, create it
-            if not os.path.exists(os.path.dirname(textFilename)):
-                try:
-                    os.makedirs(os.path.dirname(textFilename))
-                except OSError as exc:
-                    if exc.errno != errno.EEXIST:
-                        raise
-            with open(textFilename,"w", encoding="utf-8",errors='ignore') as textFile:
-                for para in document.paragraphs:
-                    textFile.write(para.text+'\n') #line of texts
-
-    IO_user_interface_util.timed_alert(GUI_util.window,2000,'Analysis end', 'Finished running docx to txt converter at', True, str(numberOfDocs) + ' txt files exported to the output subdirectory ' + outputDir, True, startTime, False)
-
-    if openOutputFiles and len(inputFilename)>0:
-        IO_files_util.openFile(window, textFilename)
+#     if openOutputFiles and len(inputFilename)>0:
+#         IO_files_util.openFile(window, textFilename)
 
 def csv_converter(window,inputFilename,inputDir,outputDir,config_filename,openOutputFiles,chartPackage, dataTransformation):
     if inputFilename!='':
         if inputFilename[:2] != '~$' and inputFilename[-4:]=='.csv':
             inputDocs=[inputFilename]
         else:
-            tk.messagebox.showinfo("csv converter","The input file " + inputFilename + " is not of type csv.\n\nPlease, select a csv type file for input and try again.")
+            print(f"INFO: The input file {inputFilename} is not of type csv. Please select a csv type file for input and try again.")
             return
         inputDocs=[inputFilename]
     else:
         if inputDir!='':
-            tk.messagebox.showinfo("csv converter","No input filename. The csv converter works only on a single csv file, rather than a whole directory. Please, select an input csv file and try again.")
+            print("INFO: No input filename. The csv converter works only on a single csv file, rather than a whole directory. Please select an input csv file and try again.")
             return
         else:
-            tk.messagebox.showinfo("csv converter","No input filename. Please, select an input csv file and try again.")
+            print("INFO: No input filename. Please select an input csv file and try again.")
             return
-        tk.messagebox.showinfo("csv converter","The function is still under construction.\n\nSorry!")
+        print("INFO: The function is still under construction.\nSorry!")
         return
         # TODO add a REMINDER that if they need to use some of the csv fields as filters,
         #   they need to use first the Data manipulation to extract specific fields by specific values
@@ -192,9 +185,11 @@ def csv_converter(window,inputFilename,inputDir,outputDir,config_filename,openOu
 
 def rtf_converter(window,inputFilename,inputDir,outputDir,config_filename, openOutputFiles,chartPackage, dataTransformation):
     textFilename=''
+    # replaced GUI prompt with default False (no)
+    msgbox_subDir = False
     if len(inputDir)>0:
-        msgbox_subDir = tk.messagebox.askyesnocancel("Process sub-directories",
-                                                     "Do you want to process for files in subdirectories?")
+        # msgbox_subDir = tk.messagebox.askyesnocancel("Process sub-directories", "Do you want to process for files in subdirectories?")
+        msgbox_subDir = False
         if msgbox_subDir:
             inputRTFs = IO_files_util.getFileList_SubDir(inputFilename,inputDir,'.rtf')
 
@@ -205,14 +200,14 @@ def rtf_converter(window,inputFilename,inputDir,outputDir,config_filename, openO
         if inputFilename[:2] != '~$' and inputFilename[-4:]=='.rtf':
             inputRTFs=[inputFilename]
         else:
-            tk.messagebox.showinfo("rtf converter","The input file " + inputFilename + " is not of type rtf.\n\nPlease, select a rtf type file for input and try again.")
+            print(f"INFO: The input file {inputFilename} is not of type rtf. Please select a rtf type file for input and try again.")
             return
         inputRTFs=[inputFilename]
     else:
-        tk.messagebox.showinfo("rtf converter","No input filename or directory specified. The program will exit.")
+        print("INFO: No input filename or directory specified. The program will exit.")
         return
     if len(inputRTFs) == 0:
-        tk.messagebox.showinfo("Warning","There are no rtf files in the input directory. The program will exit.")
+        print("WARNING: There are no rtf files in the input directory. The program will exit.")
         return
     numberOfDocs=len(inputRTFs)
 

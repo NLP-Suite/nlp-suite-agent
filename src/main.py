@@ -92,31 +92,27 @@ def sentiment_analysis(
     calculateMedian: Annotated[bool, Form()] = False,
     
 ):
-    try:
-        inputDirectory = os.path.expanduser(inputDirectory)
+    inputDirectory = os.path.expanduser(inputDirectory)
 
-        outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
-        thread = Thread(
-            target=lambda: run(
-                app,
-                lambda: run_sentiment_analysis(
-                    inputDirectory,
-                    outputDirectory,
-                    False,
-                    "Excel",
-                    transformation,
-                    calculateMean,
-                    calculateMedian,
-                    algorithm,
-                ),
-            )
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_sentiment_analysis(
+                inputDirectory,
+                outputDirectory,
+                False,
+                "Excel",
+                transformation,
+                calculateMean,
+                calculateMedian,
+                algorithm,
+            ),
         )
-        thread.start()
-        return PlainTextResponse("", status_code=200)
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
     
-    except Exception as e:
-        print("Error: ", e)
-        return RedirectResponse("./error.html", status_code=302)
 
 @app.post("/topic_modeling")
 def topic_modeling(
@@ -135,36 +131,32 @@ def topic_modeling(
     nounsOnly_var: Annotated[bool, Form()] = False,
     Gensim_MALLET_var: Annotated[bool, Form()] = False,
 ):
-    try:
-        inputDirectory = os.path.expanduser(inputDirectory)
-        outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
-        thread = Thread(
-            target=lambda: run(
-                app,
-                lambda: run_topic_modeling(
-                    inputDir=inputDirectory,
-                    outputDir=outputDirectory,
-                    chartPackage=chartPackage, 
-                    dataTransformation=transformation,
-                    num_topics=numberOfTopics,
-                    BERT_var=topicModelingBERT,
-                    split_docs_var=splitToSentence,
-                    MALLET_var=topicModelingMALLET,
-                    optimize_intervals_var=optimizeTopicIntervals,
-                    Gensim_var=topicModelingGensim,
-                    remove_stopwords_var=removeStopwords,
-                    lemmatize_var=lemmatizeWords,
-                    nounsOnly_var=nounsOnly_var,
-                    Gensim_MALLET_var=Gensim_MALLET_var,
-                ),
-            )
+    inputDirectory = os.path.expanduser(inputDirectory)
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_topic_modeling(
+                inputDir=inputDirectory,
+                outputDir=outputDirectory,
+                chartPackage=chartPackage, 
+                dataTransformation=transformation,
+                num_topics=numberOfTopics,
+                BERT_var=topicModelingBERT,
+                split_docs_var=splitToSentence,
+                MALLET_var=topicModelingMALLET,
+                optimize_intervals_var=optimizeTopicIntervals,
+                Gensim_var=topicModelingGensim,
+                remove_stopwords_var=removeStopwords,
+                lemmatize_var=lemmatizeWords,
+                nounsOnly_var=nounsOnly_var,
+                Gensim_MALLET_var=Gensim_MALLET_var,
+            ),
         )
-        thread.start()
-        return PlainTextResponse("", status_code=200)
-    except Exception as e:
-        print("Error: ", e)
-        return RedirectResponse("./error.html", status_code=302)
-
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+    
 @app.post("/parsers_annotators")
 def parsers_annotators(
     inputDirectory: Annotated[str, Form()],
