@@ -10,6 +10,12 @@ from sys import platform
 import os
 import requests
 
+AGENT_MOUNT_PATH = "/root/nlp-suite"
+
+def mallet_to_agent_path(path):
+    return path.replace("/app", AGENT_MOUNT_PATH)
+    
+    
 def call_mallet_api(command, args):
     #Helper function to send a request to MALLET API.
     
@@ -90,8 +96,9 @@ def run_MALLET(inputDir, outputDir, chartPackage, dataTransformation, OptimizeIn
     print('Topic modeling complete!')
 
     # Map expected local file paths
-    Keys_FileName = os.path.join(outputDir, "topic_keys.txt")
-    Composition_FileName = os.path.join(outputDir, "doc_topics.txt")
+    Keys_FileName = mallet_to_agent_path("/app/output/TM-MALLET_input/topic_keys.txt")
+    Composition_FileName = mallet_to_agent_path("/app/output/TM-MALLET_input/doc_topics.txt")
+
 
     print(Keys_FileName)
     print(Composition_FileName)
