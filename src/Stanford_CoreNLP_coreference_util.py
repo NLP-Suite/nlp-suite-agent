@@ -118,12 +118,6 @@ def run(config_filename, inputFilename, inputDir, outputDir, openOutputFiles, ch
     corefed_files = []
     errorFound = False
 
-    CoreNLPdir, _, errorFound = IO_libraries_util.external_software_install('Stanford_CoreNLP_coreference_util',
-                                                                            'Stanford CoreNLP', '', silent=False, errorFound=False)
-
-    if CoreNLPdir == '' or CoreNLPdir is None:
-        logger.error("CoreNLP directory is not configured properly.")
-        return corefed_files, errorFound
 
     try:
         # Annotate with CoreNLP

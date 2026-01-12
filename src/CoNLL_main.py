@@ -27,7 +27,7 @@ import CoNLL_function_words_analysis_util
 import CoNLL_table_search_util
 import IO_csv_util
 import CoNLL_util
-
+from get_first_csv import first_csv
 # from data_manager_main import extract_from_csv
 
 # more imports (e.g., import CoNLL_clause_analysis_util) are called below under separate if statements
@@ -41,8 +41,8 @@ def run_conll(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage,
         ):
 
     #INPUTE FILENAME WILLBE INPUT DIR, CoNLL Table to be parsed as one in directory 
-    inputFilename = inputDir
-    
+    inputFilename = first_csv(inputDir)
+    print(inputFilename)
     
     global recordID_position, documentId_position, data, all_CoNLL_records
     recordID_position = 9 # NEW CoNLL_U

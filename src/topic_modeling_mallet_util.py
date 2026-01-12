@@ -12,6 +12,8 @@ import requests
 
 AGENT_MOUNT_PATH = "/root/nlp-suite"
 
+
+#converts from mallet to point at folders agent knows where 
 def mallet_to_agent_path(path):
     return path.replace("/app", AGENT_MOUNT_PATH)
     

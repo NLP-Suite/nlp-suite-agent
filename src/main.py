@@ -21,6 +21,7 @@ from wordcloud_visual import run_wordcloud
 from style_analysis import run_style_analysis
 from SVO import run_svo
 from NGrams_CoOccurrences import run_ngrams
+from file_search_byWord_main import run_search_byWord
 
 app = FastAPI()
 origins = [
@@ -574,7 +575,7 @@ def wordcloud(
     return PlainTextResponse("", status_code=200)
 
 
-@app.post("/NGrams_CoOccurrences.html")
+@app.post("/NGrams_CoOccurrences")
 def NGrams_CoOccurrences(
         inputDirectory: Annotated[str, Form()],
         outputDirectory: Annotated[str, Form()],
@@ -606,7 +607,7 @@ def NGrams_CoOccurrences(
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
         
     thread = Thread(
-        target=lambda: run_ngrams(
+        target=lambda: run(
             app,
             lambda: run_ngrams(
                     inputFilename=inputFilename,
@@ -641,6 +642,74 @@ def NGrams_CoOccurrences(
     thread.start()
     return PlainTextResponse("", status_code=200)
 
+
+@app.post("/filesearchword")
+def filesearchword(
+        inputDirectory: Annotated[str, Form()],
+        outputDirectory: Annotated[str, Form()],
+        dataTransformation: Annotated[str, Form()],
+        search_options: Annotated[str, Form()],
+        minus_K_words_sentences_var: Annotated[int, Form()],
+        plus_K_words_sentences_var: Annotated[int, Form()],
+        search_keyword_values: Annotated[str, Form()] = "",
+        selectedCsvFile: Annotated[str, Form()] = "",
+        search_by_dictionary: Annotated[bool, Form()] = False,
+        search_by_keyword: Annotated[bool, Form()] = False,
+        extract_sentences_var: Annotated[bool, Form()] = False,
+        coOccurring_keywords_var: Annotated[bool, Form()] = False
+
+):
+    inputFilename = ""
+    inputDirectory = os.path.expanduser(inputDirectory)
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    chartPackage = "Excel"
+    openOutputFiles = False
+    search_options_list = []
+    search_options_menu_var = ""
+    create_subcorpus_var = 0
+    language_list = ["English"]
+    language = "English"
+    
+    if(extract_sentences_var):
+        extract_sentences_var = 1
+    else:
+        extract_sentences_var = 0
+        
+    if(coOccurring_keywords_var):
+        coOccurring_keywords_var = 1
+    else:
+        coOccurring_keywords_var = 0
+    
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_search_byWord(
+                inputFilename = inputFilename,
+                inputDir = inputDirectory, 
+                outputDir = outputDirectory,
+                openOutputFiles = openOutputFiles,
+                chartPackage = chartPackage,
+                dataTransformation = dataTransformation,
+                
+                search_options = search_options,
+                search_by_dictionary = search_by_dictionary,
+                selectedCsvFile = selectedCsvFile,
+                search_by_keyword = search_by_keyword,
+                search_keyword_values = search_keyword_values,
+                minus_K_words_sentences_var = minus_K_words_sentences_var,
+                plus_K_words_sentences_var = plus_K_words_sentences_var,
+                extract_sentences_var = extract_sentences_var,
+                coOccurring_keywords_var = coOccurring_keywords_var,
+                create_subcorpus_var = create_subcorpus_var,
+                search_options_menu_var = search_options_menu_var,
+                search_options_list = search_options_list,
+                language_list = language_list,
+                language = language
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
 
 if __name__ == "__main__":
     uvicorn.run(app, port=3000, host="0.0.0.0")

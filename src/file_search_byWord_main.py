@@ -16,7 +16,7 @@ import config_util
 
 # RUN section ______________________________________________________________________________________________________________________________________________________
 
-def run(inputFilename,inputDir, outputDir,
+def run_search_byWord(inputFilename,inputDir, outputDir,
     openOutputFiles,
     chartPackage,
     dataTransformation,

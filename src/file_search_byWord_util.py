@@ -16,7 +16,6 @@ import IO_libraries_util
 import os
 import shutil # for copy of files
 import csv
-import tkinter.messagebox as mb
 import stanza
 import collections
 import re
@@ -642,7 +641,7 @@ def search_sentences_documents(inputFilename, inputDir, outputDir, configFileNam
     if create_subcorpus_var and len(corpus_to_copy) > 0:
         for file in corpus_to_copy:
             shutil.copy(file, subCorpusDir)
-        mb.showwarning(title='Warning',message='The search function has created a subcorpus of the files containing the search word(s) "'
+        print('Warning', ' The search function has created a subcorpus of the files containing the search word(s) "'
                         + str(search_keywords_list) + '" as a subdirectory called "subcorpus_search" of the input directory:\n\n'
                         + subCorpusDir + '\n\nA set of csv files have also been exported to the output  directory.')
 
@@ -672,16 +671,16 @@ def search_sentences_documents(inputFilename, inputDir, outputDir, configFileNam
 
     else:
         if not search_keywords_found:
-            mb.showwarning(title='Search word(s) not found',
-                           message='The search keywords:\n\n   ' + search_keywords_str + '\n\nwere not found in your input document(s) with the following set of search options:\n\n  '+ str('\n  '.join(search_options_list)))
+            print("Search word(s) not found", 'The search keywords:\n\n   ' + search_keywords_str + '\n\nwere not found in your input document(s) with the following set of search options:\n\n  '+ str('\n  '.join(search_options_list)))
+
             outputFilename_csv_word = ''
         else:
             try:
                 df = pd.read_csv(outputFilename_csv_word)
             except UnicodeEncodeError:
-                # mb.showwarning(title='Output file error', message="Could not write the file " + outputFilename + "\n\nA file with the same name is already open. Please, close the Excel file and then click OK to resume.")
-                mb.showwarning(title='Input file error', message="Could not read the file " +
+                print('Input file error', "Could not read the file " +
                                     outputFilename_csv_word + "\n\nThe file is not utf-8")
+                
                 df = pd.read_csv(outputFilename_csv_word, encoding="ISO-8859-1")
             # except UnicodeEncodeError:
             #     print('   Filename ' + outputFilename_csv_word + ' is not utf-8')
@@ -755,7 +754,7 @@ def search_sentences_documents(inputFilename, inputDir, outputDir, configFileNam
 
 def visualize_wordcloud(textToProcess, search_keywords_str, label, inputFilename, inputDir, outputDir, configFileName, filesToOpen, lemmatize):
     if len(textToProcess)<15:
-        mb.showwarning(title='Warning',message='The text required to produce a wordcloud is too short.\n"'
+        print('Warning', 'The text required to produce a wordcloud is too short.\n"'
                         + textToProcess + '\n\nWordcloud exits.')
         return
     # write to text file textToProcess for wordcloud

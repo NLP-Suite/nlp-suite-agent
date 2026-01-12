@@ -2,7 +2,7 @@ import os
 from CoNLL_main import run_conll
 
 # Replace with your input and output directories
-inputDir = '/Users/aidenamaya/nlp-suite/input/NLP_CoreNLP_Dir_NLPInput_nn_CoNLL.csv'
+inputDir = '/Users/aidenamaya/nlp-suite/csvInput'
 outputDir = '/Users/aidenamaya/nlp-suite/output'
 
 # Ensure the directories exist
@@ -22,7 +22,7 @@ End_K_sent_var = 0
 compute_sentence_var = False
 search_token_var = False
 k_sentences_var = False
-all_analyses_var = True
+all_analyses_var = False
 all_analyses = '*'
 
 # Run the function

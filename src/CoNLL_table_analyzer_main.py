@@ -6,8 +6,8 @@ import CoNLL_function_words_analysis_util
 import CoNLL_table_search_util
 import IO_csv_util
 import CoNLL_util
-    
-    
+from get_first_csv import first_csv
+
 def run_conll(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, dataTransformation,
         searchedCoNLLField, searchField_kw, postag, deprel, co_postag, co_deprel, Begin_K_sent_var, End_K_sent_var):
     
@@ -16,6 +16,7 @@ def run_conll(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage,
     
     config_filename = 'NLP_default_IO_config.csv'
     filesToOpen = []
+    inputFilename = first_csv(inputDir)
 
     # Reading CoNLL file data
     data, header = IO_csv_util.get_csv_data(inputFilename, True)
