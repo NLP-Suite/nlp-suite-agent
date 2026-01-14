@@ -60,7 +60,8 @@ def getGoogleAPIkey(Google_config, display_key=False):
             message = "Enter the Google " + config_type + " API key"
         else:
             message = "Enter a new Google " + config_type + " API key if you want to change the key"
-        key, string_out = GUI_IO_util.enter_value_widget(message, 'Enter', 1, key, 'API key', key)
+        # key, string_out = GUI_IO_util.enter_value_widget(message, 'Enter', 1, key, 'API key', key)
+        key = ''
         # save the API key
         if key!='':
             config_util.Google_API_Config_Save(Google_config, key)
@@ -111,13 +112,10 @@ def GIS_pipeline(config_filename, inputFilename, inputDir, outputDir,
     
     
     #<!------------------GOOGLE EARTH PRO DIRECTORY CHECK-------------------------------------------------------------------------------!>
-    # GoogleEarthProDir, existing_software_config, errorFound = IO_libraries_util.external_software_install('GIS_pipeline_util',
-    #                                                                                      'Google Earth Pro',
-    #                                                                                      '',
-    #                                                                                      silent=False, errorFound=False)
+    GoogleEarthProDir = os.getenv("GOOGLE_EARTH_PATH")
 
-    # if GoogleEarthProDir == None or GoogleEarthProDir == '':
-    #     return
+    if GoogleEarthProDir == None or GoogleEarthProDir == '':
+        return
 
     startTime = IO_user_interface_util.timed_alert(2000, 'Analysis start', 'Started running GIS pipeline at',
                                                    True, '', True, '', False)

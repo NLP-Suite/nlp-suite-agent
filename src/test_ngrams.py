@@ -1,7 +1,7 @@
 
 
 import os
-from NGrams_CoOccurrences import run
+from NGrams_CoOccurrences import run_ngrams
 import GUI_IO_util
 
 inputDir = '/Users/aidenamaya/nlp-suite/input'
@@ -38,7 +38,7 @@ language_list = ["English"]
 config_input_output_numeric_options = [0,1,0,1]
 number_of_years = 0
 
-run(
+run_ngrams(
     inputFilename=inputFilename,
     inputDir=inputDir,
     outputDir=outputDir,

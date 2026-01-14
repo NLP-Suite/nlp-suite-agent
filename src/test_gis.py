@@ -18,11 +18,11 @@ dataTransformation = 'No transformation'
 csv_file = ""
 NER_extractor = True
 location_menu = False
-geocoder = "Google"
+geocoder = "Nominatim"
 country_bias_var = ""
 area_var = "e.g.,"
 restrict_var = False
-GIS_package_var = "folium"
+GIS_package_var = "Google Earth Pro"
 
 
 
