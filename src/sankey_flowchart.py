@@ -6,25 +6,28 @@ import charts_util
 import json
 import pandas as pd 
 import io 
+from get_first_csv import first_csv
 
-def run_sankey(data, inputDir, outputDir,
+
+def run_sankey(inputDir, outputDir,
         csv_file_relational_field_list, # = "a, b, c"
         Sankey_limit1_var, Sankey_limit2_var, Sankey_limit3_var,
         ):
+    
+        file = first_csv(inputDir)
+
         
-        print("This is the datra: " + data)
-        data = json.loads(data)
+        # data = json.loads(data)
         
         
-        data = pd.DataFrame(data) 
-        # @@@ nan values will break the code
-        data = data.fillna("Blank/missing value")
+        # data = pd.DataFrame(data) 
+        # # @@@ nan values will break the code
+        # data = data.fillna("Blank/missing value")
         
-        # csv_file_relational_field_list = json.loads(csv_file_relational_field_list)
+        # # csv_file_relational_field_list = json.loads(csv_file_relational_field_list)
         output_label = 'Sankey'
         
-        print(data)
-        outputFilename = IO_files_util.generate_output_file_name(data, inputDir, outputDir,
+        outputFilename = IO_files_util.generate_output_file_name(file, inputDir, outputDir,
                                                              '.html', output_label) 
         filesToOpen = []
         
@@ -46,9 +49,9 @@ def run_sankey(data, inputDir, outputDir,
             var3=None
             Sankey_limit3_var=None
             
-        outputFiles = charts_util.Sankey(outputFilename,
+        outputFiles = charts_util.Sankey(file, outputFilename,
                                     csv_file_relational_field_list[0], Sankey_limit1_var, csv_file_relational_field_list[1],
-                                            Sankey_limit2_var, three_way_Sankey, var3, Sankey_limit3_var, data=data)
+                                            Sankey_limit2_var, three_way_Sankey, var3, Sankey_limit3_var)
             
         if outputFiles != None:
             if isinstance(outputFiles, str):
@@ -78,14 +81,15 @@ def main():
     data = json.dumps(data_list)
 
     
-    inputDir = "/Users/aidenamaya/nlp-suite/input"
+    
+    inputDir = "/Users/aidenamaya/nlp-suite/csvInput"
     outputDir = "/Users/aidenamaya/nlp-suite/output"
-    csv_file_relational_field_list = "Name, Color"
+    csv_file_relational_field_list = "Name, Gender"
     Sankey_limit1_var = 10
     Sankey_limit2_var = 15
     Sankey_limit3_var = 20
 
-    run_sankey(data= data, 
+    run_sankey(
                inputDir = inputDir, 
                outputDir = outputDir,
                csv_file_relational_field_list = csv_file_relational_field_list, 

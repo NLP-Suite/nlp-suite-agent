@@ -22,6 +22,7 @@ from style_analysis import run_style_analysis
 from SVO import run_svo
 from NGrams_CoOccurrences import run_ngrams
 from file_search_byWord_main import run_search_byWord
+from statistics_txt_main import run_statistics
 
 app = FastAPI()
 origins = [
@@ -88,13 +89,13 @@ def sentiment_analysis(
     inputDirectory: Annotated[str, Form()],
     outputDirectory: Annotated[str, Form()],
     algorithm: Annotated[str, Form()],
+    
     dataTransformation: Annotated[str, Form()] = "No transformation",
     calculateMean: Annotated[bool, Form()] = False,
     calculateMedian: Annotated[bool, Form()] = False,
     
 ):
     inputDirectory = os.path.expanduser(inputDirectory)
-
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
     thread = Thread(
         target=lambda: run(
@@ -444,7 +445,6 @@ def sankey_flowchart(
         variable_1_max: Annotated[int, Form()], 
         variable_2_max: Annotated[int, Form()], 
         variable_3_max: Annotated[int, Form()], 
-        file_data: Annotated[str, Form()] = "",
         selected_pairs_data: Annotated[str, Form()] = "[]",
 ):
     inputDirectory = os.path.expanduser(inputDirectory)
@@ -454,7 +454,6 @@ def sankey_flowchart(
         target=lambda: run(
             app,
             lambda: run_sankey(
-                data = file_data,
                 inputDir = inputDirectory,
                 outputDir = outputDirectory,
                 csv_file_relational_field_list = selected_pairs_data,
@@ -722,3 +721,44 @@ def filesearchword(
 
 if __name__ == "__main__":
     uvicorn.run(app, port=3000, host="0.0.0.0")
+
+
+@app.post("/document_statistics")
+def document_statistics(
+    inputDirectory: Annotated[str, Form()],
+    outputDirectory: Annotated[str, Form()],
+    
+    dataTransformation: Annotated[str, Form()] = "No transformation",
+    corpus_statistics_var: Annotated[bool, Form()] = False,
+    corpus_text_options_menu_var:  Annotated[str, Form()] = "*",
+    corpus_statistics_options_menu_var: Annotated[str, Form()] = "*",
+    corpus_statistics_byPOS_var: Annotated[bool, Form()] = False
+    
+    
+):
+    inputDirectory = os.path.expanduser(inputDirectory)
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    
+    inputFilename = ""
+    chartPackage = "Excel"
+    openOutputFiles = False
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_statistics(
+                inputFilename=inputFilename,
+                inputDir = inputDirectory,
+                outputDIr = outputDirectory,
+                corpus_statistics_options_menu_var = corpus_statistics_options_menu_var,
+                corpus_text_options_menu_var = corpus_text_options_menu_var,
+                openOutputFiles = openOutputFiles,
+                chartPackage = chartPackage,
+                dataTransformation = dataTransformation,
+                corpus_statistics_var = corpus_statistics_var,
+                corpus_statistics_byPOS_var = corpus_statistics_byPOS_var
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+    

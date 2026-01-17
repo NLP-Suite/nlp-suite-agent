@@ -10,11 +10,40 @@ from collections import Counter
 import string
 from nltk.stem.porter import PorterStemmer
 import stanza
+
+#Docker Directories 
+STANZA_RESOURCES_DIR = '/root/stanza_resources'
+NLTK_DATA_DIR = '/root/nltk_data'
+
+#Local Directories 
+# STANZA_RESOURCES_DIR = os.path.join(os.path.expanduser("~"), "stanza_resources")
+
+# NLTK_DATA_DIR = os.path.join(os.path.expanduser("~"), "nltk_data")
+
+
+
 try:
-    stanza.download('en')
-except:
-    import IO_internet_util
-    IO_internet_util.check_internet_availability_warning("statistics_txt_util.py (stanza.download(en))")
+    os.makedirs(STANZA_RESOURCES_DIR, exist_ok=True)
+
+except Exception:
+    stanza.download('en', model_dir=STANZA_RESOURCES_DIR)
+    
+
+EN_MODEL_PATH = os.path.join(STANZA_RESOURCES_DIR, 'en')
+
+os.makedirs(NLTK_DATA_DIR, exist_ok=True)
+
+if not os.path.exists(EN_MODEL_PATH):
+    try:
+        print("Stanza English models not found. Downloading...")
+        stanza.download('en', model_dir=STANZA_RESOURCES_DIR)
+        print("Download complete!")
+    except Exception:
+        # Handle no internet / failed download
+        import IO_internet_util
+        IO_internet_util.check_internet_availability_warning(
+            "statistics_txt_util.py (stanza.download('en'))"
+        )
 
 # from nltk import tokenize
 # from nltk import word_tokenize

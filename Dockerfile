@@ -8,6 +8,9 @@ RUN apt-get update && apt-get install -y python3.9 python3.9-dev python3-pip pyt
 RUN python3.9 -m pip install --upgrade pip
 RUN python3.9 -m pip install --upgrade setuptools
 
+ENV STANZA_RESOURCES_DIR=/root/stanza_resources
+ENV NLTK_DATA=/root/nltk_data
+
 COPY . .
 RUN python3.9 -m pip install -r requirements.txt
 
