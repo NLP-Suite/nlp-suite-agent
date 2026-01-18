@@ -9,7 +9,7 @@ openOutputFiles = False
 chartPackage = "Excel"
 dataTransformation = "No transformation"
 corpus_statistics_var = True
-corpus_statistics_byPOS_var = True
+corpus_statistics_byPOS_var = False
 
 
 run_statistics(inputFilename = inputFilename, inputDir = inputDir, outputDir = outputDir,
@@ -20,3 +20,4 @@ run_statistics(inputFilename = inputFilename, inputDir = inputDir, outputDir = o
         dataTransformation = dataTransformation,
         corpus_statistics_var = corpus_statistics_var,
         corpus_statistics_byPOS_var =corpus_statistics_byPOS_var)
+

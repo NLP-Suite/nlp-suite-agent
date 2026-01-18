@@ -24,7 +24,7 @@ from NGrams_CoOccurrences import run_ngrams
 from file_search_byWord_main import run_search_byWord
 from statistics_txt_main import run_statistics
 
-app = FastAPI()
+app = FastAPI(debug=True)
 origins = [
     "*",
     "http://172.16.0.11:8000",
@@ -42,15 +42,20 @@ app.add_middleware(
 app.worker = False
 
 
+
 def run(app, method):
-    try: 
-        method()
+    method()
+    app.worker = False
+
+# def run(app, method):
+#     try: 
+#         method()
         
-    except Exception as e:
-        app.worker_exception = e
+#     except Exception as e:
+#         app.worker_exception = e
         
-    finally:
-        app.worker = False
+#     finally:
+#         app.worker = False
 
 
 @app.middleware("http")
@@ -65,23 +70,33 @@ async def single_runner(request: Request, call_next):
     app.worker = False
     return response
 
-
 @app.get("/status")
 def status():
-    if hasattr(app, 'worker_exception') and app.worker_exception:
-        e = app.worker_exception
-        app.worker_exception = None
-        
-        raise HTTPException(status_code=500, detail=str(e))
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: None,
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
 
-    # thread = Thread(
-    #     target=lambda: run(
-    #         app,
-    #         lambda: None,
-    #     )
-    # )
-    # thread.start()
-    # return PlainTextResponse("", status_code=200)
+# @app.get("/status")
+# def status():
+#     if hasattr(app, 'worker_exception') and app.worker_exception:
+#         e = app.worker_exception
+#         app.worker_exception = None
+        
+#         raise HTTPException(status_code=500, detail=str(e))
+
+#     # thread = Thread(
+#     #     target=lambda: run(
+#     #         app,
+#     #         lambda: None,
+#     #     )
+#     # )
+#     # thread.start()
+#     # return PlainTextResponse("", status_code=200)
 
 
 @app.post("/sentiment_analysis")
@@ -719,10 +734,6 @@ def filesearchword(
     thread.start()
     return PlainTextResponse("", status_code=200)
 
-if __name__ == "__main__":
-    uvicorn.run(app, port=3000, host="0.0.0.0")
-
-
 @app.post("/document_statistics")
 def document_statistics(
     inputDirectory: Annotated[str, Form()],
@@ -733,8 +744,7 @@ def document_statistics(
     corpus_text_options_menu_var:  Annotated[str, Form()] = "*",
     corpus_statistics_options_menu_var: Annotated[str, Form()] = "*",
     corpus_statistics_byPOS_var: Annotated[bool, Form()] = False
-    
-    
+      
 ):
     inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
@@ -748,7 +758,7 @@ def document_statistics(
             lambda: run_statistics(
                 inputFilename=inputFilename,
                 inputDir = inputDirectory,
-                outputDIr = outputDirectory,
+                outputDir = outputDirectory,
                 corpus_statistics_options_menu_var = corpus_statistics_options_menu_var,
                 corpus_text_options_menu_var = corpus_text_options_menu_var,
                 openOutputFiles = openOutputFiles,
@@ -761,4 +771,8 @@ def document_statistics(
     )
     thread.start()
     return PlainTextResponse("", status_code=200)
+
+if __name__ == "__main__":
+    uvicorn.run(app, port=3000, host="0.0.0.0")
+
     

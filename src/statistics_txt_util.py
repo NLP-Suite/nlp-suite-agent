@@ -16,9 +16,9 @@ STANZA_RESOURCES_DIR = '/root/stanza_resources'
 NLTK_DATA_DIR = '/root/nltk_data'
 
 #Local Directories 
-# STANZA_RESOURCES_DIR = os.path.join(os.path.expanduser("~"), "stanza_resources")
+STANZA_RESOURCES_DIR = os.path.join(os.path.expanduser("~"), "stanza_resources")
 
-# NLTK_DATA_DIR = os.path.join(os.path.expanduser("~"), "nltk_data")
+NLTK_DATA_DIR = os.path.join(os.path.expanduser("~"), "nltk_data")
 
 
 
