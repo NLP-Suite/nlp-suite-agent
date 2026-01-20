@@ -18,9 +18,9 @@ dataTransformation = 'No transformation'
 
 ngrams_options_list = ['Case sensitive (default)']
 Ngrams_compute_var = True
-ngrams_menu_var = 'Word'
-ngrams_options_menu_var = True
-ngrams_size = 3
+ngrams_menu_var = 'Character'
+ngrams_options_menu_var = ""
+ngrams_size = 2
 
 
 search_words = ''

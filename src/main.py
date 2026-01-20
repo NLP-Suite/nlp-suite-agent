@@ -601,32 +601,36 @@ def NGrams_CoOccurrences(
         outputDirectory: Annotated[str, Form()],
         
         dataTransformation: Annotated[str, Form()] = "No transformation",
-        openOutputFiles: Annotated[bool, Form()] = False, 
-        ngrams_options_list: Annotated[str, Form()] = "",
+        ngrams_options_list: Annotated[str, Form()] = "[]",
         Ngrams_compute_var: Annotated[bool, Form()] = False,
         ngrams_menu_var: Annotated[str, Form()] = "",
-        ngrams_options_menu_var: Annotated[str, Form()] ="",
         ngrams_size: Annotated[int, Form()] =2,
         search_words: Annotated[str, Form()] ="", 
         minus_K_words_var: Annotated[int, Form()] = 0,
         plus_K_words_var: Annotated[int, Form()] = 0,
         Ngrams_search_var: Annotated[str, Form()] = "",
-        csv_file_var: Annotated[str, Form()] ="",
+        csv_file_var: Annotated[bool, Form()] =False,
         ngrams_viewer_var:  Annotated[bool, Form()]=False,
         CoOcc_Viewer_var: Annotated[bool, Form()]= False,
         date_options: Annotated[bool, Form()] = False,
         temporal_aggregation_var: Annotated[str, Form()] = "",
         viewer_options_list: Annotated[str, Form()] ="",
-        language_list: Annotated[str, Form()] = "",
-        number_of_years: Annotated[int, Form()] = 0,
         
 ):
-
     inputFilename = ""
-    config_input_output_numeric_options = [0,1,0,1]
+    language_list = ["English"]
+    config_input_output_numeric_options = [1, 0, 0, 1]
+    openOutputFiles = False
+    chartPackage = "Excel"
+    ngrams_options_menu_var = "" #Empty in function?
+    number_of_years = 0 #Set for now
+    
     inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
-    chartPackage = "Excel"
+
+    if(csv_file_var):
+        csv_file_var = inputDirectory
+        
     thread = Thread(
         target=lambda: run(
             app,
