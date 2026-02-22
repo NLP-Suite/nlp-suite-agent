@@ -40,7 +40,7 @@ def run_NER(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
         print("No setup for NLP package and language, The default NLP package and language has not been setup.\n\nPlease, click on the Setup NLP button and try again.")
         return
 
-    if len(NER_list)==0 and 'CoreNLP' in NER_packages_var.get():
+    if len(NER_list)==0 and 'CoreNLP' in NER_package:
         print("No NER tag selected, No NER tag has been selected.\n\nPlease, select an NER tag and try again.")
         return
 
@@ -53,7 +53,7 @@ def run_NER(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
             return
         import BERT_util
         NER_list = BERT_util.NER_dict
-        NER_entry_var.set(NER_list['NERs'])
+        # NER_entry_var.set(NER_list['NERs'])
         outputFiles = BERT_util.NER_tags_BERT(inputFilename, inputDir, outputDir, config_filename, '', chartPackage, dataTransformation)
         if outputFiles!=None:
             if isinstance(outputFiles, str):
@@ -67,7 +67,7 @@ def run_NER(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
         document_length_var = 1
         limit_sentence_length_var = 1000
         NER_list = spaCy_util.NER_dict
-        NER_entry_var.set(NER_list)
+        # NER_entry_var.set(NER_list)
         outputFiles = spaCy_util.spaCy_annotate(config_filename, inputFilename, inputDir,
                                                     outputDir,
                                                     openOutputFiles,
@@ -90,7 +90,7 @@ def run_NER(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
 # Stanford CoreNLP -------------------------------------------------------------------------
 
     if '*' in NER_package or 'CoreNLP' in NER_package:
-        NER_list = NER_entry_var.get() #Stanford_CoreNLP_util.NER_list
+        # NER_list = NER_entry_var.get() #Stanford_CoreNLP_util.NER_list
         outputFiles = Stanford_CoreNLP_util.CoreNLP_annotate(config_filename, inputFilename, inputDir, outputDir,
                                                             openOutputFiles, chartPackage, dataTransformation,
                                                             'NER',
@@ -119,8 +119,8 @@ def run_NER(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
         document_length_var = 1
         limit_sentence_length_var = 1000
 
-        NER_list = get_NER_list('Stanza',language)
-        NER_entry_var.set(NER_list)
+        NER_list = NER_list('Stanza',language)
+        # NER_entry_var.set(NER_list)
 
         outputFiles = Stanza_util.Stanza_annotate(config_filename, inputFilename, inputDir,
                                                       outputDir,
@@ -143,5 +143,5 @@ def run_NER(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
 
     if '*' in NER_package:
         NER_list = []
-        NER_tag_var.set(' ')
-        NER_entry_var.set(NER_list)
+        # NER_tag_var.set(' ')
+        # NER_entry_var.set(NER_list)

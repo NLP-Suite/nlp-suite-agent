@@ -16,9 +16,9 @@ openOutputFiles = False
 chartPackage = 'Excel'
 dataTransformation = 'No transformation'
 
-ngrams_options_list = ['Case sensitive (default)']
+ngrams_options_list = ["sensitive", "insensitive"]
 Ngrams_compute_var = True
-ngrams_menu_var = 'Character'
+ngrams_menu_var = 'Word'
 ngrams_options_menu_var = ""
 ngrams_size = 2
 

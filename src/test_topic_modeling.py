@@ -17,14 +17,14 @@ dataTransformation=''
 num_topics = 10
 #BERT_var = True
 BERT_var = False
-split_docs_var = True
-MALLET_var = True
+split_docs_var = False
+MALLET_var = False
 #MALLET_var = False
 optimize_intervals_var = 0
-Gensim_var = False
-remove_stopwords_var = False
-lemmatize_var = False
-nounsOnly_var = False
+Gensim_var = True
+remove_stopwords_var = True
+lemmatize_var = True
+nounsOnly_var = True
 Gensim_MALLET_var = False
 
 

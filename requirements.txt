@@ -74,6 +74,7 @@ spacytextblob==4.0.0
 srsly==2.4.8
 stanza==1.8.1
 starlette==0.36.3
+setuptools==75.1.0
 bert-extractive-summarizer
 # summarizer==0.0.7 #out of date, doesn't work, use above
 sympy==1.12
@@ -112,3 +113,5 @@ langid==1.1.6
 pyspellchecker==0.8.2
 fuzzywuzzy==0.18.0
 striprtf==0.0.29
+
+

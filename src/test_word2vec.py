@@ -14,25 +14,25 @@ os.makedirs(outputDir, exist_ok=True)
 inputFilename = ""
 chartPackage='Excel'
 dataTransformation=''
-remove_stopwords_var = True
-lemmatize_var = True
-WSI_var = True
+remove_stopwords_var = False
+lemmatize_var = False
+WSI_var = False
 BERT_var = False
-Gensim_var = False
+Gensim_var = True
 sg_menu_var = False
 vector_size_var = 100
 window_var = 5
 min_count_var = 5
 vis_menu_var = "Plot word vectors"
 dim_menu_var = "2D"
-compute_distances_var = True
+compute_distances_var = False
 top_words_var = 200
 keywords_var = False
-keywordInput = "harry, magic"
+keywordInput = ""
 range4 = 4
 range6 = 6
 range20 = 10 
-ngramsDropDown = "3-grams (trigrams)"
+ngramsDropDown = ""
 #Vairbalke names for training architecute for gensim: Skip-Gram , CBOW
 # Run the topic modeling function
 run_word2vec(inputFilename, inputDir, outputDir, chartPackage, dataTransformation,
