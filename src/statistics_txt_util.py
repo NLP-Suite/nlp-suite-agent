@@ -1609,25 +1609,27 @@ def compute_sentence_text_readability( inputFilename, inputDir, outputDir, confi
 
 # written by Siyan Pu October 2021
 # edited by Roberto Franzosi October 2021
-def sentence_structure_tree(inputFilename, outputDir):
+def sentence_structure_tree(inputFilename, outputDir, num_sentences):
     if inputFilename == '':
-        sentences = GUI_IO_util.enter_value_widget(
-            'Enter sentence                                                                               ', 'Enter', 1)
-        sent = [sentences[0]]
-        if len(sent) == 0:
-            return
-        else:
-            sentences = sent
-        maxNum = 1
+        print("No input file")
+        return 
+        # sentences = GUI_IO_util.enter_value_widget(
+        #     'Enter sentence                                                                               ', 'Enter', 1)
+        # sent = [sentences[0]]
+        # if len(sent) == 0:
+        #     return
+        # else:
+        #     sentences = sent
+        # maxNum = 1
     else:
         # split into sentences
         text = (open(inputFilename, "r", encoding="utf-8", errors='ignore').read())
         sentences = nltk.sent_tokenize(text)
-        maxNum = GUI_IO_util.enter_value_widget('Enter number of sentences to be visualized', 'Enter', 1)
-        maxNum = str(maxNum[0])
-        if maxNum == '':
+        maxNum = num_sentences
+        maxNum = num_sentences
+        if maxNum == 0:
             return
-        maxNum = int(maxNum)
+
         if maxNum >= 10:
             print('Warning', "The number of sentences entered is quite large. The tree graph algorithm will produce a png file for every sentence")
 

@@ -23,6 +23,7 @@ from SVO import run_svo
 from NGrams_CoOccurrences import run_ngrams
 from file_search_byWord_main import run_search_byWord
 from statistics_txt_main import run_statistics
+from sentence_analysis import run_sentence_analysis
 
 app = FastAPI(debug=True)
 origins = [
@@ -770,6 +771,56 @@ def document_statistics(
                 dataTransformation = dataTransformation,
                 corpus_statistics_var = corpus_statistics_var,
                 corpus_statistics_byPOS_var = corpus_statistics_byPOS_var
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+
+@app.post("/sentence_analysis")
+def sentence_analysis(
+    inputDirectory: Annotated[str, Form()],
+    outputDirectory: Annotated[str, Form()],
+    
+    dataTransformation: Annotated[str, Form()] = "No transformation",
+    compute_sentence_length_var: Annotated[bool, Form()] = False,
+    sentence_complexity_var: Annotated[bool, Form()] = False,
+    text_readability_var: Annotated[bool, Form()] = False,
+    visualize_sentence_structure_var: Annotated[bool, Form()] = False,
+    num_sentences: Annotated[int, Form()] = 1
+      
+):
+    inputDirectory = os.path.expanduser(inputDirectory)
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    
+    #These variables aren't in the gui?
+    visualize_bySentenceIndex_var = False
+    visualize_bySentenceIndex_options_var = ''
+    IO_values = ''
+    script_to_run = ''
+    
+    inputFilename = ""
+    chartPackage = "Excel"
+    openOutputFiles = False
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_sentence_analysis(
+                inputFilename = inputFilename,
+                inputDir = inputDirectory,
+                outputDir = outputDirectory,
+                openOutputFiles = openOutputFiles,
+                chartPackage = chartPackage,
+                dataTransformation = dataTransformation,
+                compute_sentence_length_var = compute_sentence_length_var,
+                visualize_bySentenceIndex_var = visualize_bySentenceIndex_var,
+                visualize_bySentenceIndex_options_var = visualize_bySentenceIndex_options_var,
+                script_to_run = script_to_run,
+                IO_values = script_to_run,
+                sentence_complexity_var = sentence_complexity_var,
+                text_readability_var = text_readability_var,
+                visualize_sentence_structure_var = visualize_sentence_structure_var,
+                num_sentences = num_sentences
             ),
         )
     )
