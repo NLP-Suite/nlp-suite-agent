@@ -120,6 +120,8 @@ def noun_POSTAG_NER_DEPREL_compute_lists_frequencies(data, data_divided_sents):
             strings+= "['"+item+"',ner_counter['"+item+"']],"
         else:
             strings += "['" + item + "',ner_counter['" + item + "']]]"
+    
+    print("DEBUG STRING:", strings)
     noun_ner_stats = eval(strings)
     print(noun_ner_stats[1],noun_ner_stats[1][1], "THIS IS THE O COUNTER!!!!!!!!")
     return list_nouns_postag, list_nouns_deprel, list_nouns_ner, noun_postag_stats, noun_deprel_stats, noun_ner_stats

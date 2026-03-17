@@ -15,7 +15,7 @@ from word2vec import run_word2vec
 from sunburst_charts import run_sun_burst
 from colormap_chart import run_colormap
 from sankey_flowchart import run_sankey
-from CoNLL_main import run_conll
+from CoNLL_table_analyzer_main import run_CoNLL_table_analyzer
 from wordcloud_visual import run_wordcloud
 
 from style_analysis import run_style_analysis
@@ -288,55 +288,60 @@ def word2vec(
     return PlainTextResponse("", status_code=200)
 
 @app.post("/CoNLL_table_analyzer_main")
-def conll_table_analyzer(
-    inputFilename: Annotated[str, Form()], 
+def run_CoNLL_table_analyzer(
     inputDirectory: Annotated[str, Form()],
     outputDirectory: Annotated[str, Form()], 
-    conll_search_field: Annotated[str, Form()], 
-    search_kw: Annotated[str, Form()], 
-    postag: Annotated[str, Form()], 
+    searchedCoNLLField: Annotated[str, Form()], 
+    postag_var: Annotated[str, Form()], 
     deprel: Annotated[str, Form()], 
-    postag_b: Annotated[str, Form()], 
-    deprel_b: Annotated[str, Form()],
+    co_postag: Annotated[str, Form()], 
+    co_deprel: Annotated[str, Form()],
     
+    inputFilename: Annotated[str, Form()] = "",
     dataTransformation: Annotated[str, Form()] = "No transformation",
+    all_analyses_var = False,
+    all_analyses: Annotated[str, Form()] = "*",
+    searchField_kw: Annotated[str, Form()] = "",
     Begin_K_sent_var: Annotated[bool, Form()] = False,
     End_K_sent_var: Annotated[bool, Form()] = False,
-    openOutputFiles: Annotated[bool, Form()] = False,
-    compute_sentence_table: Annotated[bool, Form()] = False,
-    search_token_word_checkbox: Annotated[bool, Form()] = False, 
-    repetition_finder: Annotated[bool, Form()] = False, 
-    clause_noun_verb_function: Annotated[bool, Form()] = False, 
-    clause_noun_verb_function_options: Annotated[str, Form()] = False 
-
+    compute_sentence_var: Annotated[bool, Form()] = False,
+    search_token_var: Annotated[bool, Form()] = False, 
+    k_sentences_var: Annotated[bool, Form()] = False,
 ):
     inputFilename = ""
     inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    
     chartPackage = "Excel"
+    openOutputFiles = False
+    WordNet_var = False
+
+    
+    
     thread = Thread(
         target=lambda: run(
             app,
-            lambda: run_conll(
-                inputFilename=inputFilename,
-                inputDir=inputDirectory,
-                outputDir=outputDirectory,
-                openOutputFiles=openOutputFiles, 
-                chartPackage=chartPackage, 
-                dataTransformation=dataTransformation,
-                searchedCoNLLField=conll_search_field,
-                searchField_kw=search_kw,
-                postag=postag,
-                deprel=deprel,
-                co_postag=postag_b,
-                co_deprel=deprel_b,
-                Begin_K_sent_var=Begin_K_sent_var,
-                End_K_sent_var=End_K_sent_var,
-                compute_sentence_var = compute_sentence_table,
-                search_token_var = search_token_word_checkbox,
-                k_sentences_var = repetition_finder,
-                all_analyses_vars = clause_noun_verb_function,
-                all_analyses = clause_noun_verb_function_options, 
+            lambda: run_CoNLL_table_analyzer(
+                inputFilename = inputFilename, 
+                inputDir = inputDirectory, 
+                outputDir = outputDirectory, 
+                openOutputFiles = openOutputFiles, 
+                chartPackage = chartPackage, 
+                dataTransformation = dataTransformation,
+                searchedCoNLLField = searchedCoNLLField, 
+                searchField_kw = searchField_kw,
+                postag_var = postag_var,
+                depre =deprel,
+                co_postag = co_postag, 
+                co_deprel = co_deprel,
+                Begin_K_sent_var = Begin_K_sent_var,
+                End_K_sent_var = End_K_sent_var,
+                all_analyses_var = all_analyses_var,
+                all_analyses = all_analyses,
+                search_token_var = search_token_var,
+                WordNet_var = WordNet_var, 
+                compute_sentence_var = compute_sentence_var, 
+                k_sentences_var = k_sentences_var
             ),
         )
     )
