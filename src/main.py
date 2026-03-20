@@ -288,7 +288,7 @@ def word2vec(
     return PlainTextResponse("", status_code=200)
 
 @app.post("/CoNLL_table_analyzer_main")
-def run_CoNLL_table_analyzer(
+def CoNLL_table_analyzer(
     inputDirectory: Annotated[str, Form()],
     outputDirectory: Annotated[str, Form()], 
     searchedCoNLLField: Annotated[str, Form()], 
@@ -299,7 +299,7 @@ def run_CoNLL_table_analyzer(
     
     inputFilename: Annotated[str, Form()] = "",
     dataTransformation: Annotated[str, Form()] = "No transformation",
-    all_analyses_var = False,
+    all_analyses_var: Annotated[bool, Form()] = False,
     all_analyses: Annotated[str, Form()] = "*",
     searchField_kw: Annotated[str, Form()] = "",
     Begin_K_sent_var: Annotated[bool, Form()] = False,
@@ -331,7 +331,7 @@ def run_CoNLL_table_analyzer(
                 searchedCoNLLField = searchedCoNLLField, 
                 searchField_kw = searchField_kw,
                 postag_var = postag_var,
-                depre =deprel,
+                deprel =deprel,
                 co_postag = co_postag, 
                 co_deprel = co_deprel,
                 Begin_K_sent_var = Begin_K_sent_var,
