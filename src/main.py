@@ -226,27 +226,28 @@ def word2vec(
     # inputFilename: Annotated[str, Form()], 
     inputDirectory: Annotated[str, Form()],
     outputDirectory: Annotated[str, Form()],
-    ngrams: Annotated[str, Form()],
-    
+
     dataTransformation: Annotated[str, Form()] = "No transformation",
-    removeStopwords: Annotated[bool, Form()] = False,
-    lemmatize: Annotated[bool, Form()] = False,
-    wordSenseInduction: Annotated[bool, Form()] = False,
-    wordEmbeddingsBERT: Annotated[bool, Form()] = False,
-    word2VecGensim: Annotated[bool, Form()] = False,
-    skipGram: Annotated[str, Form()] = "Skip-Gram",
-    vectorSize: Annotated[int, Form()] = 100,
-    windowSize: Annotated[int, Form()] = 5,
-    minCount: Annotated[int, Form()] = 5,
-    plotWordVectors: Annotated[str, Form()] = "Plot word vectors",
-    dimension: Annotated[str, Form()] = "2D",
-    computeWordDistances: Annotated[bool, Form()] = False,
-    topWords: Annotated[int, Form()] = 200,
-    keyWords: Annotated[str, Form()] = "",
+    ngramsDropDown: Annotated[str, Form()] = "3-grams (unigrams)",
+    remove_stopwords_var: Annotated[bool, Form()] = False,
+    lemmatize_var: Annotated[bool, Form()] = False,
+    WSI_var: Annotated[bool, Form()] = False,
+    BERT_var: Annotated[bool, Form()] = False,
+    Gensim_var: Annotated[bool, Form()] = False,
+    sg_menu_var: Annotated[str, Form()] = "Skip-Gram",
+    vector_size_var: Annotated[int, Form()] = 100,
+    window_var: Annotated[int, Form()] = 5,
+    min_count_var: Annotated[int, Form()] = 5,
+    vis_menu_var: Annotated[str, Form()] = "Plot word vectors",
+    dim_menu_var: Annotated[str, Form()] = "2D",
+    compute_distances_var: Annotated[bool, Form()] = False,
+    top_words_var: Annotated[int, Form()] = 200,
+    keywords_var: Annotated[str, Form()] = "",
     keywordInput: Annotated[str, Form()] = "",
-    kMeansMin: Annotated[int, Form()] = 4,
-    kMeansMax: Annotated[int, Form()] = 6,
+    range4: Annotated[int, Form()] = 4,
+    range6: Annotated[int, Form()] = 6,
     range20: Annotated[int, Form()] = 10,
+    
 ):
     inputFilename = ""
     inputDirectory = os.path.expanduser(inputDirectory)
@@ -262,25 +263,25 @@ def word2vec(
                 outputDir=outputDirectory,
                 chartPackage=chartPackage,
                 dataTransformation=dataTransformation, 
-                remove_stopwords_var=removeStopwords,
-                lemmatize_var=lemmatize,
-                WSI_var=wordSenseInduction,
-                BERT_var=wordEmbeddingsBERT,
-                Gensim_var=word2VecGensim,
-                sg_menu_var=skipGram,
-                vector_size_var=vectorSize,
-                window_var=windowSize,
-                min_count_var=minCount,
-                vis_menu_var=plotWordVectors,
-                dim_menu_var=dimension,
-                compute_distances_var=computeWordDistances,
-                top_words_var=topWords,
-                keywords_var=keyWords,
+                remove_stopwords_var=remove_stopwords_var,
+                lemmatize_var=lemmatize_var,
+                WSI_var=WSI_var,
+                BERT_var=BERT_var,
+                Gensim_var=Gensim_var,
+                sg_menu_var=sg_menu_var,
+                vector_size_var=vector_size_var,
+                window_var=window_var,
+                min_count_var=min_count_var,
+                vis_menu_var=vis_menu_var,
+                dim_menu_var=dim_menu_var,
+                compute_distances_var=compute_distances_var,
+                top_words_var=top_words_var,
+                keywords_var=keywords_var,
                 keywordInput=keywordInput,
-                range4=kMeansMin,
-                range6=kMeansMax,
+                range4=range4,
+                range6=range6,
                 range20=range20,
-                ngramsDropDown=ngrams
+                ngramsDropDown=ngramsDropDown
             ),
         )
     )
@@ -636,6 +637,8 @@ def NGrams_CoOccurrences(
 
     if(csv_file_var):
         csv_file_var = inputDirectory
+    else:
+        csv_file_var = ''
         
     thread = Thread(
         target=lambda: run(
