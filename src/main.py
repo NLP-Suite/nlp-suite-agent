@@ -24,6 +24,7 @@ from NGrams_CoOccurrences import run_ngrams
 from file_search_byWord_main import run_search_byWord
 from statistics_txt_main import run_statistics
 from sentence_analysis import run_sentence_analysis
+from GIS_main import run_GIS
 
 from file_manager_main import FileManagerConfig, run_file_manager
 
@@ -70,7 +71,9 @@ async def single_runner(request: Request, call_next):
 
     app.worker = True
     response = await call_next(request)
-    app.worker = False
+    if response.status_code >= 400:
+        app.worker = False  
+        
     return response
 
 @app.get("/status")
@@ -835,6 +838,64 @@ def sentence_analysis(
     )
     thread.start()
     return PlainTextResponse("", status_code=200)
+
+@app.post("/gis")
+def gis(
+    inputDirectory: Annotated[str, Form()],
+    outputDirectory: Annotated[str, Form()],
+    
+    dataTransformation: Annotated[str, Form()] = "No transformation",
+    NER_extractor: Annotated[bool, Form()] = False,
+    geocoder: Annotated[str, Form()] = "Nominatim", 
+    country_bias_var: Annotated[str, Form()] = "", 
+    area_var: Annotated[str, Form()] = "e.g.,", 
+    restrict_var: Annotated[bool, Form()] = False,
+    GIS_package_var: Annotated[str, Form()] = '', 
+    
+):
+    inputDirectory = os.path.expanduser(inputDirectory)
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    
+    inputFilename = ""
+    chartPackage = "Excel"
+    csv_file = ""
+    GIS_package2_var = False
+    openOutputFiles = False
+    geocode_locations = False
+    map_locations = ""
+    location_menu = ""
+    #Geocode, map locations, gis_package var_2
+    
+    
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_GIS(
+                inputFilename,
+                inputDirectory,
+                outputDirectory,
+                openOutputFiles,
+                
+                chartPackage,
+                dataTransformation,
+                csv_file,
+                NER_extractor,
+                location_menu,
+                geocoder,
+                geocode_locations,
+                country_bias_var,
+                area_var,
+                restrict_var,
+                map_locations,
+                GIS_package_var,
+                GIS_package2_var
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
+    
+
 
 if __name__ == "__main__":
     uvicorn.run(app, port=3000, host="0.0.0.0")
