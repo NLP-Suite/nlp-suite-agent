@@ -25,6 +25,8 @@ from file_search_byWord_main import run_search_byWord
 from statistics_txt_main import run_statistics
 from sentence_analysis import run_sentence_analysis
 
+from file_manager_main import FileManagerConfig, run_file_manager
+
 app = FastAPI(debug=True)
 origins = [
     "*",
@@ -98,7 +100,6 @@ def status():
 #     # )
 #     # thread.start()
 #     # return PlainTextResponse("", status_code=200)
-
 
 @app.post("/sentiment_analysis")
 def sentiment_analysis(
