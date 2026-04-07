@@ -194,7 +194,8 @@ def parsers_annotators(
     # CoNLL_table_analyzer_var: Annotated[bool, Form()] = False,
     annotators_var: Annotated[bool, Form()] = False,
     annotators_menu_var: Annotated[str, Form()] = '',
-):
+    package: Annotated[str, Form()] = "Stanford CoreNLP"
+    ):
     inputFilename =  ''
     inputDirectory = os.path.expanduser(inputDirectory)
     outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
@@ -217,7 +218,8 @@ def parsers_annotators(
                 single_quote=single_quote,
                 CoNLL_table_analyzer_var=False,
                 annotators_var=annotators_var,
-                annotators_menu_var=annotators_menu_var
+                annotators_menu_var=annotators_menu_var,
+                package=package
             )
         )
     )
@@ -510,6 +512,8 @@ def SVO(
     filter_objects: Annotated[bool, Form()] = False,
     so_gender: Annotated[bool, Form()] = False,
     so_quote: Annotated[bool, Form()] = False,
+    wordcloud_var: Annotated[bool, Form()] = False,
+    google_earth_var: Annotated[bool, Form()] = False,
 ):
     inputFilename = ""
     chartPackage = 'Excel'
@@ -541,8 +545,8 @@ def SVO(
                 lemmatize_verbs = lemmatize_verbs,
                 lemmatize_objects = lemmatize_objects,
                 gephi_var = False,
-                wordcloud_var = False,
-                google_earth_var = False
+                wordcloud_var = wordcloud_var,
+                google_earth_var = google_earth_var
             ),
         )
     )

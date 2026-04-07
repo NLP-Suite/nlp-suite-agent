@@ -13,9 +13,9 @@ os.makedirs(outputDir, exist_ok=True)
 # Set parameters
 inputFilename  = ''
 openOutputFiles = False
-chartPackage = 'Excel'
+chartPackage = 'Excel' 
 dataTransformation = 'No transformation'
-coref_var = True 
+coref_var = False 
 manual_coref_var = False 
 normalized_NER_date_extractor_var = False
 package_var = 'Stanford CoreNLP'
@@ -24,15 +24,15 @@ quote_var = False
 subjects_dict_path_var =  GUI_IO_util.wordLists_libPath + os.sep + 'social-actor-list.csv'  
 verbs_dict_path_var =  GUI_IO_util.wordLists_libPath + os.sep + 'social-actor-list.csv'
 objects_dict_path_var =   GUI_IO_util.wordLists_libPath + os.sep + 'social-actor-list.csv'
-filter_subjects =  True
-filter_verbs = True
+filter_subjects =  False
+filter_verbs = False
 filter_objects = False
-lemmatize_subjects = True
-lemmatize_verbs = True
+lemmatize_subjects = False
+lemmatize_verbs = False
 lemmatize_objects = False 
 gephi_var = False 
 wordcloud_var = True 
-google_earth_var = False
+google_earth_var = True
 
 
 

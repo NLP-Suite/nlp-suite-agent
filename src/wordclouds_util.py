@@ -163,9 +163,24 @@ class GroupedColorFunc(object):
     def __call__(self, word, **kwargs):
         return self.get_color_func(word)
 
+def get_wordcloud_title(inputFilename, inputDir, wordcloud_title):
+    if wordcloud_title=='':
+        if inputFilename!='':
+            head, tail = os.path.split(inputFilename)
+        else:
+            head, tail = os.path.split(inputDir)
+        wordcloud_title='Wordcloud for ' + str(tail)
+    return wordcloud_title
+
+
 # CYNTHIA: wordcloud function particularly designed for SVO
 # collocations set to False to avoid repetition of words
-def SVOWordCloud(svoFile, inputFilename, outputDir, transformed_image_mask, prefer_horizontal):
+# wordcloud_title = 'Wordcloud of Subject (red), Verb (blue), Object (green)'
+def SVOWordCloud(svoFile, inputFilename, outputDir, transformed_image_mask, wordcloud_title, prefer_horizontal):
+
+    wordcloud_title = get_wordcloud_title(inputFilename,'', wordcloud_title)
+
+
     # read SVO result in
     svo_df = pd.read_csv(svoFile, encoding='utf-8',on_bad_lines='skip')
     svo_df = svo_df.fillna("")
@@ -204,10 +219,13 @@ def SVOWordCloud(svoFile, inputFilename, outputDir, transformed_image_mask, pref
     wc.recolor(color_func=grouped_color_func)
     plt.figure(figsize = (8, 8), facecolor = None)
     plt.imshow(wc, interpolation="bilinear")
+    plt.title(wordcloud_title, fontsize=14, fontweight='bold', pad=20)
     plt.axis("off")
     output_file_name = IO_files_util.generate_output_file_name(inputFilename, '', outputDir, '.png', 'WC', 'img')
     wc.to_file(output_file_name)
     return output_file_name
+
+
 
 
 

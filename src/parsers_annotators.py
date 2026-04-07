@@ -15,7 +15,7 @@ def run_parsers_annotators(inputFilename, inputDir, outputDir, openOutputFiles, 
         parser_var,
         parser_menu_var,
         single_quote,
-        CoNLL_table_analyzer_var, annotators_var, annotators_menu_var):
+        CoNLL_table_analyzer_var, annotators_var, annotators_menu_var, package):
     print("started")
     print(inputFilename)
     print('parser_var',parser_var)
@@ -37,8 +37,8 @@ def run_parsers_annotators(inputFilename, inputDir, outputDir, openOutputFiles, 
         raise ValueError('Your annotator selection is invalid. It is only a label to make readability of menu options easier. Please select a different option and try again.')
 
     # Get the NLP package and language options
-    error, package, parsers, package_basics, language, package_display_area_value, encoding_var, export_json_var, memory_var, document_length_var, limit_sentence_length_var = \
-        config_util.read_NLP_package_language_config()
+    error, _, parsers, package_basics, language, package_display_area_value, encoding_var, export_json_var, memory_var, document_length_var, limit_sentence_length_var = \
+        config_util.read_NLP_package_language_config() #package used to be _
     print(package)
     language_var = language
     language_list = [language]

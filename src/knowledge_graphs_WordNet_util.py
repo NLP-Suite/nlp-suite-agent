@@ -95,15 +95,15 @@ def aggregate_GoingUP(WordNetDir, inputFile, outputDir, config_filename, noun_ve
     from nltk.corpus import wordnet as wn
 
     filesToOpen=[]
-
+    
     # check that external software WordNet has been setup
-    WordNetDir, existing_software_config, errorFound = IO_libraries_util.external_software_install('knowledge_graphs_WordNet_util',
-                                                                                         'WordNet',
-                                                                                         '',
-                                                                                         silent=False, errorFound=False)
+    # WordNetDir, existing_software_config, errorFound = IO_libraries_util.external_software_install('knowledge_graphs_WordNet_util',
+    #                                                                                      'WordNet',
+    #                                                                                      '',
+    #                                                                                      silent=False, errorFound=False)
 
-    if WordNetDir == None or WordNetDir == '':
-        return filesToOpen
+    # if WordNetDir == None or WordNetDir == '':
+    #     return filesToOpen
 
     errorFound, error_code, system_output, java_version = IO_libraries_util.check_java_installation('WordNet upward search')
     if errorFound:

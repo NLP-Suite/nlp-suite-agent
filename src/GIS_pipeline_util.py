@@ -112,7 +112,8 @@ def GIS_pipeline(config_filename, inputFilename, inputDir, outputDir,
     
     
     #<!------------------GOOGLE EARTH PRO DIRECTORY CHECK-------------------------------------------------------------------------------!>
-    GoogleEarthProDir = os.getenv("GOOGLE_EARTH_PATH")
+    # GoogleEarthProDir = os.getenv("GOOGLE_EARTH_PATH")
+    GoogleEarthProDir = "'/Applications/Google Earth Pro.app'"
 
     if GoogleEarthProDir == None or GoogleEarthProDir == '':
         return
