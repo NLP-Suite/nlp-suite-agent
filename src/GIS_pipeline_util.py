@@ -113,15 +113,38 @@ def GIS_pipeline(config_filename, inputFilename, inputDir, outputDir,
     
     #<!------------------GOOGLE EARTH PRO DIRECTORY CHECK-------------------------------------------------------------------------------!>
     # GoogleEarthProDir = os.getenv("GOOGLE_EARTH_PATH")
-    GoogleEarthProDir = "'/Applications/Google Earth Pro.app'"
+    import platform
+    
+    os_temp = platform.system()
+    
+    if os_temp =="Darwin":
+        print("os is darwin")
+        GoogleEarthProDir = "/Applications/Google Earth Pro.app"
 
-    if GoogleEarthProDir == None or GoogleEarthProDir == '':
-        return
+    elif os_temp == "Windows":
+        print("os is darwin")
+        GoogleEarthProDir = "C:\Program Files\Google\Google Earth Pro\client\googleearth.exe"
+        
+    elif os_temp=="Linux":
+        print("os is linux")
+        GoogleEarthProDir = "/opt/google/earth/pro"
+ 
+    else:
+        print("unsure of os, defaulting to mac directory")
+
+        GoogleEarthProDir = "'/Applications/Google Earth Pro.app'"
+
+        
+    # if GoogleEarthProDir == None or GoogleEarthProDir == '': #We dont need this potentially
+    #     return
 
     startTime = IO_user_interface_util.timed_alert(2000, 'Analysis start', 'Started running GIS pipeline at',
                                                    True, '', True, '', False)
 
+    print("HEREEE ", __file__)
     head, scriptName = os.path.split(os.path.basename(__file__))
+    print("Head ", head)
+    print("Scriptname ", scriptName)
     reminders_util.checkReminder(scriptName,
                                  reminders_util.title_options_GIS_timing,
                                  reminders_util.message_GIS_timing,

@@ -12,26 +12,16 @@ from nltk.stem.porter import PorterStemmer
 import stanza
 
 #Docker Directories 
-STANZA_RESOURCES_DIR = '/root/stanza_resources'
-NLTK_DATA_DIR = '/root/nltk_data'
-
-#Local Directories 
-STANZA_RESOURCES_DIR = os.path.join(os.path.expanduser("~"), "stanza_resources")
-
-NLTK_DATA_DIR = os.path.join(os.path.expanduser("~"), "nltk_data")
-
-
+STANZA_RESOURCES_DIR = os.environ.get('STANZA_RESOURCES_DIR', '/root/stanza_resources') #second argument is a fall back
+EN_MODEL_PATH = os.path.join(STANZA_RESOURCES_DIR, 'en')
+NLTK_DATA_DIR = os.environ.get("NLTK_DATA", "/root/nltk_data")
 
 try:
-    os.makedirs(STANZA_RESOURCES_DIR, exist_ok=True)
+    os.makedirs(STANZA_RESOURCES_DIR, exist_ok=False)
 
 except Exception:
-    stanza.download('en', model_dir=STANZA_RESOURCES_DIR)
+    print("Stanza directory already exists")
     
-
-EN_MODEL_PATH = os.path.join(STANZA_RESOURCES_DIR, 'en')
-
-os.makedirs(NLTK_DATA_DIR, exist_ok=True)
 
 if not os.path.exists(EN_MODEL_PATH):
     try:
@@ -39,11 +29,22 @@ if not os.path.exists(EN_MODEL_PATH):
         stanza.download('en', model_dir=STANZA_RESOURCES_DIR)
         print("Download complete!")
     except Exception:
-        # Handle no internet / failed download
+        # Handle no internet / failed download````
         import IO_internet_util
         IO_internet_util.check_internet_availability_warning(
             "statistics_txt_util.py (stanza.download('en'))"
         )
+else:
+    print("Englis.h model")  
+
+
+try:
+    os.makedirs(NLTK_DATA_DIR, exist_ok=False)
+
+except Exception:
+    print("NLTK Directory already exists")
+    
+    
 
 # from nltk import tokenize
 # from nltk import word_tokenize

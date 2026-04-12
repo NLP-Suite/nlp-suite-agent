@@ -57,6 +57,7 @@ def import_nltk_resource(resource_path, resource):
         import nltk.data
         try:
             nltk.data.find(resource_path)
+            print("path ", resource_path, " with resource ", resource, " already installed")
         except:
             nltk.data.find(resource_path+'.zip')
     except LookupError:
