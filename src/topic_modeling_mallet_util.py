@@ -35,7 +35,7 @@ def call_mallet_api(command, args):
         response.raise_for_status()
 
         if command == "train-topics":
-            print("\nDEBUG: Checking what MALLET wrote in /app/output ...")
+            print("\nDEBUG: Checking what MALLET wrote in /app/output")
             os.system("docker exec mallet_api ls -lh /app/output")
             print("\nDEBUG: Finished listing files.\n")
 
@@ -75,7 +75,7 @@ def run_MALLET(inputDir, outputDir, chartPackage, dataTransformation, OptimizeIn
         return
 
 
-    print('Training topics...')
+    print('Training topics')
 
     #  Train topics on the .mallet file
     train_args = {

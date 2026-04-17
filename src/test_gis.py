@@ -22,7 +22,7 @@ geocoder = "Nominatim"
 country_bias_var = ""
 area_var = "e.g.,"
 restrict_var = False
-GIS_package_var = "Google Earth Pro"
+GIS_package_var = "folium"
 
 
 

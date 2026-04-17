@@ -22,6 +22,10 @@ import data_manipulation_util
 import IO_csv_util
 import statistics_csv_util
 
+import WordNet_API
+
+
+
 filesToOpen=[]
 
 def process_keyword(wordNet_keyword_list, noun_verb, wn):
