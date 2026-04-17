@@ -15,8 +15,8 @@ def run_file_manager(inputDir, outputDir,
         chartPackage,
         dataTransformation,
         selectedCsvFile_var, selectedCsvFile_colName,
-        # utf8_var,
-        # ASCII_var,
+        utf8_var,
+        ASCII_var,
         list_var,
         rename_var,
         copy_var,
@@ -55,6 +55,7 @@ def run_file_manager(inputDir, outputDir,
     # Frontend Implementation
     
     filesToOpen = []
+    fileList = []
     
     outputFilename = ''
     options = 0
@@ -113,8 +114,8 @@ def run_file_manager(inputDir, outputDir,
         return
 
     if options==1:
-        if count_file_manager_var==0:
-            if list_var==0 and by_file_type_var=='' and by_prefix_var==0 and by_substring_var==0:
+        if count_file_manager_var:
+            if not list_var and not by_file_type_var and not by_prefix_var and not by_substring_var:
                 print("You have selected a file manager option, but no specific criteria for managing the files: By file type, By prefix value, or By substring value.\n\nPlease, select the file criteria to use and try again.")
                 return
 
@@ -159,13 +160,17 @@ def run_file_manager(inputDir, outputDir,
         fieldnames = fieldnames + ['Character count ('+character_entry_var+')']
 
     if split_var:
-        # must get the first file in order to compute the number of headers to be displayed in the output csv file
-        for inputDir, subdirs, files in os.walk(inputDir):
-            ID = 1
-            for filename in files:
-                if ID==1:
-                    break
-        filename_items = filename.split(embedded_item_character_value_var)
+        first_filename = None
+        for root, subdirs, files in os.walk(inputDir):
+            if files:
+                first_filename = files[0]
+                break
+
+        if not first_filename:
+            print("No files found for split operation.")
+            return
+
+        filename_items = first_filename.split(embedded_item_character_value_var)
         ID = 1
         for item in filename_items:
             fieldnames = fieldnames + ['Split item' + str(ID)]
@@ -247,38 +252,43 @@ def run_file_manager(inputDir, outputDir,
     noHeaders = False
     headers = []
     #implemented noHeaders and headers here as it was in GUI section
-    if selectedCsvFile_var != '':
-        headers_result = IO_csv_util.get_csv_file_headers(selectedCsvFile_var, True)
-        if headers_result == '':
-            noHeaders= True
-            headers = []
-        else:
-            noHeaders = False
-            data, headers = IO_csv_util.get_csv_file_data_and_headers(selectedCsvFile_var, True)
+    #no need!! 
+    # csv_file = get_first_csv(inputDir)
+    # if selectedCsvFile_var != '':
+    #     headers_result = IO_csv_util.get_csv_file_headers(selectedCsvFile_var, True)
+    #     if headers_result == '':
+    #         noHeaders= True
+    #         headers = []
+    #     else:
+    #         noHeaders = False
+    #         data, headers = IO_csv_util.get_csv_file_data_and_headers(selectedCsvFile_var, True)
 
 
-        if noHeaders==False:
-            selectedCsvFile_colNum=IO_csv_util.get_columnNumber_from_headerValue(headers, selectedCsvFile_colName, selectedCsvFile_var)
-        else:
-            # No headers, we assume the first column
-            selectedCsvFile_colNum=0
+    #     if noHeaders==False:
+    #         selectedCsvFile_colNum=IO_csv_util.get_columnNumber_from_headerValue(headers, selectedCsvFile_colName, selectedCsvFile_var)
+    #     else:
+    #         # No headers, we assume the first column
+    #         selectedCsvFile_colNum=0
 
-        fileList = []
-        with open(selectedCsvFile_var, 'r', encoding="utf-8", errors='ignore') as read_obj:
-            csv_reader = csv.reader(read_obj)
-            if noHeaders==False:
-                # skip first row since it has headers
-                next(csv_reader)
-            for row in csv_reader:
-                if row[selectedCsvFile_colNum][:10] == "=hyperlink":
-                    f = IO_csv_util.undressFilenameForCSVHyperlink(row[selectedCsvFile_colNum])
-                    print(f)
-                else:
-                    f = row[selectedCsvFile_colNum]
-                head, tail = os.path.split(f)
-                if head != '':
-                    hasFullPath = True
-                fileList.append(f)
+
+# if there are variables declared in frontend, just take them from frontend
+
+        # fileList = []
+        # with open(selectedCsvFile_var, 'r', encoding="utf-8", errors='ignore') as read_obj:
+        #     csv_reader = csv.reader(read_obj)
+        #     if noHeaders==False:
+        #         # skip first row since it has headers
+        #         next(csv_reader)
+        #     for row in csv_reader:
+        #         if row[selectedCsvFile_colNum][:10] == "=hyperlink":
+        #             f = IO_csv_util.undressFilenameForCSVHyperlink(row[selectedCsvFile_colNum])
+        #             print(f)
+        #         else:
+        #             f = row[selectedCsvFile_colNum]
+        #         head, tail = os.path.split(f)
+        #         if head != '':
+        #             hasFullPath = True
+        #         fileList.append(f)
 
     # _________________________________________________________________________________________________________________________________________________
 
@@ -294,8 +304,8 @@ def run_file_manager(inputDir, outputDir,
 							fieldnames,
 							selectedCsvFile_var,
 							hasFullPath,
-							# utf8_var,
-							# ASCII_var,
+							utf8_var,
+							ASCII_var,
                             list_var,
 							rename_var,
 							copy_var,
@@ -357,8 +367,8 @@ def run_file_manager(inputDir, outputDir,
                                 fieldnames,
                                 selectedCsvFile_var,
                                 hasFullPath,
-                                # utf8_var,
-                                # ASCII_var,
+                                utf8_var,
+                                ASCII_var,
                                 list_var,rename_var,copy_var,move_var,delete_var, split_var, rename_new_entry,file_type_menu_var,by_creation_date_var,by_author_var,by_prefix_var,by_substring_var,string_entry_var,by_foldername_var,folder_character_separator_var,by_embedded_items_var,comparison_var, number_of_items_var,embedded_item_character_value_var,include_exclude_var,character_count_file_manager_var,character_entry_var,include_subdir_var,fileName_embeds_date,date_format,date_separator,date_position)
                         if fileFound:
                             i=i+1
