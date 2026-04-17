@@ -18,6 +18,7 @@ from sankey_flowchart import run_sankey
 from CoNLL_table_analyzer_main import run_CoNLL_table_analyzer
 from wordcloud_visual import run_wordcloud
 
+
 from style_analysis import run_style_analysis
 from SVO import run_svo
 from NGrams_CoOccurrences import run_ngrams
@@ -25,6 +26,8 @@ from file_search_byWord_main import run_search_byWord
 from statistics_txt_main import run_statistics
 from sentence_analysis import run_sentence_analysis
 from GIS_main import run_GIS
+
+from file_manager_main import run_file_manager
 
 app = FastAPI(debug=True)
 origins = [
@@ -102,6 +105,109 @@ def status():
 #     # thread.start()
 #     # return PlainTextResponse("", status_code=200)
 
+
+
+@app.post("/file_manager")
+def file_manager(
+    
+    inputDirectory: Annotated[str, Form()],
+    outputDirectory: Annotated[str, Form()],
+
+    chartPackage: Annotated[str, Form()] = "",
+    dataTransformation: Annotated[str, Form()] = "",
+    selectedCsvFile_var: Annotated[str, Form()] = "",
+    selectedCsvFile_colName: Annotated[str, Form()] = "",
+
+    # utf8_var : Annotated[bool, Form()] = False,
+    # ASCII_var : Annotated[bool, Form()] = False,
+    list_var: Annotated[bool, Form()] = False,
+    rename_var: Annotated[bool, Form()] = False,
+    copy_var: Annotated[bool, Form()] = False,
+    move_var: Annotated[bool, Form()] = False,
+    delete_var: Annotated[bool, Form()] = False,
+    count_file_manager_var: Annotated[bool, Form()] = False,
+    split_var: Annotated[bool, Form()] = False,
+
+    rename_new_entry: Annotated[str, Form()] = "",
+    by_file_type_var: Annotated[bool, Form()] = False,
+    file_type_menu_var: Annotated[str, Form()] = "",
+    by_creation_date_var: Annotated[bool, Form()] = False,
+    by_author_var: Annotated[bool, Form()] = False,
+    before_date_var: Annotated[str, Form()] = "",
+    after_date_var: Annotated[str, Form()] = "",
+    by_prefix_var: Annotated[bool, Form()] = False,
+    by_substring_var: Annotated[bool, Form()] = False,
+    string_entry_var: Annotated[str, Form()] = "",
+    by_foldername_var: Annotated[bool, Form()] = False,
+    folder_character_separator_var: Annotated[str, Form()] = "",
+    by_embedded_items_var: Annotated[bool, Form()] = False,
+    comparison_var: Annotated[str, Form()] = "",
+    number_of_items_var: Annotated[int, Form()] = 0,
+    embedded_item_character_value_var: Annotated[str, Form()] = "",
+    include_exclude_var: Annotated[str, Form()] = "",
+    character_count_file_manager_var: Annotated[bool, Form()] = False,
+    character_entry_var: Annotated[str, Form()] = "",
+    include_subdir_var: Annotated[bool, Form()] = False,
+    fileName_embeds_date: Annotated[bool, Form()] = False,
+    date_format: Annotated[str, Form()] = "",
+    date_separator: Annotated[str, Form()] = "",
+    date_position: Annotated[int, Form()] = 0,
+):
+    inputDirectory = os.path.expanduser(inputDirectory)
+
+    outputDirectory = os.path.join(os.path.expanduser("~"), "nlp-suite", "output")
+    os.makedirs(outputDirectory, exist_ok=True)
+
+    thread = Thread(
+        target=lambda: run(
+            app,
+            lambda: run_file_manager(
+                inputDir=inputDirectory,
+                outputDir=outputDirectory,
+                chartPackage=chartPackage,
+                dataTransformation=dataTransformation,
+                selectedCsvFile_var=selectedCsvFile_var,
+                selectedCsvFile_colName=selectedCsvFile_colName,
+                # utf8_var=utf8_var,
+                # ASCII_var=ASCII_var,
+                utf8_var=False,
+                ASCII_var=False,
+                list_var=list_var,
+                rename_var=rename_var,
+                copy_var=copy_var,
+                move_var=move_var,
+                delete_var=delete_var,
+                count_file_manager_var=count_file_manager_var,
+                split_var=split_var,
+                rename_new_entry=rename_new_entry,
+                by_file_type_var=by_file_type_var,
+                file_type_menu_var=file_type_menu_var,
+                by_creation_date_var=by_creation_date_var,
+                by_author_var=by_author_var,
+                before_date_var=before_date_var,
+                after_date_var=after_date_var,
+                by_prefix_var=by_prefix_var,
+                by_substring_var=by_substring_var,
+                string_entry_var=string_entry_var,
+                by_foldername_var=by_foldername_var,
+                folder_character_separator_var=folder_character_separator_var,
+                by_embedded_items_var=by_embedded_items_var,
+                comparison_var=comparison_var,
+                number_of_items_var=number_of_items_var,
+                embedded_item_character_value_var=embedded_item_character_value_var,
+                include_exclude_var=include_exclude_var,
+                character_count_file_manager_var=character_count_file_manager_var,
+                character_entry_var=character_entry_var,
+                include_subdir_var=include_subdir_var,
+                fileName_embeds_date=fileName_embeds_date,
+                date_format=date_format,
+                date_separator=date_separator,
+                date_position=date_position,
+            ),
+        )
+    )
+    thread.start()
+    return PlainTextResponse("", status_code=200)
 
 @app.post("/sentiment_analysis")
 def sentiment_analysis(
