@@ -907,7 +907,8 @@ def CoreNLP_annotate(
 
     nlp = StanfordCoreNLP("http://172.16.0.12:9000")
     
-    # nlp = StanfordCoreNLP("http://localhost:9000/") # for testing on local
+    # local test
+    # nlp = StanfordCoreNLP("http://localhost:9000/") 
 #     The corpus you have selected is too small for data reduction algorithms. These algorithms require a LARGE number of files.
 
 # Please, select a different corpus directory and try again.

@@ -14,8 +14,11 @@ ENV NLTK_DATA=/root/nltk_data
 
 COPY . .
 RUN python3.9 -m pip install -r requirements.txt
+RUN python3.9 -c "import stanza; stanza.download('en', model_dir='/root/stanza_resources')"
+RUN python3.9 -c "import nltk; nltk.download('stopwords', download_dir='/root/nltk_data'); nltk.download('punkt', download_dir='/root/nltk_data')"
 
-RUN python3.9 -m nltk.downloader stopwords
+
+
 
 WORKDIR /nlp-suite/src
 EXPOSE 3000

@@ -21,8 +21,8 @@ from subprocess import call
 import config_util
 import GUI_IO_util
 import IO_files_util
-# import GIS_pipeline_util
-# import wordclouds_util
+import GIS_pipeline_util
+import wordclouds_util
 import IO_csv_util
 import SVO_util
 import Stanza_util
@@ -55,8 +55,11 @@ def run_svo(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
         wordcloud_var,
         google_earth_var):
 
+    #Already hard coded below
+    # subjects_dict_path_var = "lib/wordLists/social-actor-list.csv"
+    # verbs_dict_path_var = "lib/wordLists/social-action-list.csv"
     
-    #
+    
     config_filename = "NLP_default_IO_config.csv"
     # get the NLP package and language options
     error, package, parsers, package_basics, language, package_display_area_value, encoding_var, export_json_var, memory_var, document_length_var, limit_sentence_length_var = config_util.read_NLP_package_language_config()
@@ -575,80 +578,84 @@ def run_svo(inputFilename, inputDir, outputDir, openOutputFiles, chartPackage, d
                                     filesToOpen.extend(outputFiles)
 
     
-    #<!---------Options disabled right now for docker version, pipelines are harder---------->
     # # wordcloud  _________________________________________________
 
-    #         if wordcloud_var:
-    #             import wordclouds_util
-    #             # i = 0
-    #             if inputFilename[-4:] == ".csv":
-    #                 nRecords, nColumns = IO_csv_util.GetNumberOf_Records_Columns_inCSVFile(inputFilename)
-    #                 if nRecords > 1:  # including headers; file is empty
-    #                     myfile = IO_files_util.openCSVFile(inputFilename, 'r')
-    #                     outputFiles = wordclouds_util.SVOWordCloud(myfile, inputFilename, tempOutputDir, "", prefer_horizontal=.9)
-    #                     myfile.close()
-    #                     filesToOpen.append(outputFiles)
-    #             else:
-    #                 # for f in svo_result_list:
-    #                 nRecords, nColumns = IO_csv_util.GetNumberOf_Records_Columns_inCSVFile(f)
-    #                 if nRecords > 1:  # including headers; file is empty
-    #                     myfile = IO_files_util.openCSVFile(f, "r")
-    #                     # keep separate in case you want to export the 3 Gephi files
-    #                     #   (normal, lemma, filtered) to different folders
-    #                     #   now exported to the main SVO subdir
-    #                     # if 'SVO_lemma' in svo_result_list[i]:
-    #                     #     # tempOutputDir = outputWNDir
-    #                     #     tempOutputDir = outputSVOSVODir
-    #                     # elif 'SVO_filter' in svo_result_list[i]:
-    #                     #     # tempOutputDir = outputSVOFilterDir
-    #                     #     tempOutputDir = outputSVOSVODir
-    #                     # else:
-    #                     #     tempOutputDir = outputSVOSVODir
-    #                     outputFiles = wordclouds_util.SVOWordCloud(myfile, f, tempOutputDir, "", prefer_horizontal=.9)
-    #                     myfile.close()
-    #                     if "CoreNLP" in f or "OpenIE" in f or "SENNA_SVO" in f or "spaCy" in f or "Stanza" in f:
-    #                         filesToOpen.append(outputFiles)
-    #                 # i +=1
+            if wordcloud_var:
+                import wordclouds_util
+                # i = 0
+                wordcloud_title = 'Wordcloud of Subject (red), Verb (blue), Object (green)'
 
-    #         i += 1
+                if inputFilename[-4:] == ".csv":
+                    nRecords, nColumns = IO_csv_util.GetNumberOf_Records_Columns_inCSVFile(inputFilename)
+                    if nRecords > 1:  # including headers; file is empty
+                        myfile = IO_files_util.openCSVFile(inputFilename, 'r')
+                        outputFiles = wordclouds_util.SVOWordCloud(myfile, inputFilename, tempOutputDir, wordcloud_title, prefer_horizontal=.9)
+                        myfile.close()
+                        print("WE GOT HERE")
+                        filesToOpen.append(outputFiles)
+                else:
+                    # for f in svo_result_list:
+                    nRecords, nColumns = IO_csv_util.GetNumberOf_Records_Columns_inCSVFile(f)
+                    if nRecords > 1:  # including headers; file is empty
+                        myfile = IO_files_util.openCSVFile(f, "r")
+                        # keep separate in case you want to export the 3 Gephi files
+                        #   (normal, lemma, filtered) to different folders
+                        #   now exported to the main SVO subdir
+                        # if 'SVO_lemma' in svo_result_list[i]:
+                        #     # tempOutputDir = outputWNDir
+                        #     tempOutputDir = outputSVOSVODir
+                        # elif 'SVO_filter' in svo_result_list[i]:
+                        #     # tempOutputDir = outputSVOFilterDir
+                        #     tempOutputDir = outputSVOSVODir
+                        # else:
+                        #     tempOutputDir = outputSVOSVODir
+                        #def SVOWordCloud(svoFile, inputFilename, outputDir, transformed_image_mask, wordcloud_title, prefer_horizontal):
 
-    # # GIS maps _____________________________________________________
+                        outputFiles = wordclouds_util.SVOWordCloud(myfile, f, tempOutputDir, transformed_image_mask='', wordcloud_title=wordcloud_title, prefer_horizontal=.9)
+                        myfile.close()
+                        if "CoreNLP" in f or "OpenIE" in f or "SENNA_SVO" in f or "spaCy" in f or "Stanza" in f:
+                            filesToOpen.append(outputFiles)
+                    # i +=1
 
-    #     if google_earth_var:
-    #         # SENNA locations are not really geocodable locations
-    #         # if (package_var=='SENNA') and os.path.isfile(location_filename):
-    #         #     reminders_util.checkReminder(scriptName, reminders_util.title_options_GIS_OpenIE_SENNA,
-    #         #                                  reminders_util.message_GIS_OpenIE_SENNA, True)
-    #         # else:
-    #         #     if (package_var != 'SENNA') and os.path.isfile(location_filename):
-    #         #         reminders_util.checkReminder(scriptName, reminders_util.title_options_geocoder,
-    #         #                                      reminders_util.message_geocoder, True)
-    #                 # locationColumnNumber where locations are stored in the csv file; any changes to the columns will result in error
-    #                 date_present = (extract_date_from_text_var == True) or (filename_embeds_date_var == True)
-    #                 country_bias = ''
-    #                 area_var = ''
-    #                 restrict = False
-    #                 for location_filename in outputLocations:
-    #                     outputFiles = GIS_pipeline_util.GIS_pipeline(GUI_util.window, # remove later 
-    #                                  config_filename, location_filename, inputDir,
-    #                                  outputGISDir,
-    #                                  'Nominatim', 'Google Earth Pro & Google Maps', chartPackage, dataTransformation,
-    #                                  date_present,
-    #                                  country_bias,
-    #                                  area_var,
-    #                                  restrict,
-    #                                  'Location',
-    #                                  'utf-8',
-    #                                  0, 1, [''], [''], # group_var, group_number_var, group_values_entry_var_list, group_label_entry_var_list,
-    #                                  ['Pushpins'], ['red'], # icon_var_list, specific_icon_var_list,
-    #                                  [0], ['1'], [0], [''], # name_var_list, scale_var_list, color_var_list, color_style_var_list,
-    #                                  [1], [1]) # bold_var_list, italic_var_list
+            i += 1
 
-    #                     if outputFiles != None:
-    #                         if isinstance(outputFiles, str):
-    #                             filesToOpen.append(outputFiles)
-    #                         else:
-    #                             filesToOpen.extend(outputFiles)
+    # GIS maps _____________________________________________________
+
+        if google_earth_var:
+            # SENNA locations are not really geocodable locations
+            # if (package_var=='SENNA') and os.path.isfile(location_filename):
+            #     reminders_util.checkReminder(scriptName, reminders_util.title_options_GIS_OpenIE_SENNA,
+            #                                  reminders_util.message_GIS_OpenIE_SENNA, True)
+            # else:
+            #     if (package_var != 'SENNA') and os.path.isfile(location_filename):
+            #         reminders_util.checkReminder(scriptName, reminders_util.title_options_geocoder,
+            #                                      reminders_util.message_geocoder, True)
+                    # locationColumnNumber where locations are stored in the csv file; any changes to the columns will result in error
+                    date_present = (extract_date_from_text_var == True) or (filename_embeds_date_var == True)
+                    country_bias = ''
+                    area_var = ''
+                    restrict = False
+                    for location_filename in outputLocations:
+                        outputFiles = GIS_pipeline_util.GIS_pipeline(
+                                     config_filename, location_filename, inputDir,
+                                     outputGISDir,
+                                     'Nominatim', 'Google Earth Pro & Google Maps', chartPackage, dataTransformation,
+                                     date_present,
+                                     country_bias,
+                                     area_var,
+                                     restrict,
+                                     'Location',
+                                     'utf-8',
+                                     0, 1, [''], [''], # group_var, group_number_var, group_values_entry_var_list, group_label_entry_var_list,
+                                     ['Pushpins'], ['red'], # icon_var_list, specific_icon_var_list,
+                                     [0], ['1'], [0], [''], # name_var_list, scale_var_list, color_var_list, color_style_var_list,
+                                     [1], [1]) # bold_var_list, italic_var_list
+
+                        if outputFiles != None:
+                            if isinstance(outputFiles, str):
+                                filesToOpen.append(outputFiles)
+                            else:
+                                filesToOpen.extend(outputFiles)
 
     # generate subset of files to be opened
 
