@@ -13,19 +13,20 @@ def run_sun_burst(inputFilename, inputDir, outputDir,
         ):
     
         csv_path = first_csv(inputDir)
-        try:
-            saved_pairs = json.loads(selected_pairs_data)
-        except json.JSONDecodeError:
-            print("Invalid JSON in selected_pairs_data, status_code=400")
-            raise ValueError("Invalid JSON in selected_pairs_data")
-            return
+        # try:
+        #     saved_pairs = json.loads(selected_pairs_data)
+        # except json.JSONDecodeError:
+        #     print("Invalid JSON in selected_pairs_data, status_code=400")
+        #     raise ValueError("Invalid JSON in selected_pairs_data")
+        #     return
 
+        csv_file_categorical_field_list = json.loads(selected_pairs_data)
         
-        csv_file_categorical_field_list = [
-            [f"{pair['searchField']}|{', '.join(word.strip() for word in pair['csvFieldList'].split(',') if word.strip())}"]
-            for pair in saved_pairs
-        ]
-        print(csv_file_categorical_field_list)
+        # csv_file_categorical_field_list = [
+        #     [f"{pair['searchField']}|{', '.join(word.strip() for word in pair['csvFieldList'].split(',') if word.strip())}"]
+        #     for pair in saved_pairs
+        # ]
+        print("IMPORTANT LIST ", csv_file_categorical_field_list)
         filesToOpen = []
         
         # NOTE: set to default values, can allow user input flexibility later 
@@ -66,8 +67,8 @@ def run_sun_burst(inputFilename, inputDir, outputDir,
 
 def main():
     inputFilename = "dogs.csv"
-    inputDir = "C:/Users/sherry/OneDrive/Desktop/QTM446W/Input"
-    outputDir = "C:/Users/sherry/OneDrive/Desktop/QTM446W/Ouput"
+    inputDir = "/Users/aidenamaya/nlp-suite/csvInput"
+    outputDir = "/Users/aidenamaya/nlp-suite/output"
     file_data = """Obs,Name,Gender,Fixed,Color,Heritage,Age,Weight,Size
 1,Max,Male,Yes,Dark brown,"Designer/deliberate mix (e.g., labradoodles)",7,70,Large
 2,Isla,Female,Yes,Black,Single breed,8,13,Small
@@ -79,10 +80,11 @@ def main():
 8,Leo,Male,Yes,Reddish,Single breed,15,14,Small"""
 
     filter_options_var = "No filtering"
-    selected_pairs_data = json.dumps([
-        {"searchField": "Color", "csvFieldList": "Black,Reddish,Light brown,"},
-        {"searchField": "Size", "csvFieldList": "Small, Medium, Large"}
-    ])
+    # selected_pairs_data = json.dumps([
+    #     {"searchField": "Color", "csvFieldList": "Black,Reddish,Light brown,"},
+    #     {"searchField": "Size", "csvFieldList": "Small, Medium, Large"}
+    # ])
+    selected_pairs_data = [["Name|Max, Isla"], ["Color|"]]
     piechart_var = True 
     treemap_var = True
 

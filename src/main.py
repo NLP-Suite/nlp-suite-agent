@@ -508,12 +508,12 @@ def style_analysis(
 
 @app.post("/sunburst_charts")
 def sunburst_charts(
-        sunburst_file_input: Annotated[str, Form()],
+        sunburst_file_input: Annotated[str, Form()], #Do we need this?
         inputDirectory: Annotated[str, Form()],
         outputDirectory: Annotated[str, Form()],
         file_data: Annotated[str, Form()] = "",
         filter_options_var: Annotated[str, Form()] = "No filtering",
-        selected_pairs_data: Annotated[str, Form()] = "[]",
+        savedPairsToSend: Annotated[str, Form()] = "[]",
         piechart_var: Annotated[bool, Form()] = False, 
         treemap_var: Annotated[bool, Form()] = False,
 ):
@@ -529,7 +529,7 @@ def sunburst_charts(
                 outputDir = outputDirectory,
                 file_data = file_data,
                 filter_options_var = filter_options_var,
-                selected_pairs_data = selected_pairs_data,
+                selected_pairs_data = savedPairsToSend,
                 piechart_var = piechart_var,
                 treemap_var = treemap_var 
             ),
